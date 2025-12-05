@@ -1,0 +1,17 @@
+.DS_Store
+node_modules
+/dist
+/.ionic
+/.sass-cache
+/.sourcemaps
+/.tmp
+/.www
+*.log
+.env
+.env.local
+
+# VSCode
+.vscode
+.history
+
+
