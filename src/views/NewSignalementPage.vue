@@ -3,15 +3,15 @@
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button default-href="/tabs/incivilities"></ion-back-button>
+          <ion-back-button default-href="/tabs/signalements"></ion-back-button>
         </ion-buttons>
-        <ion-title>Nouvelle incivilité</ion-title>
+        <ion-title>Nouveau signalement</ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
       <ion-header collapse="condense">
         <ion-toolbar>
-          <ion-title size="large">Nouvelle incivilité</ion-title>
+          <ion-title size="large">Nouveau signalement</ion-title>
         </ion-toolbar>
       </ion-header>
 
@@ -19,10 +19,10 @@
         <div class="form-section">
           <h3 class="section-title">Description</h3>
           <ion-item lines="none" class="form-item">
-            <ion-label position="stacked">Description de l'incivilité</ion-label>
+            <ion-label position="stacked">Description du signalement</ion-label>
             <ion-textarea
               v-model="description"
-              placeholder="Décrivez l'incivilité..."
+              placeholder="Décrivez le signalement..."
               rows="4"
             ></ion-textarea>
           </ion-item>
@@ -54,7 +54,7 @@
                 <ion-label position="stacked">Adresse</ion-label>
                 <ion-input
                   v-model="address"
-                  placeholder="Adresse où se trouve l'incivilité"
+                  placeholder="Adresse où se trouve le signalement"
                 ></ion-input>
               </ion-item>
             </div>
@@ -80,7 +80,7 @@
           </ion-button>
 
           <div v-if="photo" class="photo-preview">
-            <img :src="photo" alt="Photo de l'incivilité" />
+            <img :src="photo" alt="Photo du signalement" />
             <ion-button fill="clear" @click="removePhoto" class="remove-photo-btn">
               <ion-icon :icon="close" />
             </ion-button>
@@ -143,7 +143,7 @@
 
         <ion-button
           expand="block"
-          @click="submitIncivility"
+          @click="submitSignalement"
           :disabled="loading || !photo || !lastName || !firstName || (!location && !address)"
           class="submit-button"
         >
@@ -273,7 +273,7 @@ onMounted(async () => {
   }
 })
 
-const submitIncivility = async () => {
+const submitSignalement = async () => {
   if (!photo.value) {
     const toast = await toastController.create({
       message: 'Veuillez prendre une photo',
@@ -324,7 +324,7 @@ const submitIncivility = async () => {
     // Convertir dataUrl en File pour Cloudinary
     const response = await fetch(photo.value)
     const blob = await response.blob()
-    const file = new File([blob], 'incivility.jpg', { type: 'image/jpeg' })
+    const file = new File([blob], 'signalement.jpg', { type: 'image/jpeg' })
 
     // Upload vers Cloudinary
     const photoUrl = await uploadImageToCloudinary(file)
@@ -352,7 +352,7 @@ const submitIncivility = async () => {
 
     // Sauvegarder dans Supabase
     const { data, error } = await supabase
-      .from('incivilities')
+      .from('signalements')
       .insert([dataToInsert])
       .select()
 
@@ -361,15 +361,15 @@ const submitIncivility = async () => {
     await loadingToast.dismiss()
 
     const toast = await toastController.create({
-      message: 'Incivilité signalée avec succès',
+      message: 'Signalement envoyé avec succès',
       duration: 2000,
       color: 'success'
     })
     await toast.present()
 
-    router.push('/tabs/incivilities')
+    router.push('/tabs/signalements')
   } catch (error) {
-    console.error('Error submitting incivility:', error)
+    console.error('Error submitting signalement:', error)
     await loadingToast.dismiss()
 
     // Afficher un message d'erreur plus détaillé

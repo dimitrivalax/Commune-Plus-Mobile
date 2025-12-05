@@ -1,7 +1,7 @@
 {
   "name": "ok-mairie",
   "version": "1.0.0",
-  "description": "Application mobile OK Mairie - Gestion des incivilités, réservations et informations municipales",
+  "description": "Application mobile OK Mairie - Gestion des signalements, réservations et informations municipales",
   "author": "OK Mairie",
   "private": true,
   "scripts": {

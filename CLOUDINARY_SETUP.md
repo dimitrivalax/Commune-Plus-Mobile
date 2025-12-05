@@ -39,7 +39,7 @@ Un **Upload Preset** dans Cloudinary est une configuration prédéfinie qui déf
 ```
 Preset name: ok-mairie-uploads
 Signing mode: Unsigned
-Folder: incivilities/ (optionnel - pour organiser les fichiers)
+Folder: signalements/ (optionnel - pour organiser les fichiers)
 Allowed formats: jpg, png, webp
 Max file size: 10 MB (ou selon vos besoins)
 Image transformations: 
@@ -85,7 +85,7 @@ VITE_CLOUDINARY_UPLOAD_PRESET=ok-mairie-uploads
 ```
 Preset name: ok-mairie-uploads
 Signing mode: Unsigned
-Folder: incivilities/
+Folder: signalements/
 Allowed formats: jpg, png, webp
 Max file size: 10 MB
 Quality: auto
@@ -136,7 +136,7 @@ Quand un utilisateur prend une photo dans l'application :
 
 1. **Limitez la taille des fichiers** : Définissez une taille maximale raisonnable
 2. **Restreignez les formats** : Autorisez uniquement les formats d'image nécessaires
-3. **Utilisez des dossiers** : Organisez les uploads par type (incivilities/, reservations/, etc.)
+3. **Utilisez des dossiers** : Organisez les uploads par type (signalements/, reservations/, etc.)
 4. **Optimisation automatique** : Activez `quality: auto` et `format: auto` pour réduire la taille des fichiers
 5. **Surveillez l'utilisation** : Vérifiez régulièrement votre utilisation dans le Dashboard
 

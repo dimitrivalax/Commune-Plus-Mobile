@@ -24,14 +24,14 @@ Si vous voyez l'erreur `Could not find the table 'public.reservations'`, cela si
 
 1. Dans le menu de gauche, cliquez sur **Table Editor**
 2. Vous devriez voir 3 tables :
-   - `incivilities`
+   - `signalements`
    - `reservations`
    - `municipal_info`
 
 ## Structure des tables
 
-### Table `incivilities`
-- Stocke les signalements d'incivilités
+### Table `signalements`
+- Stocke les signalements
 - Supporte GPS (latitude/longitude) ou adresse textuelle
 - Contient les coordonnées du déclarant
 
@@ -46,8 +46,8 @@ Si vous voyez l'erreur `Could not find the table 'public.reservations'`, cela si
 
 Les politiques RLS sont configurées pour permettre :
 - **Lecture publique** : Tous peuvent lire les informations municipales
-- **Insertion publique** : Tous peuvent créer des incivilités et réservations
-- **Lecture publique** : Tous peuvent lire leurs propres incivilités et réservations
+- **Insertion publique** : Tous peuvent créer des signalements et réservations
+- **Lecture publique** : Tous peuvent lire leurs propres signalements et réservations
 
 Pour un environnement de production, vous devriez :
 - Ajouter l'authentification Supabase Auth
@@ -65,7 +65,7 @@ FROM
   information_schema.tables 
 WHERE 
   table_schema = 'public' 
-  AND table_name IN ('incivilities', 'reservations', 'municipal_info');
+  AND table_name IN ('signalements', 'reservations', 'municipal_info');
 ```
 
 Vous devriez voir les 3 tables listées.

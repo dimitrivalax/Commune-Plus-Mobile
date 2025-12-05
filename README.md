@@ -1,10 +1,10 @@
 # OK Mairie
 
-Application mobile développée avec Ionic et Vue.js pour la gestion des incivilités, réservations de salles municipales et réception des informations de la mairie.
+Application mobile développée avec Ionic et Vue.js pour la gestion des signalements, réservations de salles municipales et réception des informations de la mairie.
 
 ## Fonctionnalités
 
-- 📸 **Signalement d'incivilités** : Prendre des photos et signaler des incivilités avec géolocalisation GPS (fallback sur adresse si GPS indisponible)
+- 📸 **Signalements** : Prendre des photos et faire des signalements avec géolocalisation GPS (fallback sur adresse si GPS indisponible)
 - 📅 **Réservation de salles** : Réserver des salles municipales pour vos événements
 - 📢 **Informations municipales** : Recevoir et consulter les dernières informations de la mairie
 
@@ -67,6 +67,18 @@ L'application utilise un design épuré et lisible en marque blanche. Pour perso
 
 ⚠️ **IMPORTANT** : Vous devez créer les tables dans Supabase avant d'utiliser l'application !
 
+### Configuration CORS (Important pour le développement local)
+
+Si vous rencontrez des erreurs CORS lors du développement local :
+
+1. Allez dans **Supabase Dashboard** → **Settings** → **API**
+2. Dans la section **CORS**, ajoutez :
+   - `http://localhost:5173`
+   - `http://localhost:*` (pour autoriser tous les ports)
+3. Sauvegardez
+
+📖 **Guide détaillé** : Consultez `CORS_FIX.md` pour plus d'informations
+
 ### Étapes rapides
 
 1. Connectez-vous à [Supabase](https://supabase.com) et ouvrez votre projet
@@ -81,9 +93,9 @@ L'application utilise un design épuré et lisible en marque blanche. Pour perso
 
 Vous devez créer les tables suivantes dans Supabase :
 
-### Table `incivilities`
+### Table `signalements`
 ```sql
-CREATE TABLE incivilities (
+CREATE TABLE signalements (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   description TEXT,
   latitude DOUBLE PRECISION NOT NULL,
@@ -105,10 +117,10 @@ CREATE TABLE incivilities (
 ```
 
 **Note** : 
-- L'application utilise la **géolocalisation GPS** en priorité pour enregistrer la position des incivilités
+- L'application utilise la **géolocalisation GPS** en priorité pour enregistrer la position des signalements
 - Si le GPS n'est pas disponible (permission refusée, GPS désactivé), l'utilisateur peut renseigner une adresse manuellement
 - Le schéma accepte soit les coordonnées GPS (latitude/longitude) soit une adresse textuelle
-- Si vous avez déjà créé la table `incivilities`, utilisez le script de migration `supabase-migration-gps.sql` pour ajouter le support GPS
+- Si vous avez déjà créé la table `incivilities`, utilisez d'abord le script `supabase-migration-rename-table.sql` pour la renommer en `signalements`, puis `supabase-migration-gps.sql` pour ajouter le support GPS
 
 ### Table `reservations`
 ```sql

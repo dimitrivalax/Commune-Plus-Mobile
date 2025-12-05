@@ -20,9 +20,9 @@ const routes = [
         component: () => import('@/views/HomePage.vue')
       },
       {
-        path: 'incivilities',
-        name: 'incivilities',
-        component: () => import('@/views/IncivilitiesPage.vue')
+        path: 'signalements',
+        name: 'signalements',
+        component: () => import('@/views/SignalementsPage.vue')
       },
       {
         path: 'reservations',
@@ -37,8 +37,8 @@ const routes = [
     ]
   },
   {
-    path: '/incivility/new',
-    component: () => import('@/views/NewIncivilityPage.vue')
+    path: '/signalement/new',
+    component: () => import('@/views/NewSignalementPage.vue')
   },
   {
     path: '/reservation/new',

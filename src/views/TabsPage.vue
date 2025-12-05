@@ -8,9 +8,9 @@
           <ion-label>Accueil</ion-label>
         </ion-tab-button>
 
-        <ion-tab-button tab="incivilities" href="/tabs/incivilities">
+        <ion-tab-button tab="signalements" href="/tabs/signalements">
           <ion-icon :icon="warning" />
-          <ion-label>Incivilités</ion-label>
+          <ion-label>Signalements</ion-label>
         </ion-tab-button>
 
         <ion-tab-button tab="reservations" href="/tabs/reservations">

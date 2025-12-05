@@ -81,12 +81,12 @@ Les variables CSS sont définies dans `src/theme/custom.css` :
 
 ### Pages principales
 - **HomePage** : Page d'accueil avec les services disponibles
-- **IncivilitiesPage** : Liste des incivilités signalées
+- **SignalementsPage** : Liste des signalements
 - **ReservationsPage** : Liste des réservations
 - **InfoPage** : Liste des informations municipales
 
 ### Pages de formulaire
-- **NewIncivilityPage** : Formulaire de signalement d'incivilité
+- **NewSignalementPage** : Formulaire de signalement
 - **NewReservationPage** : Formulaire de réservation
 
 ### Composants réutilisables

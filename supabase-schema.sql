@@ -1,7 +1,7 @@
 -- Script SQL pour créer les tables nécessaires dans Supabase
 
--- Table pour les incivilités
-CREATE TABLE IF NOT EXISTS incivilities (
+-- Table pour les signalements
+CREATE TABLE IF NOT EXISTS signalements (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   description TEXT,
   latitude DOUBLE PRECISION,
@@ -51,11 +51,11 @@ CREATE TABLE IF NOT EXISTS municipal_info (
 );
 
 -- Index pour améliorer les performances
-CREATE INDEX IF NOT EXISTS idx_incivilities_created_at ON incivilities(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_signalements_created_at ON signalements(created_at DESC);
 -- Index spatial (nécessite PostGIS - commenté par défaut, décommentez si PostGIS est activé)
--- CREATE INDEX IF NOT EXISTS idx_incivilities_location ON incivilities USING GIST (point(longitude, latitude));
+-- CREATE INDEX IF NOT EXISTS idx_signalements_location ON signalements USING GIST (point(longitude, latitude));
 -- Index simple pour les coordonnées GPS (fonctionne sans PostGIS)
-CREATE INDEX IF NOT EXISTS idx_incivilities_lat_lng ON incivilities(latitude, longitude) WHERE latitude IS NOT NULL AND longitude IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_signalements_lat_lng ON signalements(latitude, longitude) WHERE latitude IS NOT NULL AND longitude IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_reservations_date ON reservations(date DESC);
 CREATE INDEX IF NOT EXISTS idx_municipal_info_created_at ON municipal_info(created_at DESC);
 
@@ -69,7 +69,7 @@ END;
 $$ language 'plpgsql';
 
 -- Triggers pour mettre à jour updated_at
-CREATE TRIGGER update_incivilities_updated_at BEFORE UPDATE ON incivilities
+CREATE TRIGGER update_signalements_updated_at BEFORE UPDATE ON signalements
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_reservations_updated_at BEFORE UPDATE ON reservations
@@ -79,7 +79,7 @@ CREATE TRIGGER update_municipal_info_updated_at BEFORE UPDATE ON municipal_info
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- RLS (Row Level Security) - Activer la sécurité au niveau des lignes
-ALTER TABLE incivilities ENABLE ROW LEVEL SECURITY;
+ALTER TABLE signalements ENABLE ROW LEVEL SECURITY;
 ALTER TABLE reservations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE municipal_info ENABLE ROW LEVEL SECURITY;
 
@@ -88,13 +88,13 @@ CREATE POLICY "Les informations municipales sont publiques en lecture"
     ON municipal_info FOR SELECT
     USING (true);
 
--- Politiques RLS pour permettre l'insertion publique des incivilités et réservations
-CREATE POLICY "Tout le monde peut créer des incivilités"
-    ON incivilities FOR INSERT
+-- Politiques RLS pour permettre l'insertion publique des signalements et réservations
+CREATE POLICY "Tout le monde peut créer des signalements"
+    ON signalements FOR INSERT
     WITH CHECK (true);
 
-CREATE POLICY "Tout le monde peut lire ses propres incivilités"
-    ON incivilities FOR SELECT
+CREATE POLICY "Tout le monde peut lire ses propres signalements"
+    ON signalements FOR SELECT
     USING (true);
 
 CREATE POLICY "Tout le monde peut créer des réservations"

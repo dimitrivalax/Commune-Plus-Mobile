@@ -12,13 +12,13 @@
         <div class="welcome-section">
           <h2 class="section-title">Services disponibles</h2>
           
-          <ion-card button @click="$router.push('/tabs/incivilities')" class="service-card">
+          <ion-card button @click="$router.push('/tabs/signalements')" class="service-card">
             <ion-card-content>
               <div class="service-icon">
                 <ion-icon :icon="warning" />
               </div>
-              <h3>Signaler une incivilité</h3>
-              <p>Prenez une photo et signalez une incivilité dans votre ville.</p>
+              <h3>Faire un signalement</h3>
+              <p>Prenez une photo et faites un signalement dans votre ville.</p>
             </ion-card-content>
           </ion-card>
 
