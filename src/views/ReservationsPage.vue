@@ -1,5 +1,5 @@
 <template>
-  <ion-page>
+  <ion-page @ionViewWillEnter="loadReservations">
     <ion-header>
       <ion-toolbar>
         <ion-title>Réservations</ion-title>
@@ -24,7 +24,13 @@
         </ion-refresher>
 
         <ion-list v-if="reservations.length > 0" class="reservations-list">
-          <ion-item v-for="reservation in reservations" :key="reservation.id" class="reservation-item">
+          <ion-item 
+            v-for="reservation in reservations" 
+            :key="reservation.id" 
+            class="reservation-item"
+            button
+            @click="$router.push(`/reservation/${reservation.id}`)"
+          >
             <ion-icon :icon="calendar" slot="start" class="reservation-icon" />
             <ion-label>
               <h2>{{ reservation.room_name }}</h2>
@@ -53,7 +59,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onActivated } from 'vue'
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonFab, IonFabButton, IonIcon, IonList, IonItem, IonLabel, IonBadge, IonCard, IonCardContent, IonButton, IonRefresher, IonRefresherContent } from '@ionic/vue'
 import { add, calendar, calendarOutline } from 'ionicons/icons'
 import { supabase } from '@/services/supabase'
@@ -93,6 +99,11 @@ const getStatusColor = (status) => {
 }
 
 onMounted(() => {
+  loadReservations()
+})
+
+// Recharger les réservations quand la page devient active (après création/suppression)
+onActivated(() => {
   loadReservations()
 })
 </script>

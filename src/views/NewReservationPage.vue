@@ -120,6 +120,11 @@
           ></ion-textarea>
         </ion-item>
 
+        <p v-if="hasSavedContact" class="saved-contact-info">
+          <ion-icon :icon="checkmarkCircleOutline" />
+          Coordonnées pré-remplies depuis votre dernière utilisation
+        </p>
+
         <ion-item>
           <ion-label position="stacked">Nom</ion-label>
           <ion-input v-model="name" placeholder="Votre nom"></ion-input>
@@ -149,12 +154,13 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonBackButton, IonItem, IonLabel, IonSelect, IonSelectOption, IonModal, IonDatetime, IonTextarea, IonInput, IonButton, IonIcon, loadingController, toastController } from '@ionic/vue'
-import { checkmark } from 'ionicons/icons'
+import { checkmark, checkmarkCircleOutline } from 'ionicons/icons'
 import { supabase } from '@/services/supabase'
 import { formatDateForDB, formatTime } from '@/utils/date'
+import { saveUserContact, getUserContact } from '@/utils/storage'
 
 const router = useRouter()
 const roomName = ref('')
@@ -169,6 +175,7 @@ const loading = ref(false)
 const openDateModal = ref(false)
 const openStartTimeModal = ref(false)
 const openEndTimeModal = ref(false)
+const hasSavedContact = ref(false)
 
 const minDate = new Date().toISOString()
 
@@ -259,6 +266,19 @@ const submitReservation = async () => {
 
     if (error) throw error
 
+    // Sauvegarder les coordonnées dans le localStorage pour les prochaines fois
+    // Séparer le nom complet en prénom et nom
+    const nameParts = name.value.trim().split(' ')
+    const firstName = nameParts[0] || ''
+    const lastName = nameParts.slice(1).join(' ') || ''
+    
+    saveUserContact({
+      firstName: firstName,
+      lastName: lastName,
+      email: email.value,
+      phone: phone.value || ''
+    })
+
     await loadingToast.dismiss()
 
     const toast = await toastController.create({
@@ -268,7 +288,8 @@ const submitReservation = async () => {
     })
     await toast.present()
 
-    router.push('/tabs/reservations')
+    // Utiliser replace pour forcer le rechargement de la liste
+    router.replace('/tabs/reservations')
   } catch (error) {
     console.error('Error submitting reservation:', error)
     await loadingToast.dismiss()
@@ -283,5 +304,37 @@ const submitReservation = async () => {
     loading.value = false
   }
 }
+
+// Charger les coordonnées sauvegardées au chargement de la page
+onMounted(() => {
+  const savedContact = getUserContact()
+  if (savedContact) {
+    hasSavedContact.value = true
+    // Reconstruire le nom complet depuis firstName et lastName
+    if (savedContact.firstName || savedContact.lastName) {
+      name.value = `${savedContact.firstName} ${savedContact.lastName}`.trim()
+    }
+    email.value = savedContact.email || ''
+    phone.value = savedContact.phone || ''
+  }
+})
 </script>
+
+<style scoped>
+.saved-contact-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ion-color-success);
+  font-size: 14px;
+  margin: 0 0 12px 0;
+  padding: 8px 12px;
+  background: rgba(var(--ion-color-success-rgb), 0.1);
+  border-radius: 8px;
+}
+
+.saved-contact-info ion-icon {
+  font-size: 18px;
+}
+</style>
 

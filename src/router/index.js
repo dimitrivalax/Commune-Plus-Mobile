@@ -50,6 +50,11 @@ const routes = [
     component: () => import('@/views/NewReservationPage.vue')
   },
   {
+    path: '/reservation/:id',
+    name: 'reservation-detail',
+    component: () => import('@/views/ReservationDetailPage.vue')
+  },
+  {
     path: '/info/:id',
     component: () => import('@/views/InfoDetailPage.vue')
   }
