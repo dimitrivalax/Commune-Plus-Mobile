@@ -41,6 +41,11 @@ const routes = [
     component: () => import('@/views/NewSignalementPage.vue')
   },
   {
+    path: '/signalement/:id',
+    name: 'signalement-detail',
+    component: () => import('@/views/SignalementDetailPage.vue')
+  },
+  {
     path: '/reservation/new',
     component: () => import('@/views/NewReservationPage.vue')
   },

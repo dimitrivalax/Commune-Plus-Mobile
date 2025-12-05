@@ -99,6 +99,10 @@
         <div class="form-section">
           <h3 class="section-title">Vos coordonnées</h3>
           <p class="section-subtitle">Ces informations nous permettront de vous contacter si nécessaire</p>
+          <p v-if="hasSavedContact" class="saved-contact-info">
+            <ion-icon :icon="checkmarkCircleOutline" />
+            Coordonnées pré-remplies depuis votre dernière utilisation
+          </p>
           
           <ion-card class="contact-card">
             <ion-card-content>
@@ -164,6 +168,7 @@ import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonBa
 import { camera, checkmark, close, location as locationIcon, checkmarkCircleOutline, alertCircleOutline } from 'ionicons/icons'
 import { supabase } from '@/services/supabase'
 import { uploadImageToCloudinary } from '@/services/cloudinary'
+import { saveUserContact, getUserContact } from '@/utils/storage'
 
 const router = useRouter()
 const description = ref('')
@@ -179,6 +184,7 @@ const firstName = ref('')
 const email = ref('')
 const phone = ref('')
 const loading = ref(false)
+const hasSavedContact = ref(false)
 
 const takePhoto = async () => {
   try {
@@ -263,8 +269,23 @@ const getCurrentLocation = async () => {
   }
 }
 
-// Essayer d'obtenir la position automatiquement au chargement de la page
+// Charger les coordonnées sauvegardées et obtenir la position GPS au chargement de la page
 onMounted(async () => {
+  // Charger les coordonnées depuis le localStorage
+  const savedContact = getUserContact()
+  if (savedContact) {
+    hasSavedContact.value = true
+    firstName.value = savedContact.firstName
+    lastName.value = savedContact.lastName
+    email.value = savedContact.email
+    phone.value = savedContact.phone
+    if (savedContact.address) {
+      address.value = savedContact.address
+      useAddress.value = true
+    }
+  }
+
+  // Essayer d'obtenir la position GPS automatiquement
   try {
     await getCurrentLocation()
   } catch (error) {
@@ -357,6 +378,15 @@ const submitSignalement = async () => {
       .select()
 
     if (error) throw error
+
+    // Sauvegarder les coordonnées dans le localStorage pour les prochaines fois
+    saveUserContact({
+      firstName: firstName.value,
+      lastName: lastName.value,
+      email: email.value,
+      phone: phone.value,
+      address: address.value
+    })
 
     await loadingToast.dismiss()
 
@@ -524,6 +554,22 @@ const submitSignalement = async () => {
 }
 
 .location-error ion-icon {
+  font-size: 18px;
+}
+
+.saved-contact-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ion-color-success);
+  font-size: 14px;
+  margin: 0 0 12px 0;
+  padding: 8px 12px;
+  background: rgba(var(--ion-color-success-rgb), 0.1);
+  border-radius: 8px;
+}
+
+.saved-contact-info ion-icon {
   font-size: 18px;
 }
 </style>

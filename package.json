@@ -1,8 +1,8 @@
 {
-  "name": "ok-mairie",
+  "name": "Commune Plus",
   "version": "1.0.0",
-  "description": "Application mobile OK Mairie - Gestion des signalements, réservations et informations municipales",
-  "author": "OK Mairie",
+  "description": "Application mobile Commune Plus - Gestion des signalements, réservations et informations municipales",
+  "author": "Dimitri Valax",
   "private": true,
   "scripts": {
     "dev": "vite",

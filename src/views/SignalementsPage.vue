@@ -1,5 +1,5 @@
 <template>
-  <ion-page>
+  <ion-page @ionViewWillEnter="loadSignalements">
     <ion-header>
       <ion-toolbar>
         <ion-title>Signalements</ion-title>
@@ -24,7 +24,13 @@
         </ion-refresher>
 
         <ion-list v-if="signalements.length > 0" class="signalements-list">
-          <ion-item v-for="signalement in signalements" :key="signalement.id" class="signalement-item">
+          <ion-item 
+            v-for="signalement in signalements" 
+            :key="signalement.id" 
+            class="signalement-item"
+            button
+            @click="$router.push(`/signalement/${signalement.id}`)"
+          >
             <ion-thumbnail slot="start" v-if="signalement.photo_url">
               <img :src="signalement.photo_url" :alt="signalement.description" />
             </ion-thumbnail>
