@@ -193,14 +193,20 @@ export const saveCityInfoToDatabase = async (cityData) => {
   const { supabase } = await import('@/services/supabase')
   
   try {
+    // Nettoyer les données et s'assurer qu'on n'inclut pas l'id lors de l'insertion
     const dataToSave = {
-      name: cityData.name || '',
-      postal_code: cityData.postalCode || '',
-      email: cityData.email || ''
+      name: (cityData.name || '').trim(),
+      postal_code: (cityData.postalCode || '').trim(),
+      email: (cityData.email || '').trim()
+    }
+    
+    // Valider que les champs requis ne sont pas vides
+    if (!dataToSave.name || !dataToSave.postal_code || !dataToSave.email) {
+      throw new Error('Tous les champs sont requis (nom, code postal, email)')
     }
 
     // Vérifier s'il existe déjà une entrée avec le même nom et code postal
-    const { data: existingData } = await supabase
+    const { data: existingData, error: checkError } = await supabase
       .from('city_info')
       .select('id')
       .eq('name', dataToSave.name)
@@ -208,9 +214,14 @@ export const saveCityInfoToDatabase = async (cityData) => {
       .limit(1)
       .maybeSingle()
 
+    if (checkError) {
+      console.error('Error checking existing city:', checkError)
+      throw new Error(`Erreur lors de la vérification: ${checkError.message}`)
+    }
+
     let result
 
-    if (existingData) {
+    if (existingData && existingData.id) {
       // Mettre à jour l'entrée existante
       const { data, error } = await supabase
         .from('city_info')
@@ -219,17 +230,42 @@ export const saveCityInfoToDatabase = async (cityData) => {
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('Error updating city info:', error)
+        throw new Error(`Erreur lors de la mise à jour: ${error.message}`)
+      }
+      
+      if (!data) {
+        throw new Error('Aucune donnée retournée après la mise à jour')
+      }
+      
       result = data
     } else {
       // Créer une nouvelle entrée
+      // S'assurer qu'on n'inclut pas l'id (il sera généré automatiquement)
+      const insertData = {
+        name: dataToSave.name,
+        postal_code: dataToSave.postal_code,
+        email: dataToSave.email
+      }
+      
+      console.log('Inserting city info:', insertData)
+      
       const { data, error } = await supabase
         .from('city_info')
-        .insert(dataToSave)
+        .insert(insertData)
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('Error inserting city info:', error)
+        throw new Error(`Erreur lors de l'insertion: ${error.message}`)
+      }
+      
+      if (!data) {
+        throw new Error('Aucune donnée retournée après l\'insertion')
+      }
+      
       result = data
     }
 
@@ -239,11 +275,19 @@ export const saveCityInfoToDatabase = async (cityData) => {
       id: result.id
     })
 
+    console.log('City info saved successfully to database:', result)
     return result
   } catch (error) {
     console.error('Error saving city info to database:', error)
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint
+    })
     // En cas d'erreur de base de données, sauvegarder quand même dans le localStorage
     saveCityInfo(cityData)
+    // Propager l'erreur pour que l'appelant puisse la gérer
     throw error
   }
 }

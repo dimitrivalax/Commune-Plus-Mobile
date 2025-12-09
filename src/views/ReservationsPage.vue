@@ -3,6 +3,11 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>Réservations</ion-title>
+        <ion-buttons slot="end">
+          <ion-button @click="$router.push('/settings')">
+            <ion-icon :icon="settings" />
+          </ion-button>
+        </ion-buttons>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
@@ -60,8 +65,8 @@
 
 <script setup>
 import { ref, onMounted, onActivated } from 'vue'
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonFab, IonFabButton, IonIcon, IonList, IonItem, IonLabel, IonBadge, IonCard, IonCardContent, IonButton, IonRefresher, IonRefresherContent } from '@ionic/vue'
-import { add, calendar, calendarOutline } from 'ionicons/icons'
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonFab, IonFabButton, IonIcon, IonList, IonItem, IonLabel, IonBadge, IonCard, IonCardContent, IonButton, IonRefresher, IonRefresherContent, IonButtons } from '@ionic/vue'
+import { add, calendar, calendarOutline, settings } from 'ionicons/icons'
 import { supabase } from '@/services/supabase'
 import { formatDate, formatTime } from '@/utils/date'
 

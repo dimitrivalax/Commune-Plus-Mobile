@@ -3,6 +3,11 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>Signalements</ion-title>
+        <ion-buttons slot="end">
+          <ion-button @click="$router.push('/settings')">
+            <ion-icon :icon="settings" />
+          </ion-button>
+        </ion-buttons>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
@@ -62,8 +67,8 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonFab, IonFabButton, IonIcon, IonList, IonItem, IonLabel, IonThumbnail, IonBadge, IonCard, IonCardContent, IonButton, IonRefresher, IonRefresherContent } from '@ionic/vue'
-import { add, documentText } from 'ionicons/icons'
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonFab, IonFabButton, IonIcon, IonList, IonItem, IonLabel, IonThumbnail, IonBadge, IonCard, IonCardContent, IonButton, IonRefresher, IonRefresherContent, IonButtons } from '@ionic/vue'
+import { add, documentText, settings } from 'ionicons/icons'
 import { supabase } from '@/services/supabase'
 import { formatDateTime } from '@/utils/date'
 

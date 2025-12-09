@@ -57,6 +57,10 @@ const routes = [
   {
     path: '/info/:id',
     component: () => import('@/views/InfoDetailPage.vue')
+  },
+  {
+    path: '/settings',
+    component: () => import('@/views/SettingsPage.vue')
   }
 ]
 

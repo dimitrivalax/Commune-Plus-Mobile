@@ -3,7 +3,7 @@
   <ion-app>
     <ion-router-outlet />
   </ion-app>
-  <CitySetupModal :is-open="showCitySetupModal" @saved="handleCityInfoSaved" />
+  <CitySetupModal :is-open="showCitySetupModal" @saved="handleCityInfoSaved" :allow-cancel="false" />
 </template>
 
 <script setup>

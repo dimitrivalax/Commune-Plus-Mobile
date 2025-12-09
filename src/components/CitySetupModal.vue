@@ -7,6 +7,9 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>Configuration de la commune</ion-title>
+        <ion-buttons slot="end" v-if="allowCancel">
+          <ion-button @click="handleCancel">Annuler</ion-button>
+        </ion-buttons>
       </ion-toolbar>
     </ion-header>
     <ion-content class="ion-padding">
@@ -89,6 +92,7 @@ import {
   IonText,
   IonIcon,
   IonSpinner,
+  IonButtons,
   toastController
 } from '@ionic/vue'
 import { locationOutline } from 'ionicons/icons'
@@ -99,6 +103,10 @@ const props = defineProps({
   isOpen: {
     type: Boolean,
     default: false
+  },
+  allowCancel: {
+    type: Boolean,
+    default: true
   }
 })
 
@@ -123,7 +131,8 @@ const isFormValid = computed(() => {
 })
 
 const canDismiss = computed(() => {
-  return isSaved.value
+  // Permettre la fermeture si les données sont sauvegardées OU si l'annulation est autorisée
+  return isSaved.value || props.allowCancel
 })
 
 const showToast = async (message, color = 'danger') => {
@@ -142,22 +151,28 @@ const handleSubmit = async () => {
   isSubmitting.value = true
 
   try {
-    await saveCityInfoToDatabase({
+    const result = await saveCityInfoToDatabase({
       name: formData.value.name.trim(),
       postalCode: formData.value.postalCode.trim(),
       email: formData.value.email.trim()
     })
+
+    if (!result) {
+      throw new Error('Aucune donnée retournée par la sauvegarde')
+    }
 
     isSaved.value = true
     await showToast('Informations de la commune enregistrées avec succès', 'success')
     emit('saved')
   } catch (error) {
     console.error('Error saving city info:', error)
+    const errorMessage = error.message || 'Erreur lors de l\'enregistrement en base de données'
     await showToast(
-      'Erreur lors de l\'enregistrement. Les données ont été sauvegardées localement.',
+      `${errorMessage}. Les données ont été sauvegardées localement.`,
       'warning'
     )
     // Les données sont quand même sauvegardées dans le localStorage grâce au fallback dans saveCityInfoToDatabase
+    // Mais on ne ferme pas la modale si l'erreur est critique
     isSaved.value = true
     emit('saved')
   } finally {
@@ -167,6 +182,12 @@ const handleSubmit = async () => {
 
 const handleDismiss = () => {
   emit('close')
+}
+
+const handleCancel = () => {
+  if (props.allowCancel) {
+    emit('close')
+  }
 }
 
 const handleCitySelect = (city) => {

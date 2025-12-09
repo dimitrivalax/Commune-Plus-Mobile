@@ -3,6 +3,11 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>Informations</ion-title>
+        <ion-buttons slot="end">
+          <ion-button @click="$router.push('/settings')">
+            <ion-icon :icon="settings" />
+          </ion-button>
+        </ion-buttons>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
@@ -51,8 +56,8 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonBadge, IonIcon, IonRefresher, IonRefresherContent } from '@ionic/vue'
-import { newspaper, newspaperOutline, chevronForward } from 'ionicons/icons'
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonBadge, IonIcon, IonRefresher, IonRefresherContent, IonButtons, IonButton } from '@ionic/vue'
+import { newspaper, newspaperOutline, chevronForward, settings } from 'ionicons/icons'
 import { supabase } from '@/services/supabase'
 import { formatDate } from '@/utils/date'
 

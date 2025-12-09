@@ -3,6 +3,11 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>Accueil</ion-title>
+        <ion-buttons slot="end">
+          <ion-button @click="$router.push('/settings')">
+            <ion-icon :icon="settings" />
+          </ion-button>
+        </ion-buttons>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
@@ -48,8 +53,8 @@
 </template>
 
 <script setup>
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardContent, IonIcon } from '@ionic/vue'
-import { warning, calendar, informationCircle } from 'ionicons/icons'
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardContent, IonIcon, IonButtons, IonButton } from '@ionic/vue'
+import { warning, calendar, informationCircle, settings } from 'ionicons/icons'
 import CityHeader from '@/components/CityHeader.vue'
 </script>
 
