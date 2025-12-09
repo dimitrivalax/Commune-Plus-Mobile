@@ -134,7 +134,7 @@ backgroundColor: '#2563eb', // Changez cette couleur
 1. Remplacez `public/assets/commune-plus.png` par votre nouvelle image
 2. Mettez à jour le chemin dans `src/components/SplashScreen.vue` :
    ```vue
-   <img src="/assets/votre-nouvelle-image.png" alt="OK Mairie" />
+   <img src="/assets/votre-nouvelle-image.png" alt="Commune Plus" />
    ```
 
 ## Test

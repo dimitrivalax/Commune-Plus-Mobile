@@ -1,4 +1,4 @@
-# Guide de démarrage - OK Mairie
+# Guide de démarrage - Commune Plus
 
 ## Prérequis
 

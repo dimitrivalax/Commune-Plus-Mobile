@@ -29,6 +29,21 @@
 
           <div class="location-section">
             <h4 class="location-title">Localisation</h4>
+            <div v-if="hasCityInfo" class="city-info-container">
+              <p class="city-info-badge">
+                <ion-icon :icon="checkmarkCircleOutline" />
+                Commune : {{ cityInfo.name }} ({{ cityInfo.postalCode }})
+              </p>
+              <ion-button 
+                fill="clear" 
+                size="small" 
+                @click="openCityModal"
+                class="change-city-button"
+              >
+                <ion-icon :icon="createOutline" slot="start" />
+                Changer de commune
+              </ion-button>
+            </div>
             <ion-button 
               expand="block" 
               @click="getCurrentLocation" 
@@ -156,6 +171,13 @@
         </ion-button>
       </div>
     </ion-content>
+    
+    <!-- Modale de configuration de la commune -->
+    <CitySetupModal 
+      :is-open="showCityModal" 
+      @saved="handleCityInfoSaved"
+      @close="showCityModal = false"
+    />
   </ion-page>
 </template>
 
@@ -165,10 +187,11 @@ import { useRouter } from 'vue-router'
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
 import { Geolocation } from '@capacitor/geolocation'
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonBackButton, IonItem, IonLabel, IonTextarea, IonInput, IonButton, IonIcon, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, loadingController, toastController } from '@ionic/vue'
-import { camera, checkmark, close, location as locationIcon, checkmarkCircleOutline, alertCircleOutline } from 'ionicons/icons'
+import { camera, checkmark, close, location as locationIcon, checkmarkCircleOutline, alertCircleOutline, createOutline } from 'ionicons/icons'
 import { supabase } from '@/services/supabase'
 import { uploadImageToCloudinary } from '@/services/cloudinary'
-import { saveUserContact, getUserContact } from '@/utils/storage'
+import { saveUserContact, getUserContact, getCityInfo, getCityIdFromDatabase } from '@/utils/storage'
+import CitySetupModal from '@/components/CitySetupModal.vue'
 
 const router = useRouter()
 const description = ref('')
@@ -185,6 +208,9 @@ const email = ref('')
 const phone = ref('')
 const loading = ref(false)
 const hasSavedContact = ref(false)
+const hasCityInfo = ref(false)
+const cityInfo = ref(null)
+const showCityModal = ref(false)
 
 const takePhoto = async () => {
   try {
@@ -285,6 +311,17 @@ onMounted(async () => {
     }
   }
 
+  // Charger les informations de la commune et préremplir l'adresse si nécessaire
+  const savedCityInfo = getCityInfo()
+  if (savedCityInfo && savedCityInfo.name && savedCityInfo.postalCode) {
+    hasCityInfo.value = true
+    cityInfo.value = savedCityInfo
+    // Si l'adresse n'est pas déjà remplie, préremplir avec les informations de la commune
+    if (!address.value) {
+      address.value = `${savedCityInfo.name}, ${savedCityInfo.postalCode}`
+    }
+  }
+
   // Essayer d'obtenir la position GPS automatiquement
   try {
     await getCurrentLocation()
@@ -293,6 +330,25 @@ onMounted(async () => {
     console.log('GPS non disponible, mode adresse activé')
   }
 })
+
+const openCityModal = () => {
+  showCityModal.value = true
+}
+
+const handleCityInfoSaved = () => {
+  showCityModal.value = false
+  // Recharger les informations de la commune
+  const savedCityInfo = getCityInfo()
+  if (savedCityInfo && savedCityInfo.name && savedCityInfo.postalCode) {
+    hasCityInfo.value = true
+    const oldCityName = cityInfo.value?.name
+    cityInfo.value = savedCityInfo
+    // Mettre à jour l'adresse si elle était préremplie avec l'ancienne commune ou si elle est vide
+    if (!address.value || (oldCityName && address.value.includes(oldCityName))) {
+      address.value = `${savedCityInfo.name}, ${savedCityInfo.postalCode}`
+    }
+  }
+}
 
 const submitSignalement = async () => {
   if (!photo.value) {
@@ -350,6 +406,9 @@ const submitSignalement = async () => {
     // Upload vers Cloudinary
     const photoUrl = await uploadImageToCloudinary(file)
 
+    // Récupérer l'ID de la commune
+    const cityId = await getCityIdFromDatabase()
+
     // Préparer les données à sauvegarder
     const dataToInsert = {
       description: description.value,
@@ -360,6 +419,11 @@ const submitSignalement = async () => {
       email: email.value || null,
       phone: phone.value || null,
       status: 'en_attente'
+    }
+
+    // Ajouter l'ID de la commune si disponible
+    if (cityId) {
+      dataToInsert.city_id = cityId
     }
 
     // Ajouter soit les coordonnées GPS soit l'adresse
@@ -571,6 +635,46 @@ const submitSignalement = async () => {
 
 .saved-contact-info ion-icon {
   font-size: 18px;
+}
+
+.city-info-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.city-info-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ion-color-primary);
+  font-size: 14px;
+  margin: 0;
+  padding: 8px 12px;
+  background: rgba(var(--ion-color-primary-rgb), 0.1);
+  border-radius: 8px;
+  font-weight: 500;
+  flex: 1;
+  min-width: 200px;
+}
+
+.city-info-badge ion-icon {
+  font-size: 18px;
+}
+
+.change-city-button {
+  --color: var(--ion-color-primary);
+  font-size: 13px;
+  margin: 0;
+  height: auto;
+  text-transform: none;
+}
+
+.change-city-button ion-icon {
+  font-size: 16px;
 }
 </style>
 

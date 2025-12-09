@@ -1,6 +1,6 @@
 # Guide de personnalisation du design
 
-Ce guide explique comment personnaliser le design de l'application OK Mairie selon l'identité visuelle de votre ville.
+Ce guide explique comment personnaliser le design de l'application Commune Plus selon l'identité visuelle de votre ville.
 
 ## Design épuré et lisible
 

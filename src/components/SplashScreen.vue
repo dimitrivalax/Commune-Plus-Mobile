@@ -1,6 +1,6 @@
 <template>
   <div v-if="show" class="splash-screen">
-    <img src="/assets/commune-plus.png" alt="OK Mairie" class="splash-image" />
+    <img src="/assets/commune-plus.png" alt="Commune Plus" class="splash-image" />
   </div>
 </template>
 

@@ -2,7 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.okmairie.app',
-  appName: 'OK Mairie',
+  appName: 'Commune Plus',
   webDir: 'dist',
   server: {
     androidScheme: 'https'

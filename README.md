@@ -1,4 +1,4 @@
-# OK Mairie
+# Commune Plus
 
 Application mobile développée avec Ionic et Vue.js pour la gestion des signalements, réservations de salles municipales et réception des informations de la mairie.
 

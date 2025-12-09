@@ -34,7 +34,7 @@ Un **Upload Preset** dans Cloudinary est une configuration prédéfinie qui déf
   - **Unsigned** (recommandé pour notre cas) : Permet les uploads sans signature
   - **Signed** : Nécessite une signature (plus sécurisé mais plus complexe)
 
-#### Paramètres recommandés pour OK Mairie :
+#### Paramètres recommandés pour Commune Plus :
 
 ```
 Preset name: ok-mairie-uploads
