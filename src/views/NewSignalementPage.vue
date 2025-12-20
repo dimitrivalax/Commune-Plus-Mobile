@@ -191,6 +191,7 @@ import { camera, checkmark, close, location as locationIcon, checkmarkCircleOutl
 import { supabase } from '@/services/supabase'
 import { uploadImageToCloudinary } from '@/services/cloudinary'
 import { saveUserContact, getUserContact, getCityInfo, getCityIdFromDatabase } from '@/utils/storage'
+import { sendSignalementEmail } from '@/services/email'
 import CitySetupModal from '@/components/CitySetupModal.vue'
 
 const router = useRouter()
@@ -451,6 +452,28 @@ const submitSignalement = async () => {
       phone: phone.value,
       address: address.value
     })
+
+    // Envoyer l'email à la mairie si l'email de la mairie est configuré
+    const cityInfoData = getCityInfo()
+    if (cityInfoData && cityInfoData.email) {
+      try {
+        await sendSignalementEmail({
+          firstName: firstName.value,
+          lastName: lastName.value,
+          email: email.value || null, // null si pas d'email utilisateur
+          commune: cityInfoData.name || '',
+          description: description.value,
+          photoUrl: photoUrl,
+          mairieEmail: cityInfoData.email
+        })
+        console.log('Email envoyé avec succès à la mairie')
+      } catch (emailError) {
+        console.error('Erreur lors de l\'envoi de l\'email:', emailError)
+        // Ne pas bloquer le processus si l'email échoue, le signalement est déjà sauvegardé
+      }
+    } else {
+      console.warn('Email de la mairie non configuré, l\'email n\'a pas été envoyé')
+    }
 
     await loadingToast.dismiss()
 

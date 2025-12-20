@@ -20,3 +20,5 @@ CREATE POLICY "Tout le monde peut mettre à jour les informations de la commune"
     USING (true)
     WITH CHECK (true);
 
+
+

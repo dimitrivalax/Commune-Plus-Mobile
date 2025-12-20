@@ -1,7 +1,7 @@
 <template>
   <ion-page>
-    <ion-header>
-      <ion-toolbar>
+    <ion-header >
+      <ion-toolbar color="secondary">
         <ion-title>Accueil</ion-title>
         <ion-buttons slot="end">
           <ion-button @click="$router.push('/settings')">
