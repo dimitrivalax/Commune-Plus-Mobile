@@ -5,7 +5,7 @@
     :can-dismiss="canDismiss"
   >
     <ion-header>
-      <ion-toolbar>
+      <ion-toolbar color="primary">
         <ion-title>Configuration de la commune</ion-title>
         <ion-buttons slot="end" v-if="allowCancel">
           <ion-button @click="handleCancel">Annuler</ion-button>

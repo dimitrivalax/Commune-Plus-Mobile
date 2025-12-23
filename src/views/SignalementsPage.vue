@@ -1,7 +1,7 @@
 <template>
   <ion-page @ionViewWillEnter="loadSignalements">
     <ion-header>
-      <ion-toolbar>
+      <ion-toolbar color="primary">
         <ion-title>Signalements</ion-title>
         <ion-buttons slot="end">
           <ion-button @click="$router.push('/settings')">
@@ -12,7 +12,7 @@
     </ion-header>
     <ion-content :fullscreen="true">
       <ion-header collapse="condense">
-        <ion-toolbar>
+        <ion-toolbar color="primary">
           <ion-title size="large">Signalements</ion-title>
         </ion-toolbar>
       </ion-header>

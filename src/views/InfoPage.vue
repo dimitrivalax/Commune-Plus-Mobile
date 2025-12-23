@@ -1,7 +1,7 @@
 <template>
   <ion-page>
     <ion-header>
-      <ion-toolbar>
+      <ion-toolbar color="primary">
         <ion-title>Informations</ion-title>
         <ion-buttons slot="end">
           <ion-button @click="$router.push('/settings')">
@@ -12,7 +12,7 @@
     </ion-header>
     <ion-content :fullscreen="true">
       <ion-header collapse="condense">
-        <ion-toolbar>
+        <ion-toolbar color="primary">
           <ion-title size="large">Informations</ion-title>
         </ion-toolbar>
       </ion-header>

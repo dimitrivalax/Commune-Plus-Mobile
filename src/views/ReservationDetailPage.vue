@@ -1,7 +1,7 @@
 <template>
   <ion-page>
     <ion-header>
-      <ion-toolbar>
+      <ion-toolbar color="primary">
         <ion-buttons slot="start">
           <ion-back-button default-href="/tabs/reservations"></ion-back-button>
         </ion-buttons>
@@ -145,7 +145,7 @@
               <!-- Modal pour la date -->
               <ion-modal :is-open="openDateModal" @didDismiss="openDateModal = false">
                 <ion-header>
-                  <ion-toolbar>
+                  <ion-toolbar color="primary">
                     <ion-title>Sélectionner une date</ion-title>
                     <ion-buttons slot="end">
                       <ion-button @click="openDateModal = false">Fermer</ion-button>
@@ -165,7 +165,7 @@
               <!-- Modal pour l'heure de début -->
               <ion-modal :is-open="openStartTimeModal" @didDismiss="openStartTimeModal = false">
                 <ion-header>
-                  <ion-toolbar>
+                  <ion-toolbar color="primary">
                     <ion-title>Sélectionner une heure de début</ion-title>
                     <ion-buttons slot="end">
                       <ion-button @click="openStartTimeModal = false">Fermer</ion-button>
@@ -184,7 +184,7 @@
               <!-- Modal pour l'heure de fin -->
               <ion-modal :is-open="openEndTimeModal" @didDismiss="openEndTimeModal = false">
                 <ion-header>
-                  <ion-toolbar>
+                  <ion-toolbar color="primary">
                     <ion-title>Sélectionner une heure de fin</ion-title>
                     <ion-buttons slot="end">
                       <ion-button @click="openEndTimeModal = false">Fermer</ion-button>

@@ -1,7 +1,7 @@
 <template>
   <ion-page>
     <ion-header>
-      <ion-toolbar>
+      <ion-toolbar color="primary">
         <ion-buttons slot="start">
           <ion-back-button default-href="/tabs/home"></ion-back-button>
         </ion-buttons>
@@ -10,7 +10,7 @@
     </ion-header>
     <ion-content :fullscreen="true">
       <ion-header collapse="condense">
-        <ion-toolbar>
+        <ion-toolbar color="primary">
           <ion-title size="large">Paramètres</ion-title>
         </ion-toolbar>
       </ion-header>
