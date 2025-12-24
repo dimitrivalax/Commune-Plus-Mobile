@@ -206,7 +206,7 @@ ion-item {
 
 .city-name {
   font-weight: 600;
-  color: var(--ion-color-dark);
+  color: var(--ion-color-light);
   margin-bottom: 4px;
 }
 

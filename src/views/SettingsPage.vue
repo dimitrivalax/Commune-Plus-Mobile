@@ -24,7 +24,7 @@
           </h2>
           <ion-card>
             <ion-card-content>
-              <form @submit.prevent="saveUserContact">
+              <form @submit.prevent="saveUserContactForm">
                 <ion-item>
                   <ion-label position="stacked">Prénom</ion-label>
                   <ion-input
@@ -76,7 +76,10 @@
                   :disabled="isSavingUser"
                   class="save-button"
                 >
-                  <ion-spinner v-if="isSavingUser" name="crescent"></ion-spinner>
+                  <ion-spinner
+                    v-if="isSavingUser"
+                    name="crescent"
+                  ></ion-spinner>
                   <span v-else>Enregistrer mes coordonnées</span>
                 </ion-button>
               </form>
@@ -166,9 +169,10 @@ import {
   IonButton,
   IonIcon,
   IonSpinner,
+  IonRadio,
   toastController
 } from '@ionic/vue'
-import { person, location, create } from 'ionicons/icons'
+import { person, location, create, colorPalette } from 'ionicons/icons'
 import { saveUserContact, getUserContact, getCityInfo } from '@/utils/storage'
 import CitySetupModal from '@/components/CitySetupModal.vue'
 
@@ -184,6 +188,7 @@ const cityInfo = ref(null)
 const hasCityInfo = ref(false)
 const isSavingUser = ref(false)
 const showCityModal = ref(false)
+const theme = ref('auto')
 
 const loadData = () => {
   // Charger les coordonnées utilisateur
@@ -207,6 +212,9 @@ const loadData = () => {
     hasCityInfo.value = false
     cityInfo.value = null
   }
+  
+  // Charger le thème
+  theme.value = getTheme()
 }
 
 const saveUserContactForm = async () => {
@@ -231,7 +239,7 @@ const saveUserContactForm = async () => {
   } catch (error) {
     console.error('Error saving user contact:', error)
     const toast = await toastController.create({
-      message: 'Erreur lors de l\'enregistrement',
+      message: "Erreur lors de l'enregistrement",
       duration: 2000,
       color: 'danger',
       position: 'top'
@@ -268,7 +276,7 @@ onMounted(() => {
   gap: 12px;
   font-size: 20px;
   font-weight: 600;
-  color: var(--ion-color-dark);
+  color: var(--ion-color-light);
   margin: 0 0 16px 0;
   padding: 0 4px;
 }
@@ -321,7 +329,7 @@ ion-item:last-child {
 .city-info-display h3 {
   font-size: 14px;
   font-weight: 600;
-  color: var(--ion-color-dark);
+  color: var(--ion-color-light);
   margin: 0 0 4px 0;
 }
 
@@ -331,6 +339,3 @@ ion-item:last-child {
   margin: 0;
 }
 </style>
-
-
-

@@ -165,7 +165,7 @@ ion-thumbnail {
 .empty-state h3 {
   font-size: 20px;
   font-weight: 600;
-  color: var(--ion-color-dark);
+  color: var(--ion-color-light);
   margin: 0 0 8px 0;
 }
 

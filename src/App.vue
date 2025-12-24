@@ -28,8 +28,10 @@ const handleCityInfoSaved = () => {
   showCitySetupModal.value = false
 }
 
+
 onMounted(() => {
   checkCityInfo()
+  
 })
 </script>
 
