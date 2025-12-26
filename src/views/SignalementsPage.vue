@@ -120,6 +120,7 @@ onMounted(() => {
   margin-bottom: 12px;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  color: var(--ion-color-dark);
 }
 
 ion-thumbnail {

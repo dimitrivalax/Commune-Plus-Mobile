@@ -102,7 +102,7 @@ ion-item:last-child {
 ion-label h2 {
   font-weight: 600;
   font-size: 16px;
-  color: var(--ion-color-light);
+
   margin-bottom: var(--spacing-xs);
 }
 
@@ -126,16 +126,6 @@ ion-button[expand="block"] {
   margin: var(--spacing-md) 0;
 }
 
-/* Boutons avec icônes - couleur light */
-ion-button ion-icon {
-  --color: var(--ion-color-light);
-  color: var(--ion-color-light);
-}
-
-ion-button:has(ion-icon) {
-  --color: var(--ion-color-light);
-}
-
 /* Inputs épurés */
 ion-input,
 ion-textarea {
@@ -147,6 +137,10 @@ ion-textarea {
   background: var(--ion-color-light);
   border: 1px solid rgba(0, 0, 0, 0.08);
   margin-top: var(--spacing-sm);
+}
+
+ion-card-title{
+  color: var(--ion-color-dark);
 }
 
 ion-input:focus-within,
@@ -201,7 +195,6 @@ ion-thumbnail img {
 .section-title {
   font-size: 18px;
   font-weight: 600;
-  color: var(--ion-color-light);
   margin-bottom: var(--spacing-md);
   padding: 0 var(--spacing-md);
 }
@@ -222,12 +215,10 @@ ion-thumbnail img {
 /* Amélioration de la lisibilité */
 p {
   line-height: 1.6;
-  color: var(--ion-color-light);
 }
 
 h1, h2, h3 {
   font-weight: 600;
-  color: var(--ion-color-light);
   letter-spacing: -0.5px;
 }
 

@@ -276,7 +276,6 @@ onMounted(() => {
   gap: 12px;
   font-size: 20px;
   font-weight: 600;
-  color: var(--ion-color-light);
   margin: 0 0 16px 0;
   padding: 0 4px;
 }

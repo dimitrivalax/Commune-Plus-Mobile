@@ -687,12 +687,12 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  color: var(--ion-color-dark);
 }
 
 .room-name {
   font-size: 20px;
   font-weight: 600;
-  color: var(--ion-color-light);
   margin: 0 0 12px 0;
 }
 

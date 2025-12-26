@@ -522,7 +522,6 @@ const submitSignalement = async () => {
 .section-title {
   font-size: 18px;
   font-weight: 600;
-  color: var(--ion-color-light);
   margin: 0 0 16px 0;
   padding: 0 4px;
 }

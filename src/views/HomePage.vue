@@ -66,7 +66,6 @@ import CityHeader from '@/components/CityHeader.vue'
 .section-title {
   font-size: 24px;
   font-weight: 600;
-  color: var(--ion-color-light);
   margin-bottom: 20px;
   padding: 0;
 }
