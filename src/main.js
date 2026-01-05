@@ -30,7 +30,8 @@ import './theme/custom.css'
 
 // Initialize PostHog
 const posthogApiKey = import.meta.env.VITE_POSTHOG_API_KEY
-const posthogHost = import.meta.env.VITE_POSTHOG_HOST || 'https://eu.i.posthog.com'
+const posthogHost =
+  import.meta.env.VITE_POSTHOG_HOST || 'https://eu.i.posthog.com'
 
 if (posthogApiKey) {
   initPostHog(posthogApiKey, posthogHost, {
@@ -44,20 +45,32 @@ if (posthogApiKey) {
 }
 
 // Track page views
-router.afterEach((to) => {
+router.afterEach((to, from) => {
   if (posthogApiKey) {
     trackPageView(to.name || to.path, {
       path: to.path,
-      fullPath: to.fullPath
+      fullPath: to.fullPath,
+      params: to.params,
+      query: to.query,
+      from_path: from.path,
+      from_name: from.name
     })
   }
 })
 
-const app = createApp(App)
-  .use(IonicVue)
-  .use(router)
+const app = createApp(App).use(IonicVue).use(router)
 
 router.isReady().then(() => {
+  // Track initial page view when router is ready
+  if (posthogApiKey) {
+    const route = router.currentRoute.value
+    trackPageView(route.name || route.path, {
+      path: route.path,
+      fullPath: route.fullPath,
+      params: route.params,
+      query: route.query,
+      is_initial_load: true
+    })
+  }
   app.mount('#app')
 })
-

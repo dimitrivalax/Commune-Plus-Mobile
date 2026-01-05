@@ -77,7 +77,7 @@
             <ion-button 
               v-if="!locationError && !useAddress"
               expand="block" 
-              @click="useAddress = true"
+              @click="handleUseAddress"
               fill="clear"
               size="small"
               class="use-address-button"
@@ -193,6 +193,7 @@ import { uploadImageToCloudinary } from '@/services/cloudinary'
 import { saveUserContact, getUserContact, getCityInfo, getCityIdFromDatabase } from '@/utils/storage'
 import { sendSignalementEmail } from '@/services/email'
 import CitySetupModal from '@/components/CitySetupModal.vue'
+import { trackEvent } from '@/services/posthog'
 
 const router = useRouter()
 const description = ref('')
@@ -223,8 +224,19 @@ const takePhoto = async () => {
     })
 
     photo.value = image.dataUrl
+    
+    // Track photo taken event
+    trackEvent('signalement_photo_taken', {
+      has_photo: true
+    })
   } catch (error) {
     console.error('Error taking photo:', error)
+    
+    // Track photo error
+    trackEvent('signalement_photo_error', {
+      error: error.message || 'Unknown error'
+    })
+    
     const toast = await toastController.create({
       message: 'Erreur lors de la prise de photo',
       duration: 2000,
@@ -236,6 +248,9 @@ const takePhoto = async () => {
 
 const removePhoto = () => {
   photo.value = null
+  
+  // Track photo removed event
+  trackEvent('signalement_photo_removed')
 }
 
 const getCurrentLocation = async () => {
@@ -274,6 +289,12 @@ const getCurrentLocation = async () => {
     address.value = ''
     useAddress.value = false
 
+    // Track GPS location obtained
+    trackEvent('signalement_location_gps_obtained', {
+      accuracy: position.coords.accuracy,
+      has_location: true
+    })
+
     const toast = await toastController.create({
       message: 'Position GPS enregistrée avec succès',
       duration: 2000,
@@ -284,6 +305,12 @@ const getCurrentLocation = async () => {
     console.error('Error getting location:', error)
     locationError.value = 'Impossible d\'obtenir votre position. Vous pouvez utiliser une adresse à la place.'
     useAddress.value = true // Activer le mode adresse en fallback
+    
+    // Track GPS error
+    trackEvent('signalement_location_gps_error', {
+      error: error.message || 'Unknown error',
+      fallback_to_address: true
+    })
     
     const toast = await toastController.create({
       message: 'Erreur lors de la récupération de la position GPS',
@@ -296,8 +323,21 @@ const getCurrentLocation = async () => {
   }
 }
 
+const handleUseAddress = () => {
+  useAddress.value = true
+  
+  // Track manual address selection
+  trackEvent('signalement_location_address_selected', {
+    location_type: 'address',
+    gps_available: !!location.value
+  })
+}
+
 // Charger les coordonnées sauvegardées et obtenir la position GPS au chargement de la page
 onMounted(async () => {
+  // Track signalement creation started
+  trackEvent('signalement_creation_started')
+  
   // Charger les coordonnées depuis le localStorage
   const savedContact = getUserContact()
   if (savedContact) {
@@ -477,6 +517,16 @@ const submitSignalement = async () => {
 
     await loadingToast.dismiss()
 
+    // Track successful signalement submission
+    trackEvent('signalement_submitted', {
+      signalement_id: data[0]?.id,
+      has_photo: !!photoUrl,
+      location_type: location.value ? 'gps' : 'address',
+      has_email: !!email.value,
+      has_phone: !!phone.value,
+      city_id: cityId || null
+    })
+
     const toast = await toastController.create({
       message: 'Signalement envoyé avec succès',
       duration: 2000,
@@ -488,6 +538,12 @@ const submitSignalement = async () => {
   } catch (error) {
     console.error('Error submitting signalement:', error)
     await loadingToast.dismiss()
+
+    // Track submission error
+    trackEvent('signalement_submission_error', {
+      error: error.message || 'Unknown error',
+      error_code: error.code || null
+    })
 
     // Afficher un message d'erreur plus détaillé
     const errorMessage = error.message || 'Erreur lors de l\'envoi'

@@ -218,6 +218,7 @@ import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonBa
 import { create, close, trash, checkmark, location as locationIcon, person, time, alertCircle } from 'ionicons/icons'
 import { supabase } from '@/services/supabase'
 import { formatDateTime } from '@/utils/date'
+import { trackEvent } from '@/services/posthog'
 
 const route = useRoute()
 const router = useRouter()
@@ -276,6 +277,12 @@ const loadSignalement = async () => {
 const toggleEditMode = () => {
   isEditing.value = !isEditing.value
   if (isEditing.value && signalement.value) {
+    // Track edit mode started
+    trackEvent('signalement_edit_started', {
+      signalement_id: signalement.value.id,
+      status: signalement.value.status
+    })
+    
     // Réinitialiser le formulaire avec les valeurs actuelles
     editForm.value = {
       description: signalement.value.description || '',
@@ -286,11 +293,21 @@ const toggleEditMode = () => {
       email: signalement.value.email || '',
       phone: signalement.value.phone || ''
     }
+  } else if (!isEditing.value) {
+    // Track edit cancelled
+    trackEvent('signalement_edit_cancelled', {
+      signalement_id: signalement.value?.id
+    })
   }
 }
 
 const cancelEdit = () => {
   isEditing.value = false
+  
+  // Track edit cancelled
+  trackEvent('signalement_edit_cancelled', {
+    signalement_id: signalement.value?.id
+  })
 }
 
 const saveChanges = async () => {
@@ -331,6 +348,22 @@ const saveChanges = async () => {
     signalement.value = data
     isEditing.value = false
 
+    // Track successful modification
+    trackEvent('signalement_modified', {
+      signalement_id: route.params.id,
+      old_status: signalement.value?.status,
+      new_status: editForm.value.status,
+      fields_modified: {
+        description: editForm.value.description !== (signalement.value?.description || ''),
+        comment: editForm.value.comment !== (signalement.value?.comment || ''),
+        status: editForm.value.status !== (signalement.value?.status || ''),
+        contact_info: editForm.value.firstName !== (signalement.value?.first_name || '') ||
+                     editForm.value.lastName !== (signalement.value?.last_name || '') ||
+                     editForm.value.email !== (signalement.value?.email || '') ||
+                     editForm.value.phone !== (signalement.value?.phone || '')
+      }
+    })
+
     await loadingToast.dismiss()
 
     const toast = await toastController.create({
@@ -342,6 +375,13 @@ const saveChanges = async () => {
   } catch (error) {
     console.error('Error updating signalement:', error)
     await loadingToast.dismiss()
+
+    // Track modification error
+    trackEvent('signalement_modification_error', {
+      signalement_id: route.params.id,
+      error: error.message || 'Unknown error',
+      error_code: error.code || null
+    })
 
     const toast = await toastController.create({
       message: 'Erreur lors de l\'enregistrement',
@@ -391,6 +431,12 @@ const deleteSignalement = async () => {
 
     if (error) throw error
 
+    // Track successful deletion
+    trackEvent('signalement_deleted', {
+      signalement_id: route.params.id,
+      status: signalement.value?.status || 'unknown'
+    })
+
     await loadingToast.dismiss()
 
     const toast = await toastController.create({
@@ -404,6 +450,13 @@ const deleteSignalement = async () => {
   } catch (error) {
     console.error('Error deleting signalement:', error)
     await loadingToast.dismiss()
+
+    // Track deletion error
+    trackEvent('signalement_deletion_error', {
+      signalement_id: route.params.id,
+      error: error.message || 'Unknown error',
+      error_code: error.code || null
+    })
 
     const toast = await toastController.create({
       message: 'Erreur lors de la suppression',
@@ -442,6 +495,11 @@ const getStatusLabel = (status) => {
 
 onMounted(() => {
   loadSignalement()
+  
+  // Track signalement detail view
+  trackEvent('signalement_detail_viewed', {
+    signalement_id: route.params.id
+  })
 })
 </script>
 
