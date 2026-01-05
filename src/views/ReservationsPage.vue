@@ -1,73 +1,84 @@
 <template>
-  <ion-page @ionViewWillEnter="loadReservations">
-    <ion-header>
-      <ion-toolbar color="primary">
-        <ion-title>Réservations</ion-title>
-        <ion-buttons slot="end">
-          <ion-button @click="$router.push('/settings')">
-            <ion-icon :icon="settings" />
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content :fullscreen="true">
-      <ion-header collapse="condense">
-        <ion-toolbar color="primary">
-          <ion-title size="large">Réservations</ion-title>
-        </ion-toolbar>
-      </ion-header>
-
-      <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-        <ion-fab-button @click="$router.push('/reservation/new')">
-          <ion-icon :icon="add" />
-        </ion-fab-button>
-      </ion-fab>
+  <IonPage @ionViewWillEnter="loadReservations">
+    <AppHeader title="Réservations"></AppHeader>
+    <IonContent :fullscreen="true">
+      <IonFab vertical="bottom" horizontal="end" slot="fixed">
+        <IonFabButton @click="$router.push('/reservation/new')">
+          <IonIcon :icon="add" />
+        </IonFabButton>
+      </IonFab>
 
       <div class="ion-padding">
-        <ion-refresher slot="fixed" @ionRefresh="loadReservations($event)">
-          <ion-refresher-content></ion-refresher-content>
-        </ion-refresher>
+        <IonRefresher slot="fixed" @ionRefresh="loadReservations($event)">
+          <IonRefresherContent></IonRefresherContent>
+        </IonRefresher>
 
-        <ion-list v-if="reservations.length > 0" class="reservations-list">
-          <ion-item 
-            v-for="reservation in reservations" 
-            :key="reservation.id" 
+        <IonList v-if="reservations.length > 0" class="reservations-list">
+          <IonItem
+            v-for="reservation in reservations"
+            :key="reservation.id"
             class="reservation-item"
             button
             @click="$router.push(`/reservation/${reservation.id}`)"
           >
-            <ion-icon :icon="calendar" slot="start" class="reservation-icon" />
-            <ion-label>
+            <IonIcon :icon="calendar" slot="start" class="reservation-icon" />
+            <IonLabel>
               <h2>{{ reservation.room_name }}</h2>
               <div class="item-meta">
-                <span class="date-text">{{ formatDate(reservation.date) }}</span>
-                <span class="time-text">{{ formatTime(reservation.start_time) }} - {{ formatTime(reservation.end_time) }}</span>
+                <span class="date-text">{{
+                  formatDate(reservation.date)
+                }}</span>
+                <span class="time-text"
+                  >{{ formatTime(reservation.start_time) }} -
+                  {{ formatTime(reservation.end_time) }}</span
+                >
               </div>
-              <ion-badge :color="getStatusColor(reservation.status)" class="status-badge">
+              <IonBadge
+                :color="getStatusColor(reservation.status)"
+                class="status-badge"
+              >
                 {{ reservation.status || 'En attente' }}
-              </ion-badge>
-            </ion-label>
-          </ion-item>
-        </ion-list>
+              </IonBadge>
+            </IonLabel>
+          </IonItem>
+        </IonList>
 
         <div v-else class="empty-state">
-          <ion-icon :icon="calendarOutline" class="empty-icon" />
+          <IonIcon :icon="calendarOutline" class="empty-icon" />
           <h3>Aucune réservation</h3>
           <p>Aucune réservation pour le moment.</p>
-          <ion-button expand="block" @click="$router.push('/reservation/new')" class="empty-action">
+          <IonButton
+            expand="block"
+            @click="$router.push('/reservation/new')"
+            class="empty-action"
+          >
             Réserver une salle
-          </ion-button>
+          </IonButton>
         </div>
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script setup>
 import { ref, onMounted, onActivated } from 'vue'
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonFab, IonFabButton, IonIcon, IonList, IonItem, IonLabel, IonBadge, IonCard, IonCardContent, IonButton, IonRefresher, IonRefresherContent, IonButtons } from '@ionic/vue'
-import { add, calendar, calendarOutline, settings } from 'ionicons/icons'
+import {
+  IonPage,
+  IonContent,
+  IonFab,
+  IonFabButton,
+  IonIcon,
+  IonList,
+  IonItem,
+  IonLabel,
+  IonBadge,
+  IonButton,
+  IonRefresher,
+  IonRefresherContent
+} from '@ionic/vue'
+import { add, calendar, calendarOutline } from 'ionicons/icons'
 import { supabase } from '@/services/supabase'
+import AppHeader from '@/components/AppHeader.vue'
 import { formatDate, formatTime } from '@/utils/date'
 
 const reservations = ref([])
@@ -182,4 +193,3 @@ onActivated(() => {
   margin: 0 auto;
 }
 </style>
-

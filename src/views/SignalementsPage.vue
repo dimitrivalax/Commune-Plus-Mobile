@@ -1,74 +1,88 @@
 <template>
-  <ion-page @ionViewWillEnter="loadSignalements">
-    <ion-header>
-      <ion-toolbar color="primary">
-        <ion-title>Signalements</ion-title>
-        <ion-buttons slot="end">
-          <ion-button @click="$router.push('/settings')">
-            <ion-icon :icon="settings" />
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content :fullscreen="true">
-      <ion-header collapse="condense">
-        <ion-toolbar color="primary">
-          <ion-title size="large">Signalements</ion-title>
-        </ion-toolbar>
-      </ion-header>
-
-      <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-        <ion-fab-button @click="$router.push('/signalement/new')">
-          <ion-icon :icon="add" />
-        </ion-fab-button>
-      </ion-fab>
+  <IonPage @ionViewWillEnter="loadSignalements">
+    <AppHeader title="Signalements"></AppHeader>
+    <IonContent :fullscreen="true">
+      <IonFab vertical="bottom" horizontal="end" slot="fixed">
+        <IonFabButton @click="$router.push('/signalement/new')">
+          <IonIcon :icon="add" />
+        </IonFabButton>
+      </IonFab>
 
       <div class="ion-padding">
-        <ion-refresher slot="fixed" @ionRefresh="loadSignalements($event)">
-          <ion-refresher-content></ion-refresher-content>
-        </ion-refresher>
+        <IonRefresher slot="fixed" @ionRefresh="loadSignalements($event)">
+          <IonRefresherContent></IonRefresherContent>
+        </IonRefresher>
 
-        <ion-list v-if="signalements.length > 0" class="signalements-list">
-          <ion-item 
-            v-for="signalement in signalements" 
-            :key="signalement.id" 
+        <IonList v-if="signalements.length > 0" class="signalements-list">
+          <IonItem
+            v-for="signalement in signalements"
+            :key="signalement.id"
             class="signalement-item"
             button
             @click="$router.push(`/signalement/${signalement.id}`)"
           >
-            <ion-thumbnail slot="start" v-if="signalement.photo_url">
-              <img :src="signalement.photo_url" :alt="signalement.description" />
-            </ion-thumbnail>
-            <ion-label>
+            <IonThumbnail v-if="signalement.photo_url" slot="start">
+              <img
+                :src="signalement.photo_url"
+                :alt="signalement.description"
+              />
+            </IonThumbnail>
+            <IonLabel>
               <h2>{{ signalement.description || 'Sans description' }}</h2>
-              <p v-if="signalement.comment" class="comment-text">{{ signalement.comment }}</p>
+              <p v-if="signalement.comment" class="comment-text">
+                {{ signalement.comment }}
+              </p>
               <div class="item-meta">
-                <span class="date-text">{{ formatDateTime(signalement.created_at) }}</span>
-                <ion-badge :color="getStatusColor(signalement.status)" class="status-badge">
+                <span class="date-text">{{
+                  formatDateTime(signalement.created_at)
+                }}</span>
+                <IonBadge
+                  :color="getStatusColor(signalement.status)"
+                  class="status-badge"
+                >
                   {{ signalement.status || 'En attente' }}
-                </ion-badge>
+                </IonBadge>
               </div>
-            </ion-label>
-          </ion-item>
-        </ion-list>
+            </IonLabel>
+          </IonItem>
+        </IonList>
 
         <div v-else class="empty-state">
-          <ion-icon :icon="documentText" class="empty-icon" />
+          <IonIcon :icon="documentText" class="empty-icon" />
           <h3>Aucun signalement</h3>
           <p>Aucun signalement pour le moment.</p>
-          <ion-button expand="block" @click="$router.push('/signalement/new')" class="empty-action">
+          <IonButton
+            expand="block"
+            @click="$router.push('/signalement/new')"
+            class="empty-action"
+          >
             Faire un signalement
-          </ion-button>
+          </IonButton>
         </div>
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonFab, IonFabButton, IonIcon, IonList, IonItem, IonLabel, IonThumbnail, IonBadge, IonCard, IonCardContent, IonButton, IonRefresher, IonRefresherContent, IonButtons } from '@ionic/vue'
-import { add, documentText, settings } from 'ionicons/icons'
+import {
+  IonPage,
+  IonContent,
+  IonFab,
+  IonFabButton,
+  IonIcon,
+  IonList,
+  IonItem,
+  IonLabel,
+  IonThumbnail,
+  IonBadge,
+  IonButton,
+  IonRefresher,
+  IonRefresherContent,
+} from '@ionic/vue'
+import { add, documentText } from 'ionicons/icons'
+import AppHeader from '@/components/AppHeader.vue'
 import { supabase } from '@/services/supabase'
 import { formatDateTime } from '@/utils/date'
 
@@ -180,4 +194,3 @@ ion-thumbnail {
   margin: 0 auto;
 }
 </style>
-

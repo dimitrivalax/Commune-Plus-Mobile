@@ -1,63 +1,59 @@
 <template>
-  <ion-page>
-    <ion-header>
-      <ion-toolbar color="primary">
-        <ion-title>Informations</ion-title>
-        <ion-buttons slot="end">
-          <ion-button @click="$router.push('/settings')">
-            <ion-icon :icon="settings" />
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content :fullscreen="true">
-      <ion-header collapse="condense">
-        <ion-toolbar color="primary">
-          <ion-title size="large">Informations</ion-title>
-        </ion-toolbar>
-      </ion-header>
-
+  <IonPage>
+    <AppHeader title="Informations"></AppHeader>
+    <IonContent :fullscreen="true">
       <div class="ion-padding">
-        <ion-refresher slot="fixed" @ionRefresh="loadInfo($event)">
-          <ion-refresher-content></ion-refresher-content>
-        </ion-refresher>
+        <IonRefresher slot="fixed" @ionRefresh="loadInfo($event)">
+          <IonRefresherContent></IonRefresherContent>
+        </IonRefresher>
 
-        <ion-list v-if="infoItems.length > 0" class="info-list">
-          <ion-item
+        <IonList v-if="infoItems.length > 0" class="info-list">
+          <IonItem
             v-for="item in infoItems"
             :key="item.id"
             button
             @click="$router.push(`/info/${item.id}`)"
             class="info-item"
           >
-            <ion-icon :icon="newspaper" slot="start" class="info-icon" />
-            <ion-label>
+            <IonIcon :icon="newspaper" slot="start" class="info-icon" />
+            <IonLabel>
               <h2>{{ item.title }}</h2>
               <div class="item-meta">
                 <span class="date-text">{{ formatDate(item.created_at) }}</span>
-                <ion-badge v-if="item.category" class="category-badge">
+                <IonBadge v-if="item.category" class="category-badge">
                   {{ item.category }}
-                </ion-badge>
+                </IonBadge>
               </div>
-            </ion-label>
-            <ion-icon :icon="chevronForward" slot="end" class="chevron-icon" />
-          </ion-item>
-        </ion-list>
+            </IonLabel>
+            <IonIcon :icon="chevronForward" slot="end" class="chevron-icon" />
+          </IonItem>
+        </IonList>
 
         <div v-else class="empty-state">
-          <ion-icon :icon="newspaperOutline" class="empty-icon" />
+          <IonIcon :icon="newspaperOutline" class="empty-icon" />
           <h3>Aucune information</h3>
           <p>Aucune information disponible pour le moment.</p>
         </div>
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonBadge, IonIcon, IonRefresher, IonRefresherContent, IonButtons, IonButton } from '@ionic/vue'
-import { newspaper, newspaperOutline, chevronForward, settings } from 'ionicons/icons'
+import {
+  IonPage,
+  IonContent,
+  IonList,
+  IonItem,
+  IonLabel,
+  IonBadge,
+  IonIcon,
+  IonRefresher,
+  IonRefresherContent
+} from '@ionic/vue'
+import { newspaper, newspaperOutline, chevronForward } from 'ionicons/icons'
+import AppHeader from '@/components/AppHeader.vue'
 import { supabase } from '@/services/supabase'
 import { formatDate } from '@/utils/date'
 
@@ -149,4 +145,3 @@ onMounted(() => {
   color: var(--ion-color-medium);
 }
 </style>
-

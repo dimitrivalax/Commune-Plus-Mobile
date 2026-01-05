@@ -1,61 +1,71 @@
 <template>
-  <ion-page>
-    <ion-header >
-      <ion-toolbar color="primary">
-        <ion-title>Accueil</ion-title>
-        <ion-buttons slot="end">
-          <ion-button @click="$router.push('/settings')">
-            <ion-icon :icon="settings" />
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content :fullscreen="true">
+  <IonPage>
+    <AppHeader title="Accueil"></AppHeader>
+    <IonContent :fullscreen="true">
       <CityHeader />
-      
+
       <div class="ion-padding">
         <div class="welcome-section">
           <h2 class="section-title">Services disponibles</h2>
-          
-          <ion-card button @click="$router.push('/tabs/signalements')" class="service-card">
-            <ion-card-content>
+
+          <IonCard
+            button
+            @click="$router.push('/tabs/signalements')"
+            class="service-card"
+          >
+            <IonCardContent>
               <div class="service-icon">
-                <ion-icon :icon="warning" />
+                <IonIcon :icon="warning" />
               </div>
               <h3>Faire un signalement</h3>
               <p>Prenez une photo et faites un signalement dans votre ville.</p>
-            </ion-card-content>
-          </ion-card>
+            </IonCardContent>
+          </IonCard>
 
-          <ion-card button @click="$router.push('/tabs/reservations')" class="service-card">
-            <ion-card-content>
+          <IonCard
+            button
+            @click="$router.push('/tabs/reservations')"
+            class="service-card"
+          >
+            <IonCardContent>
               <div class="service-icon">
-                <ion-icon :icon="calendar" />
+                <IonIcon :icon="calendar" />
               </div>
               <h3>Réserver une salle</h3>
               <p>Réservez une salle municipale pour vos événements.</p>
-            </ion-card-content>
-          </ion-card>
+            </IonCardContent>
+          </IonCard>
 
-          <ion-card button @click="$router.push('/tabs/info')" class="service-card">
-            <ion-card-content>
+          <IonCard
+            button
+            @click="$router.push('/tabs/info')"
+            class="service-card"
+          >
+            <IonCardContent>
               <div class="service-icon">
-                <ion-icon :icon="informationCircle" />
+                <IonIcon :icon="informationCircle" />
               </div>
               <h3>Informations municipales</h3>
               <p>Consultez les dernières informations de la mairie.</p>
-            </ion-card-content>
-          </ion-card>
+            </IonCardContent>
+          </IonCard>
         </div>
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script setup>
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardContent, IonIcon, IonButtons, IonButton } from '@ionic/vue'
-import { warning, calendar, informationCircle, settings } from 'ionicons/icons'
+import {
+  IonPage,
+  IonContent,
+  IonCard,
+  IonCardContent,
+  IonIcon
+} from '@ionic/vue'
+import { warning, calendar, informationCircle } from 'ionicons/icons'
 import CityHeader from '@/components/CityHeader.vue'
+import AppHeader from '@/components/AppHeader.vue'
 </script>
 
 <style scoped>
@@ -72,7 +82,9 @@ import CityHeader from '@/components/CityHeader.vue'
 
 .service-card {
   margin-bottom: 16px;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .service-card:active {
@@ -90,7 +102,11 @@ import CityHeader from '@/components/CityHeader.vue'
   width: 56px;
   height: 56px;
   border-radius: 12px;
-  background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-shade));
+  background: linear-gradient(
+    135deg,
+    var(--ion-color-primary),
+    var(--ion-color-primary-shade)
+  );
   display: flex;
   align-items: center;
   justify-content: center;
@@ -116,4 +132,3 @@ import CityHeader from '@/components/CityHeader.vue'
   line-height: 1.5;
 }
 </style>
-
