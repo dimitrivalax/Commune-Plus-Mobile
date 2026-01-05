@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import { IonicVue } from '@ionic/vue'
+import { initPostHog, trackPageView } from './services/posthog'
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/vue/css/core.css'
@@ -26,6 +27,31 @@ import './theme/custom.css'
 
 // Appliquer le thème de la ville
 // applyCityTheme()
+
+// Initialize PostHog
+const posthogApiKey = import.meta.env.VITE_POSTHOG_API_KEY
+const posthogHost = import.meta.env.VITE_POSTHOG_HOST || 'https://eu.i.posthog.com'
+
+if (posthogApiKey) {
+  initPostHog(posthogApiKey, posthogHost, {
+    // Disable autocapture for mobile apps to reduce noise
+    autocapture: false,
+    // Enable session recording if needed (can be disabled for privacy)
+    disable_session_recording: true,
+    // Persist user across sessions
+    persistence: 'localStorage+cookie'
+  })
+}
+
+// Track page views
+router.afterEach((to) => {
+  if (posthogApiKey) {
+    trackPageView(to.name || to.path, {
+      path: to.path,
+      fullPath: to.fullPath
+    })
+  }
+})
 
 const app = createApp(App)
   .use(IonicVue)

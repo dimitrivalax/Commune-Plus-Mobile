@@ -13,6 +13,7 @@ Application mobile développée avec Ionic et Vue.js pour la gestion des signale
 - **Frontend** : Ionic 7 + Vue.js 3
 - **Backend** : Supabase
 - **Stockage d'images** : Cloudinary
+- **Analytics** : PostHog
 - **Build** : Vite
 
 ## Installation
@@ -39,6 +40,8 @@ Puis remplir le fichier `.env` avec vos credentials :
 - `VITE_SUPABASE_ANON_KEY` : Clé anonyme de votre projet Supabase
 - `VITE_CLOUDINARY_CLOUD_NAME` : Nom de votre cloud Cloudinary
 - `VITE_CLOUDINARY_UPLOAD_PRESET` : Preset d'upload Cloudinary
+- `VITE_POSTHOG_API_KEY` : Clé API PostHog (optionnel, pour l'analytics)
+- `VITE_POSTHOG_HOST` : URL de votre instance PostHog (optionnel, par défaut: https://app.posthog.com)
 
 ## Personnalisation du design
 
