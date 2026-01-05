@@ -29,7 +29,7 @@ Un **Upload Preset** dans Cloudinary est une configuration prédéfinie qui déf
 
 #### Configuration de base :
 
-- **Preset name** : Donnez un nom (ex: `ok-mairie-uploads`)
+- **Preset name** : Donnez un nom (ex: `commune-plus-uploads`)
 - **Signing mode** : 
   - **Unsigned** (recommandé pour notre cas) : Permet les uploads sans signature
   - **Signed** : Nécessite une signature (plus sécurisé mais plus complexe)
@@ -37,7 +37,7 @@ Un **Upload Preset** dans Cloudinary est une configuration prédéfinie qui déf
 #### Paramètres recommandés pour Commune Plus :
 
 ```
-Preset name: ok-mairie-uploads
+Preset name: commune-plus-uploads
 Signing mode: Unsigned
 Folder: signalements/ (optionnel - pour organiser les fichiers)
 Allowed formats: jpg, png, webp
@@ -67,7 +67,7 @@ Cliquez sur **Save** pour créer le preset.
 ### Upload Preset
 
 1. Après avoir créé le preset, vous verrez son nom dans la liste
-2. Le nom du preset est ce que vous avez défini (ex: `ok-mairie-uploads`)
+2. Le nom du preset est ce que vous avez défini (ex: `commune-plus-uploads`)
 
 ## Configuration dans l'application
 
@@ -75,7 +75,7 @@ Une fois que vous avez vos credentials, ajoutez-les dans votre fichier `.env` :
 
 ```env
 VITE_CLOUDINARY_CLOUD_NAME=votre_cloud_name
-VITE_CLOUDINARY_UPLOAD_PRESET=ok-mairie-uploads
+VITE_CLOUDINARY_UPLOAD_PRESET=commune-plus-uploads
 ```
 
 ## Exemple de configuration complète
@@ -83,7 +83,7 @@ VITE_CLOUDINARY_UPLOAD_PRESET=ok-mairie-uploads
 ### Dans Cloudinary Dashboard :
 
 ```
-Preset name: ok-mairie-uploads
+Preset name: commune-plus-uploads
 Signing mode: Unsigned
 Folder: signalements/
 Allowed formats: jpg, png, webp
@@ -96,7 +96,7 @@ Format: auto
 
 ```env
 VITE_CLOUDINARY_CLOUD_NAME=dxyz123456
-VITE_CLOUDINARY_UPLOAD_PRESET=ok-mairie-uploads
+VITE_CLOUDINARY_UPLOAD_PRESET=commune-plus-uploads
 ```
 
 ## Comment ça fonctionne dans l'application
@@ -170,7 +170,7 @@ Vérifiez votre fichier `.env` :
 
 ```env
 VITE_CLOUDINARY_CLOUD_NAME=dgrmkvdil  # Votre cloud name (sans espaces)
-VITE_CLOUDINARY_UPLOAD_PRESET=ok-mairie-uploads  # Nom exact du preset
+VITE_CLOUDINARY_UPLOAD_PRESET=commune-plus-uploads  # Nom exact du preset
 ```
 
 **Important** :

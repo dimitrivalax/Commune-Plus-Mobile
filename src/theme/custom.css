@@ -133,9 +133,7 @@ ion-textarea {
   --padding-end: 12px;
   --padding-top: 12px;
   --padding-bottom: 12px;
-  border-radius: var(--border-radius-sm);
   background: var(--ion-color-light);
-  border: 1px solid rgba(0, 0, 0, 0.08);
   margin-top: var(--spacing-sm);
 }
 

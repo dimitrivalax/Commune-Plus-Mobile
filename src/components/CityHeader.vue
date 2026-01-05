@@ -13,6 +13,9 @@
 <script setup>
 import { computed } from 'vue'
 import { cityConfig } from '@/config/city'
+import { getCityInfo } from '@/utils/storage'
+
+const cityInfo = getCityInfo()
 
 const props = defineProps({
   subtitle: {
@@ -25,8 +28,8 @@ const props = defineProps({
   }
 })
 
-const cityName = computed(() => cityConfig.name)
-const logoUrl = computed(() => cityConfig.logo)
+const cityName = computed(() => cityInfo.name || cityConfig.name)
+const logoUrl = computed(() => cityInfo.logo || cityConfig.logo)
 </script>
 
 <style scoped>

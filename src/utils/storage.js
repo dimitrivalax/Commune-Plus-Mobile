@@ -2,7 +2,7 @@
  * Service de gestion du localStorage pour les coordonnées utilisateur
  */
 
-const STORAGE_KEY = 'ok-mairie-user-contact'
+const STORAGE_KEY = 'commune-plus-user-contact'
 
 /**
  * Structure des données sauvegardées :
@@ -72,7 +72,7 @@ export const clearUserContact = () => {
  * Service de gestion du localStorage pour les informations de la commune
  */
 
-const CITY_STORAGE_KEY = 'ok-mairie-city-info'
+const CITY_STORAGE_KEY = 'commune-plus-city-info'
 
 /**
  * Structure des données sauvegardées :

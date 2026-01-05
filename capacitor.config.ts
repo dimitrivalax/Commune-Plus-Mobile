@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.okmairie.app',
+  appId: 'com.communeplus.app',
   appName: 'Commune Plus',
   webDir: 'dist',
   server: {

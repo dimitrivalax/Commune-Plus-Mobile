@@ -1,6 +1,6 @@
 <template>
-  <ion-modal 
-    :is-open="isOpen" 
+  <ion-modal
+    :is-open="isOpen"
     @willDismiss="handleDismiss"
     :can-dismiss="canDismiss"
   >
@@ -17,17 +17,20 @@
         <div class="modal-header">
           <ion-icon :icon="locationOutline" class="header-icon"></ion-icon>
           <h2>Informations de votre commune</h2>
-          <p>Veuillez renseigner les informations suivantes pour configurer l'application</p>
+          <p>
+            Veuillez renseigner les informations suivantes pour configurer
+            l'application
+          </p>
         </div>
 
         <form @submit.prevent="handleSubmit">
-          <CityTypeahead
-            @select="handleCitySelect"
-            :disabled="isSubmitting"
-          />
+          <CityTypeahead @select="handleCitySelect" :disabled="isSubmitting" />
 
           <ion-item>
-            <ion-label position="stacked">Nom de la commune <ion-text color="danger">*</ion-text></ion-label>
+            <ion-label position="stacked"
+              >Nom de la commune
+              <ion-text color="danger">*</ion-text></ion-label
+            >
             <ion-input
               v-model="formData.name"
               type="text"
@@ -38,7 +41,9 @@
           </ion-item>
 
           <ion-item>
-            <ion-label position="stacked">Code postal <ion-text color="danger">*</ion-text></ion-label>
+            <ion-label position="stacked"
+              >Code postal <ion-text color="danger">*</ion-text></ion-label
+            >
             <ion-input
               v-model="formData.postalCode"
               type="text"
@@ -51,7 +56,10 @@
           </ion-item>
 
           <ion-item>
-            <ion-label position="stacked">Email de la commune <ion-text color="danger">*</ion-text></ion-label>
+            <ion-label position="stacked"
+              >Email de la commune
+              <ion-text color="danger">*</ion-text></ion-label
+            >
             <ion-input
               v-model="formData.email"
               type="email"
@@ -162,11 +170,15 @@ const handleSubmit = async () => {
     }
 
     isSaved.value = true
-    await showToast('Informations de la commune enregistrées avec succès', 'success')
+    await showToast(
+      'Informations de la commune enregistrées avec succès',
+      'success'
+    )
     emit('saved')
   } catch (error) {
     console.error('Error saving city info:', error)
-    const errorMessage = error.message || 'Erreur lors de l\'enregistrement en base de données'
+    const errorMessage =
+      error.message || "Erreur lors de l'enregistrement en base de données"
     await showToast(
       `${errorMessage}. Les données ont été sauvegardées localement.`,
       'warning'
@@ -200,16 +212,19 @@ const handleCitySelect = (city) => {
 }
 
 // Réinitialiser le formulaire quand la modale s'ouvre
-watch(() => props.isOpen, (newValue) => {
-  if (newValue) {
-    formData.value = {
-      name: '',
-      postalCode: '',
-      email: ''
+watch(
+  () => props.isOpen,
+  (newValue) => {
+    if (newValue) {
+      formData.value = {
+        name: '',
+        postalCode: '',
+        email: ''
+      }
+      isSaved.value = false
     }
-    isSaved.value = false
   }
-})
+)
 </script>
 
 <style scoped>
@@ -265,4 +280,3 @@ ion-spinner {
   margin-right: 8px;
 }
 </style>
-

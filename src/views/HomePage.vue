@@ -11,7 +11,7 @@
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
-      <CityHeader subtitle="Services municipaux" />
+      <CityHeader />
       
       <div class="ion-padding">
         <div class="welcome-section">

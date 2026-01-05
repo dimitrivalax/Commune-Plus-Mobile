@@ -1,4 +1,4 @@
-package com.okmairie.app;
+package com.communeplus.app;
 
 import com.getcapacitor.BridgeActivity;
 
