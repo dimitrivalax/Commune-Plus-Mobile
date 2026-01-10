@@ -42,7 +42,7 @@ export const getUserContact = () => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
     if (!stored) return null
-    
+
     const data = JSON.parse(stored)
     return {
       firstName: data.firstName || '',
@@ -79,7 +79,8 @@ const CITY_STORAGE_KEY = 'commune-plus-city-info'
  * {
  *   name: string,
  *   postalCode: string,
- *   email: string
+ *   email: string,
+ *   logo: string (optionnel)
  * }
  */
 
@@ -93,6 +94,7 @@ export const saveCityInfo = (cityData) => {
       name: cityData.name || '',
       postalCode: cityData.postalCode || '',
       email: cityData.email || '',
+      logo: cityData.logo || cityData.logo_url || null, // Support logo et logo_url
       id: cityData.id || null // Sauvegarder aussi l'ID si disponible
     }
     localStorage.setItem(CITY_STORAGE_KEY, JSON.stringify(dataToSave))
@@ -109,12 +111,13 @@ export const getCityInfo = () => {
   try {
     const stored = localStorage.getItem(CITY_STORAGE_KEY)
     if (!stored) return null
-    
+
     const data = JSON.parse(stored)
     return {
       name: data.name || '',
       postalCode: data.postalCode || '',
       email: data.email || '',
+      logo: data.logo || null,
       id: data.id || null
     }
   } catch (error) {
@@ -130,7 +133,7 @@ export const getCityInfo = () => {
 export const getCityIdFromDatabase = async () => {
   // Import dynamique pour éviter les problèmes de dépendances circulaires
   const { supabase } = await import('@/services/supabase')
-  
+
   try {
     // D'abord vérifier si on a déjà l'ID dans le localStorage
     const cityInfo = getCityInfo()
@@ -179,7 +182,7 @@ export const getCityIdFromDatabase = async () => {
 export const isCityInfoComplete = () => {
   const cityInfo = getCityInfo()
   if (!cityInfo) return false
-  
+
   return !!(cityInfo.name && cityInfo.postalCode && cityInfo.email)
 }
 
@@ -191,15 +194,16 @@ export const isCityInfoComplete = () => {
 export const saveCityInfoToDatabase = async (cityData) => {
   // Import dynamique pour éviter les problèmes de dépendances circulaires
   const { supabase } = await import('@/services/supabase')
-  
+
   try {
     // Nettoyer les données et s'assurer qu'on n'inclut pas l'id lors de l'insertion
     const dataToSave = {
       name: (cityData.name || '').trim(),
       postal_code: (cityData.postalCode || '').trim(),
-      email: (cityData.email || '').trim()
+      email: (cityData.email || '').trim(),
+      logo_url: (cityData.logo || cityData.logo_url || '').trim() || null
     }
-    
+
     // Valider que les champs requis ne sont pas vides
     if (!dataToSave.name || !dataToSave.postal_code || !dataToSave.email) {
       throw new Error('Tous les champs sont requis (nom, code postal, email)')
@@ -234,11 +238,11 @@ export const saveCityInfoToDatabase = async (cityData) => {
         console.error('Error updating city info:', error)
         throw new Error(`Erreur lors de la mise à jour: ${error.message}`)
       }
-      
+
       if (!data) {
         throw new Error('Aucune donnée retournée après la mise à jour')
       }
-      
+
       result = data
     } else {
       // Créer une nouvelle entrée
@@ -246,11 +250,12 @@ export const saveCityInfoToDatabase = async (cityData) => {
       const insertData = {
         name: dataToSave.name,
         postal_code: dataToSave.postal_code,
-        email: dataToSave.email
+        email: dataToSave.email,
+        logo_url: dataToSave.logo_url
       }
-      
+
       console.log('Inserting city info:', insertData)
-      
+
       const { data, error } = await supabase
         .from('city_info')
         .insert(insertData)
@@ -261,11 +266,11 @@ export const saveCityInfoToDatabase = async (cityData) => {
         console.error('Error inserting city info:', error)
         throw new Error(`Erreur lors de l'insertion: ${error.message}`)
       }
-      
+
       if (!data) {
-        throw new Error('Aucune donnée retournée après l\'insertion')
+        throw new Error("Aucune donnée retournée après l'insertion")
       }
-      
+
       result = data
     }
 
@@ -299,7 +304,7 @@ export const saveCityInfoToDatabase = async (cityData) => {
 export const getCityInfoFromDatabase = async () => {
   // Import dynamique pour éviter les problèmes de dépendances circulaires
   const { supabase } = await import('@/services/supabase')
-  
+
   try {
     const { data, error } = await supabase
       .from('city_info')
@@ -322,6 +327,7 @@ export const getCityInfoFromDatabase = async () => {
       name: data.name || '',
       postalCode: data.postal_code || '',
       email: data.email || '',
+      logo: data.logo_url || null,
       id: data.id || null
     }
 
@@ -344,19 +350,19 @@ export const getCityInfoFromDatabase = async () => {
 export const searchCitiesInDatabase = async (searchTerm) => {
   // Import dynamique pour éviter les problèmes de dépendances circulaires
   const { supabase } = await import('@/services/supabase')
-  
+
   try {
     if (!searchTerm || searchTerm.trim().length < 2) {
       return []
     }
 
     const search = searchTerm.trim()
-    
+
     // Recherche avec OR pour le nom ou le code postal
     // Syntaxe PostgREST : colonne.opérateur.valeur
     const { data, error } = await supabase
       .from('city_info')
-      .select('id, name, postal_code, email')
+      .select('id, name, postal_code, email, logo_url')
       .or(`name.ilike.%${search}%,postal_code.ilike.%${search}%`)
       .limit(10)
       .order('name', { ascending: true })
@@ -366,15 +372,15 @@ export const searchCitiesInDatabase = async (searchTerm) => {
       return []
     }
 
-    return (data || []).map(city => ({
+    return (data || []).map((city) => ({
       id: city.id,
       name: city.name || '',
       postalCode: city.postal_code || '',
-      email: city.email || ''
+      email: city.email || '',
+      logo: city.logo_url || null
     }))
   } catch (error) {
     console.error('Error searching cities in database:', error)
     return []
   }
 }
-

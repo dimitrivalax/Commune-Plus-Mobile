@@ -4,7 +4,12 @@ const cloudinaryCloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
 const cloudinaryUploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
 
 export const uploadImageToCloudinary = async (file) => {
+  // Vérifier que les credentials sont présents
   if (!cloudinaryCloudName || !cloudinaryUploadPreset) {
+    console.error('Cloudinary configuration missing:', {
+      cloudName: cloudinaryCloudName || 'MISSING',
+      uploadPreset: cloudinaryUploadPreset || 'MISSING'
+    })
     throw new Error('Cloudinary credentials are missing. Please check your .env file.')
   }
 
@@ -12,6 +17,15 @@ export const uploadImageToCloudinary = async (file) => {
   if (!file || !(file instanceof File)) {
     throw new Error('Invalid file provided for upload')
   }
+
+  // Log pour débogage (sans exposer les valeurs sensibles)
+  console.log('Uploading to Cloudinary:', {
+    cloudName: cloudinaryCloudName,
+    uploadPreset: cloudinaryUploadPreset,
+    fileName: file.name,
+    fileSize: file.size,
+    fileType: file.type
+  })
 
   const formData = new FormData()
   formData.append('file', file)
@@ -51,20 +65,40 @@ export const uploadImageToCloudinary = async (file) => {
         status,
         data,
         cloudName: cloudinaryCloudName,
-        uploadPreset: cloudinaryUploadPreset
+        uploadPreset: cloudinaryUploadPreset,
+        url: `https://api.cloudinary.com/v1_1/${cloudinaryCloudName}/image/upload`
       })
       
+      // Extraire le message d'erreur de Cloudinary
+      let cloudinaryMessage = ''
+      if (data?.error?.message) {
+        cloudinaryMessage = data.error.message
+      } else if (typeof data === 'string') {
+        cloudinaryMessage = data
+      } else if (data?.message) {
+        cloudinaryMessage = data.message
+      }
+      
       if (status === 400) {
-        errorMessage = data?.error?.message || 'Requête invalide. Vérifiez votre configuration Cloudinary (cloud_name et upload_preset)'
+        if (cloudinaryMessage.toLowerCase().includes('upload preset') || 
+            cloudinaryMessage.toLowerCase().includes('preset not found')) {
+          errorMessage = `Upload preset non trouvé: "${cloudinaryUploadPreset}". Vérifiez que le preset existe dans Cloudinary et qu'il est de type "Unsigned".`
+        } else if (cloudinaryMessage.toLowerCase().includes('cloud name')) {
+          errorMessage = `Cloud name invalide: "${cloudinaryCloudName}". Vérifiez votre configuration.`
+        } else {
+          errorMessage = cloudinaryMessage || 'Requête invalide. Vérifiez votre configuration Cloudinary (cloud_name et upload_preset)'
+        }
       } else if (status === 401) {
-        errorMessage = 'Non autorisé. Vérifiez votre upload preset'
+        errorMessage = 'Non autorisé. Vérifiez que votre upload preset est de type "Unsigned" ou que vous avez les bonnes permissions.'
       } else if (status === 404) {
-        errorMessage = 'Cloud name introuvable. Vérifiez votre configuration'
+        errorMessage = `Cloud name introuvable: "${cloudinaryCloudName}". Vérifiez votre configuration.`
       } else {
-        errorMessage = `Erreur Cloudinary (${status}): ${data?.error?.message || 'Erreur inconnue'}`
+        errorMessage = `Erreur Cloudinary (${status}): ${cloudinaryMessage || 'Erreur inconnue'}`
       }
     } else if (error.request) {
       errorMessage = 'Pas de réponse du serveur Cloudinary. Vérifiez votre connexion internet'
+    } else {
+      errorMessage = error.message || 'Erreur inconnue lors de l\'upload'
     }
     
     throw new Error(errorMessage)

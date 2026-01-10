@@ -28,8 +28,8 @@ const props = defineProps({
   }
 })
 
-const cityName = computed(() => cityInfo.name || cityConfig.name)
-const logoUrl = computed(() => cityInfo.logo || cityConfig.logo)
+const cityName = computed(() => cityInfo?.name || cityConfig.name)
+const logoUrl = computed(() => cityInfo?.logo || cityConfig.logo)
 </script>
 
 <style scoped>

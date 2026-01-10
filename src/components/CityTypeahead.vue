@@ -3,7 +3,7 @@
     <ion-item>
       <ion-label position="stacked">
         Rechercher une commune existante
-        <ion-text color="medium" style="font-size: 12px; font-weight: normal;">
+        <ion-text color="medium" style="font-size: 12px; font-weight: normal">
           (optionnel)
         </ion-text>
       </ion-label>
@@ -33,17 +33,16 @@
 
     <!-- Dropdown avec les résultats -->
     <div
-      v-if="showDropdown && (filteredCities.length > 0 || searchTerm.length >= 2)"
+      v-if="
+        showDropdown && (filteredCities.length > 0 || searchTerm.length >= 2)
+      "
       class="dropdown"
     >
-      <div
-        v-if="isSearching"
-        class="dropdown-item loading"
-      >
+      <div v-if="isSearching" class="dropdown-item loading">
         <ion-spinner name="crescent" size="small"></ion-spinner>
         <span>Recherche en cours...</span>
       </div>
-      
+
       <div
         v-else-if="filteredCities.length === 0 && searchTerm.length >= 2"
         class="dropdown-item no-results"
@@ -62,6 +61,7 @@
           <span class="postal-code">{{ city.postalCode }}</span>
           <span class="separator">•</span>
           <span class="email">{{ city.email }}</span>
+          <img v-if="city.logo" :src="city.logo" alt="Logo" class="city-logo" />
         </div>
       </div>
     </div>
@@ -69,8 +69,15 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
-import { IonItem, IonLabel, IonInput, IonIcon, IonText, IonSpinner } from '@ionic/vue'
+import { ref, onMounted } from 'vue'
+import {
+  IonItem,
+  IonLabel,
+  IonInput,
+  IonIcon,
+  IonText,
+  IonSpinner
+} from '@ionic/vue'
 import { searchOutline, hourglassOutline } from 'ionicons/icons'
 import { searchCitiesInDatabase } from '@/utils/storage'
 
@@ -248,5 +255,12 @@ ion-item {
 .dropdown::-webkit-scrollbar-thumb:hover {
   background: var(--ion-color-medium-shade);
 }
+.city-logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  background: white;
+  border-radius: 24px;
+  margin: 4px;
+}
 </style>
-

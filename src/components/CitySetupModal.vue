@@ -17,14 +17,20 @@
         <div class="modal-header">
           <ion-icon :icon="locationOutline" class="header-icon"></ion-icon>
           <h2>Informations de votre commune</h2>
-          <p>
-            Veuillez renseigner les informations suivantes pour configurer
-            l'application
-          </p>
+          <p>Veuillez rechercher la commune dans la liste ci-dessous</p>
         </div>
 
         <form @submit.prevent="handleSubmit">
           <CityTypeahead @select="handleCitySelect" :disabled="isSubmitting" />
+
+          <div class="modal-header">
+            <p>Ou renseignez les informations manuellement</p>
+          </div>
+
+
+          <ion-item v-if="formData.logo">
+            <IonImg :src="formData.logo" alt="Logo" class="logo-image" />
+          </ion-item>
 
           <ion-item>
             <ion-label position="stacked"
@@ -93,6 +99,7 @@ import {
   IonToolbar,
   IonTitle,
   IonContent,
+  IonImg,
   IonItem,
   IonLabel,
   IonInput,
@@ -162,7 +169,8 @@ const handleSubmit = async () => {
     const result = await saveCityInfoToDatabase({
       name: formData.value.name.trim(),
       postalCode: formData.value.postalCode.trim(),
-      email: formData.value.email.trim()
+      email: formData.value.email.trim(),
+      logo: formData.value.logo?.trim() || null
     })
 
     if (!result) {
@@ -207,7 +215,8 @@ const handleCitySelect = (city) => {
   formData.value = {
     name: city.name,
     postalCode: city.postalCode,
-    email: city.email
+    email: city.email,
+    logo: city.logo
   }
 }
 
@@ -219,7 +228,8 @@ watch(
       formData.value = {
         name: '',
         postalCode: '',
-        email: ''
+        email: '',
+        logo: ''
       }
       isSaved.value = false
     }
@@ -257,6 +267,11 @@ watch(
   font-size: 14px;
 }
 
+.logo-image {
+  width: 50%;
+  height: 50%;
+  margin: 0 auto;
+}
 ion-item {
   --padding-start: 0;
   --inner-padding-end: 0;

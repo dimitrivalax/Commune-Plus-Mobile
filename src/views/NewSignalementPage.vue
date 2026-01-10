@@ -186,6 +186,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
 import { Geolocation } from '@capacitor/geolocation'
+import { Capacitor } from '@capacitor/core'
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonBackButton, IonItem, IonLabel, IonTextarea, IonInput, IonButton, IonIcon, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, loadingController, toastController } from '@ionic/vue'
 import { camera, checkmark, close, location as locationIcon, checkmarkCircleOutline, alertCircleOutline, createOutline } from 'ionicons/icons'
 import { supabase } from '@/services/supabase'
@@ -259,57 +260,125 @@ const getCurrentLocation = async () => {
   useAddress.value = false // Réinitialiser le mode adresse si on essaie le GPS
 
   try {
-    // Demander la permission
-    const permissionStatus = await Geolocation.checkPermissions()
-    
-    if (permissionStatus.location !== 'granted') {
-      const requestResult = await Geolocation.requestPermissions()
-      if (requestResult.location !== 'granted') {
-        locationError.value = 'Permission de géolocalisation refusée. Vous pouvez utiliser une adresse à la place.'
-        useAddress.value = true // Activer le mode adresse en fallback
+    // Vérifier si on est sur le web
+    const isWeb = Capacitor.getPlatform() === 'web'
+
+    if (isWeb) {
+      // Utiliser l'API géolocalisation native du navigateur
+      if (!navigator.geolocation) {
+        locationError.value = 'La géolocalisation n\'est pas supportée par votre navigateur. Vous pouvez utiliser une adresse à la place.'
+        useAddress.value = true
         gettingLocation.value = false
         return
       }
+
+      // Obtenir la position avec l'API du navigateur
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(
+          resolve,
+          reject,
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+          }
+        )
+      })
+
+      location.value = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        accuracy: position.coords.accuracy
+      }
+
+      // Réinitialiser l'adresse si le GPS fonctionne
+      address.value = ''
+      useAddress.value = false
+
+      // Track GPS location obtained
+      trackEvent('signalement_location_gps_obtained', {
+        accuracy: position.coords.accuracy,
+        has_location: true,
+        platform: 'web'
+      })
+
+      const toast = await toastController.create({
+        message: 'Position GPS enregistrée avec succès',
+        duration: 2000,
+        color: 'success'
+      })
+      await toast.present()
+    } else {
+      // Utiliser Capacitor Geolocation pour mobile
+      // Demander la permission
+      const permissionStatus = await Geolocation.checkPermissions()
+      
+      if (permissionStatus.location !== 'granted') {
+        const requestResult = await Geolocation.requestPermissions()
+        if (requestResult.location !== 'granted') {
+          locationError.value = 'Permission de géolocalisation refusée. Vous pouvez utiliser une adresse à la place.'
+          useAddress.value = true // Activer le mode adresse en fallback
+          gettingLocation.value = false
+          return
+        }
+      }
+
+      // Obtenir la position
+      const position = await Geolocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      })
+
+      location.value = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        accuracy: position.coords.accuracy
+      }
+
+      // Réinitialiser l'adresse si le GPS fonctionne
+      address.value = ''
+      useAddress.value = false
+
+      // Track GPS location obtained
+      trackEvent('signalement_location_gps_obtained', {
+        accuracy: position.coords.accuracy,
+        has_location: true,
+        platform: Capacitor.getPlatform()
+      })
+
+      const toast = await toastController.create({
+        message: 'Position GPS enregistrée avec succès',
+        duration: 2000,
+        color: 'success'
+      })
+      await toast.present()
     }
-
-    // Obtenir la position
-    const position = await Geolocation.getCurrentPosition({
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 0
-    })
-
-    location.value = {
-      latitude: position.coords.latitude,
-      longitude: position.coords.longitude,
-      accuracy: position.coords.accuracy
-    }
-
-    // Réinitialiser l'adresse si le GPS fonctionne
-    address.value = ''
-    useAddress.value = false
-
-    // Track GPS location obtained
-    trackEvent('signalement_location_gps_obtained', {
-      accuracy: position.coords.accuracy,
-      has_location: true
-    })
-
-    const toast = await toastController.create({
-      message: 'Position GPS enregistrée avec succès',
-      duration: 2000,
-      color: 'success'
-    })
-    await toast.present()
   } catch (error) {
     console.error('Error getting location:', error)
-    locationError.value = 'Impossible d\'obtenir votre position. Vous pouvez utiliser une adresse à la place.'
+    
+    // Message d'erreur adapté selon le type d'erreur
+    if (error.code === 1) {
+      // PERMISSION_DENIED
+      locationError.value = 'Permission de géolocalisation refusée. Vous pouvez utiliser une adresse à la place.'
+    } else if (error.code === 2) {
+      // POSITION_UNAVAILABLE
+      locationError.value = 'Position indisponible. Vous pouvez utiliser une adresse à la place.'
+    } else if (error.code === 3) {
+      // TIMEOUT
+      locationError.value = 'Timeout lors de la récupération de la position. Vous pouvez utiliser une adresse à la place.'
+    } else {
+      locationError.value = 'Impossible d\'obtenir votre position. Vous pouvez utiliser une adresse à la place.'
+    }
+    
     useAddress.value = true // Activer le mode adresse en fallback
     
     // Track GPS error
     trackEvent('signalement_location_gps_error', {
       error: error.message || 'Unknown error',
-      fallback_to_address: true
+      error_code: error.code || null,
+      fallback_to_address: true,
+      platform: Capacitor.getPlatform()
     })
     
     const toast = await toastController.create({
@@ -442,7 +511,24 @@ const submitSignalement = async () => {
     // Convertir dataUrl en File pour Cloudinary
     const response = await fetch(photo.value)
     const blob = await response.blob()
-    const file = new File([blob], 'signalement.jpg', { type: 'image/jpeg' })
+    
+    // Déterminer l'extension et le type MIME à partir du blob
+    let extension = 'jpg'
+    let mimeType = 'image/jpeg'
+    
+    if (blob.type) {
+      mimeType = blob.type
+      if (blob.type === 'image/png') {
+        extension = 'png'
+      } else if (blob.type === 'image/webp') {
+        extension = 'webp'
+      } else if (blob.type === 'image/jpeg' || blob.type === 'image/jpg') {
+        extension = 'jpg'
+        mimeType = 'image/jpeg'
+      }
+    }
+    
+    const file = new File([blob], `signalement.${extension}`, { type: mimeType })
 
     // Upload vers Cloudinary
     const photoUrl = await uploadImageToCloudinary(file)
