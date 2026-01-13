@@ -39,9 +39,18 @@
             </ion-card-header>
             <ion-card-content>
               <p class="description-text">{{ signalement.description || 'Aucune description' }}</p>
-              <p v-if="signalement.comment" class="comment-text">
-                <strong>Commentaire :</strong> {{ signalement.comment }}
-              </p>
+            </ion-card-content>
+          </ion-card>
+
+          <!-- Réponse de l'administration -->
+          <ion-card v-if="signalement.comment" class="info-card response-card">
+            <ion-card-header>
+              <ion-card-title>
+                <ion-icon :icon="checkmarkCircle" /> Réponse de la mairie
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <p class="response-text">{{ signalement.comment }}</p>
             </ion-card-content>
           </ion-card>
 
@@ -98,12 +107,7 @@
 
           <!-- Bouton de suppression -->
           <div class="action-buttons">
-            <ion-button
-              expand="block"
-              color="danger"
-              @click="confirmDelete"
-              :disabled="isDeleting"
-            >
+            <ion-button expand="block" color="danger" @click="confirmDelete" :disabled="isDeleting">
               <ion-icon :icon="trash" slot="start" />
               Supprimer le signalement
             </ion-button>
@@ -117,20 +121,14 @@
               <h3 class="section-title">Description</h3>
               <ion-item lines="none" class="form-item">
                 <ion-label position="stacked">Description du signalement</ion-label>
-                <ion-textarea
-                  v-model="editForm.description"
-                  placeholder="Décrivez le signalement..."
-                  rows="4"
-                ></ion-textarea>
+                <ion-textarea v-model="editForm.description" placeholder="Décrivez le signalement..."
+                  rows="4"></ion-textarea>
               </ion-item>
 
               <ion-item lines="none" class="form-item">
                 <ion-label position="stacked">Commentaire</ion-label>
-                <ion-textarea
-                  v-model="editForm.comment"
-                  placeholder="Commentaire sur la photo (optionnel)..."
-                  rows="3"
-                ></ion-textarea>
+                <ion-textarea v-model="editForm.comment" placeholder="Commentaire sur la photo (optionnel)..."
+                  rows="3"></ion-textarea>
               </ion-item>
             </div>
 
@@ -140,59 +138,34 @@
                 <ion-card-content>
                   <ion-item lines="none" class="form-item">
                     <ion-label position="stacked">Nom *</ion-label>
-                    <ion-input
-                      v-model="editForm.lastName"
-                      placeholder="Votre nom"
-                      required
-                    ></ion-input>
+                    <ion-input v-model="editForm.lastName" placeholder="Votre nom" required></ion-input>
                   </ion-item>
 
                   <ion-item lines="none" class="form-item">
                     <ion-label position="stacked">Prénom *</ion-label>
-                    <ion-input
-                      v-model="editForm.firstName"
-                      placeholder="Votre prénom"
-                      required
-                    ></ion-input>
+                    <ion-input v-model="editForm.firstName" placeholder="Votre prénom" required></ion-input>
                   </ion-item>
 
                   <ion-item lines="none" class="form-item">
                     <ion-label position="stacked">Email</ion-label>
-                    <ion-input
-                      v-model="editForm.email"
-                      type="email"
-                      placeholder="votre.email@exemple.com"
-                    ></ion-input>
+                    <ion-input v-model="editForm.email" type="email" placeholder="votre.email@exemple.com"></ion-input>
                   </ion-item>
 
                   <ion-item lines="none" class="form-item">
                     <ion-label position="stacked">Téléphone</ion-label>
-                    <ion-input
-                      v-model="editForm.phone"
-                      type="tel"
-                      placeholder="06 12 34 56 78"
-                    ></ion-input>
+                    <ion-input v-model="editForm.phone" type="tel" placeholder="06 12 34 56 78"></ion-input>
                   </ion-item>
                 </ion-card-content>
               </ion-card>
             </div>
 
             <div class="action-buttons">
-              <ion-button
-                expand="block"
-                @click="saveChanges"
-                :disabled="saving || !editForm.lastName || !editForm.firstName"
-                class="save-button"
-              >
+              <ion-button expand="block" @click="saveChanges"
+                :disabled="saving || !editForm.lastName || !editForm.firstName" class="save-button">
                 <ion-icon :icon="checkmark" slot="start" />
                 Enregistrer les modifications
               </ion-button>
-              <ion-button
-                expand="block"
-                fill="outline"
-                @click="cancelEdit"
-                :disabled="saving"
-              >
+              <ion-button expand="block" fill="outline" @click="cancelEdit" :disabled="saving">
                 Annuler
               </ion-button>
             </div>
@@ -215,7 +188,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonBackButton, IonButton, IonIcon, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonBadge, IonItem, IonLabel, IonTextarea, IonInput, IonSelect, IonSelectOption, IonSpinner, loadingController, toastController, alertController } from '@ionic/vue'
-import { create, close, trash, checkmark, location as locationIcon, person, time, alertCircle } from 'ionicons/icons'
+import { create, close, trash, checkmark, checkmarkCircle, location as locationIcon, person, time, alertCircle } from 'ionicons/icons'
 import { supabase } from '@/services/supabase'
 import { formatDateTime } from '@/utils/date'
 import { trackEvent } from '@/services/posthog'
@@ -282,7 +255,7 @@ const toggleEditMode = () => {
       signalement_id: signalement.value.id,
       status: signalement.value.status
     })
-    
+
     // Réinitialiser le formulaire avec les valeurs actuelles
     editForm.value = {
       description: signalement.value.description || '',
@@ -303,7 +276,7 @@ const toggleEditMode = () => {
 
 const cancelEdit = () => {
   isEditing.value = false
-  
+
   // Track edit cancelled
   trackEvent('signalement_edit_cancelled', {
     signalement_id: signalement.value?.id
@@ -358,9 +331,9 @@ const saveChanges = async () => {
         comment: editForm.value.comment !== (signalement.value?.comment || ''),
         status: editForm.value.status !== (signalement.value?.status || ''),
         contact_info: editForm.value.firstName !== (signalement.value?.first_name || '') ||
-                     editForm.value.lastName !== (signalement.value?.last_name || '') ||
-                     editForm.value.email !== (signalement.value?.email || '') ||
-                     editForm.value.phone !== (signalement.value?.phone || '')
+          editForm.value.lastName !== (signalement.value?.last_name || '') ||
+          editForm.value.email !== (signalement.value?.email || '') ||
+          editForm.value.phone !== (signalement.value?.phone || '')
       }
     })
 
@@ -471,7 +444,7 @@ const deleteSignalement = async () => {
 
 const getStatusColor = (status) => {
   switch (status) {
-    case 'traité':
+    case 'traite':
       return 'success'
     case 'en_cours':
       return 'warning'
@@ -483,19 +456,19 @@ const getStatusColor = (status) => {
 
 const getStatusLabel = (status) => {
   switch (status) {
-    case 'traité':
+    case 'traite':
       return 'Traité'
     case 'en_cours':
       return 'En cours'
     case 'en_attente':
     default:
-      return 'En attente'
+      return 'En Attente'
   }
 }
 
 onMounted(() => {
   loadSignalement()
-  
+
   // Track signalement detail view
   trackEvent('signalement_detail_viewed', {
     signalement_id: route.params.id
@@ -555,6 +528,17 @@ onMounted(() => {
   border-top: 1px solid var(--ion-color-light);
   font-style: italic;
   color: var(--ion-color-medium);
+}
+
+.response-card {
+  background: var(--ion-color-success-tint);
+  border-left: 4px solid var(--ion-color-success);
+}
+
+.response-text {
+  color: var(--ion-color-dark);
+  line-height: 1.6;
+  white-space: pre-wrap;
 }
 
 .accuracy-text {
@@ -625,4 +609,3 @@ onMounted(() => {
   margin: 0 0 24px 0;
 }
 </style>
-

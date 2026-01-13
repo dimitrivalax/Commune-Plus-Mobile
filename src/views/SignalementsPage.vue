@@ -14,18 +14,10 @@
         </IonRefresher>
 
         <IonList v-if="signalements.length > 0" class="signalements-list">
-          <IonItem
-            v-for="signalement in signalements"
-            :key="signalement.id"
-            class="signalement-item"
-            button
-            @click="$router.push(`/signalement/${signalement.id}`)"
-          >
+          <IonItem v-for="signalement in signalements" :key="signalement.id" class="signalement-item" button
+            @click="$router.push(`/signalement/${signalement.id}`)">
             <IonThumbnail v-if="signalement.photo_url" slot="start">
-              <img
-                :src="signalement.photo_url"
-                :alt="signalement.description"
-              />
+              <img :src="signalement.photo_url" :alt="signalement.description" />
             </IonThumbnail>
             <IonLabel>
               <h2>{{ signalement.description || 'Sans description' }}</h2>
@@ -35,12 +27,9 @@
               <div class="item-meta">
                 <span class="date-text">{{
                   formatDateTime(signalement.created_at)
-                }}</span>
-                <IonBadge
-                  :color="getStatusColor(signalement.status)"
-                  class="status-badge"
-                >
-                  {{ signalement.status || 'En attente' }}
+                  }}</span>
+                <IonBadge :color="getStatusColor(signalement.status)" class="status-badge">
+                  {{ getStatusLabel(signalement.status) }}
                 </IonBadge>
               </div>
             </IonLabel>
@@ -51,11 +40,7 @@
           <IonIcon :icon="documentText" class="empty-icon" />
           <h3>Aucun signalement</h3>
           <p>Aucun signalement pour le moment.</p>
-          <IonButton
-            expand="block"
-            @click="$router.push('/signalement/new')"
-            class="empty-action"
-          >
+          <IonButton expand="block" @click="$router.push('/signalement/new')" class="empty-action">
             Faire un signalement
           </IonButton>
         </div>
@@ -109,13 +94,25 @@ const loadSignalements = async (event) => {
 
 const getStatusColor = (status) => {
   switch (status) {
-    case 'traité':
+    case 'traite':
       return 'success'
     case 'en_cours':
       return 'warning'
     case 'en_attente':
     default:
       return 'medium'
+  }
+}
+
+const getStatusLabel = (status) => {
+  switch (status) {
+    case 'traite':
+      return 'Traité'
+    case 'en_cours':
+      return 'En cours'
+    case 'en_attente':
+    default:
+      return 'En Attente'
   }
 }
 
