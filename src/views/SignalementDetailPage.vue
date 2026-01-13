@@ -7,7 +7,7 @@
         </ion-buttons>
         <ion-title>Détail du signalement</ion-title>
         <ion-buttons slot="end">
-          <ion-button @click="toggleEditMode" v-if="!isDeleting">
+          <ion-button @click="toggleEditMode" v-if="!isArchiving">
             <ion-icon :icon="isEditing ? close : create" />
           </ion-button>
         </ion-buttons>
@@ -105,11 +105,11 @@
             </ion-card-content>
           </ion-card>
 
-          <!-- Bouton de suppression -->
-          <div class="action-buttons">
-            <ion-button expand="block" color="danger" @click="confirmDelete" :disabled="isDeleting">
-              <ion-icon :icon="trash" slot="start" />
-              Supprimer le signalement
+          <!-- Bouton d'archivage -->
+          <div class="action-buttons" v-if="signalement.status !== 'archive'">
+            <ion-button expand="block" color="medium" @click="confirmArchive" :disabled="isArchiving">
+              <ion-icon :icon="archive" slot="start" />
+              Archiver le signalement
             </ion-button>
           </div>
         </div>
@@ -188,7 +188,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonBackButton, IonButton, IonIcon, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonBadge, IonItem, IonLabel, IonTextarea, IonInput, IonSelect, IonSelectOption, IonSpinner, loadingController, toastController, alertController } from '@ionic/vue'
-import { create, close, trash, checkmark, checkmarkCircle, location as locationIcon, person, time, alertCircle } from 'ionicons/icons'
+import { create, close, trash, checkmark, checkmarkCircle, archive, location as locationIcon, person, time, alertCircle } from 'ionicons/icons'
 import { supabase } from '@/services/supabase'
 import { formatDateTime } from '@/utils/date'
 import { trackEvent } from '@/services/posthog'
@@ -200,7 +200,7 @@ const signalement = ref(null)
 const loading = ref(true)
 const isEditing = ref(false)
 const saving = ref(false)
-const isDeleting = ref(false)
+const isArchiving = ref(false)
 
 const editForm = ref({
   description: '',
@@ -367,20 +367,19 @@ const saveChanges = async () => {
   }
 }
 
-const confirmDelete = async () => {
+const confirmArchive = async () => {
   const alert = await alertController.create({
-    header: 'Confirmer la suppression',
-    message: 'Êtes-vous sûr de vouloir supprimer ce signalement ? Cette action est irréversible.',
+    header: 'Confirmer l\'archivage',
+    message: 'Êtes-vous sûr de vouloir archiver ce signalement ? Il sera déplacé dans les archives.',
     buttons: [
       {
         text: 'Annuler',
         role: 'cancel'
       },
       {
-        text: 'Supprimer',
-        role: 'destructive',
+        text: 'Archiver',
         handler: () => {
-          deleteSignalement()
+          archiveSignalement()
         }
       }
     ]
@@ -389,56 +388,76 @@ const confirmDelete = async () => {
   await alert.present()
 }
 
-const deleteSignalement = async () => {
-  isDeleting.value = true
+const archiveSignalement = async () => {
+  isArchiving.value = true
   const loadingToast = await loadingController.create({
-    message: 'Suppression en cours...'
+    message: 'Archivage en cours...'
   })
   await loadingToast.present()
 
   try {
-    const { error } = await supabase
+    // Sauvegarder le statut précédent pour le tracking
+    const previousStatus = signalement.value?.status || 'unknown'
+
+    console.log('Archiving signalement:', route.params.id, 'Previous status:', previousStatus)
+
+    const { data, error } = await supabase
       .from('signalements')
-      .delete()
+      .update({ status: 'archive', updated_at: new Date().toISOString() })
       .eq('id', route.params.id)
+      .select()
 
-    if (error) throw error
+    console.log('Update result:', { data, error })
 
-    // Track successful deletion
-    trackEvent('signalement_deleted', {
+    if (error) {
+      console.error('Supabase error:', error)
+      throw error
+    }
+
+    if (!data || data.length === 0) {
+      console.error('No data returned from update')
+      throw new Error('Signalement non trouvé ou non autorisé à être mis à jour')
+    }
+
+    // Mettre à jour le signalement local
+    signalement.value = data[0]
+
+    // Track successful archiving
+    trackEvent('signalement_archived', {
       signalement_id: route.params.id,
-      status: signalement.value?.status || 'unknown'
+      previous_status: previousStatus
     })
 
     await loadingToast.dismiss()
 
     const toast = await toastController.create({
-      message: 'Signalement supprimé avec succès',
+      message: 'Signalement archivé avec succès',
       duration: 2000,
       color: 'success'
     })
     await toast.present()
 
-    router.push('/tabs/signalements')
+    // Recharger le signalement pour mettre à jour l'affichage
+    await loadSignalement()
   } catch (error) {
-    console.error('Error deleting signalement:', error)
+    console.error('Error archiving signalement:', error)
     await loadingToast.dismiss()
 
-    // Track deletion error
-    trackEvent('signalement_deletion_error', {
+    // Track archiving error
+    trackEvent('signalement_archiving_error', {
       signalement_id: route.params.id,
       error: error.message || 'Unknown error',
       error_code: error.code || null
     })
 
     const toast = await toastController.create({
-      message: 'Erreur lors de la suppression',
+      message: 'Erreur lors de l\'archivage',
       duration: 2000,
       color: 'danger'
     })
     await toast.present()
   } finally {
-    isDeleting.value = false
+    isArchiving.value = false
   }
 }
 
@@ -448,6 +467,8 @@ const getStatusColor = (status) => {
       return 'success'
     case 'en_cours':
       return 'warning'
+    case 'archive':
+      return 'medium'
     case 'en_attente':
     default:
       return 'medium'
@@ -460,6 +481,8 @@ const getStatusLabel = (status) => {
       return 'Traité'
     case 'en_cours':
       return 'En cours'
+    case 'archive':
+      return 'Archivé'
     case 'en_attente':
     default:
       return 'En Attente'
