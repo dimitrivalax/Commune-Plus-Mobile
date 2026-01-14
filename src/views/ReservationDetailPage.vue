@@ -7,7 +7,7 @@
         </ion-buttons>
         <ion-title>Détail de la réservation</ion-title>
         <ion-buttons slot="end">
-          <ion-button @click="toggleEditMode" v-if="!isDeleting && isOwner">
+          <ion-button @click="toggleEditMode" v-if="!isDeleting && isOwner" color="light">
             <ion-icon :icon="isEditing ? close : create" />
           </ion-button>
         </ion-buttons>
@@ -33,7 +33,7 @@
               </div>
             </ion-card-header>
             <ion-card-content>
-              <p class="room-name">{{ reservation.room_name }}</p>
+              <p class="room-name">{{ reservation.salle?.nom || reservation.salle_nom || 'Salle inconnue' }}</p>
               <p v-if="reservation.reason" class="reason-text">
                 <strong>Raison :</strong> {{ reservation.reason }}
               </p>
@@ -107,98 +107,63 @@
               <h3 class="section-title">Réservation</h3>
               <ion-item lines="none" class="form-item">
                 <ion-label position="stacked">Salle</ion-label>
-                <ion-select v-model="editForm.roomName" placeholder="Sélectionner une salle">
-                  <ion-select-option value="Salle des fêtes">Salle des fêtes</ion-select-option>
-                  <ion-select-option value="Salle polyvalente">Salle polyvalente</ion-select-option>
-                  <ion-select-option value="Salle de réunion">Salle de réunion</ion-select-option>
-                  <ion-select-option value="Salle de sport">Salle de sport</ion-select-option>
+                <ion-select v-model="editForm.salleId" placeholder="Sélectionner une salle">
+                  <ion-select-option
+                    v-for="salle in salles"
+                    :key="salle.id"
+                    :value="salle.id"
+                  >
+                    {{ salle.nom }}
+                  </ion-select-option>
                 </ion-select>
               </ion-item>
 
-              <ion-item button @click="openDateModal = true" lines="none" class="form-item">
-                <ion-label position="stacked">Date</ion-label>
-                <ion-input
-                  :value="editForm.date ? formatDisplayDate(editForm.date) : 'Sélectionner une date'"
-                  readonly
-                  placeholder="Sélectionner une date"
-                ></ion-input>
-              </ion-item>
-
-              <ion-item button @click="openStartTimeModal = true" lines="none" class="form-item">
-                <ion-label position="stacked">Heure de début</ion-label>
-                <ion-input
-                  :value="editForm.startTime ? formatDisplayTime(editForm.startTime) : 'Sélectionner une heure'"
-                  readonly
-                  placeholder="Sélectionner une heure"
-                ></ion-input>
-              </ion-item>
-
-              <ion-item button @click="openEndTimeModal = true" lines="none" class="form-item">
-                <ion-label position="stacked">Heure de fin</ion-label>
-                <ion-input
-                  :value="editForm.endTime ? formatDisplayTime(editForm.endTime) : 'Sélectionner une heure'"
-                  readonly
-                  placeholder="Sélectionner une heure"
-                ></ion-input>
-              </ion-item>
-
-              <!-- Modal pour la date -->
-              <ion-modal :is-open="openDateModal" @didDismiss="openDateModal = false">
-                <ion-header>
-                  <ion-toolbar color="primary">
-                    <ion-title>Sélectionner une date</ion-title>
-                    <ion-buttons slot="end">
-                      <ion-button @click="openDateModal = false">Fermer</ion-button>
-                    </ion-buttons>
-                  </ion-toolbar>
-                </ion-header>
-                <ion-content>
+              <!-- Date -->
+              <ion-item lines="none" class="form-item">
+                <ion-label >Date</ion-label>
+                <ion-datetime-button datetime="edit-datetime"></ion-datetime-button>
+                <ion-modal :keep-contents-mounted="true">
                   <ion-datetime
-                    v-model="editForm.date"
+                    id="edit-datetime"
+                    :show-default-buttons="true"
                     presentation="date"
                     :min="minDate"
-                    @ionChange="handleDateChange"
+                    :value="editForm.date"
+                    @ionChange="(event) => { editForm.date = event.detail.value }"
                   ></ion-datetime>
-                </ion-content>
-              </ion-modal>
+                </ion-modal>
+              </ion-item>
 
-              <!-- Modal pour l'heure de début -->
-              <ion-modal :is-open="openStartTimeModal" @didDismiss="openStartTimeModal = false">
-                <ion-header>
-                  <ion-toolbar color="primary">
-                    <ion-title>Sélectionner une heure de début</ion-title>
-                    <ion-buttons slot="end">
-                      <ion-button @click="openStartTimeModal = false">Fermer</ion-button>
-                    </ion-buttons>
-                  </ion-toolbar>
-                </ion-header>
-                <ion-content>
+              <!-- Heure de début -->
+              <ion-item lines="none" class="form-item">
+                <ion-label >Heure de début</ion-label>
+                <ion-datetime-button datetime="edit-start-time"></ion-datetime-button>
+                <ion-modal :keep-contents-mounted="true">
                   <ion-datetime
-                    v-model="editForm.startTime"
+                    id="edit-start-time"
+                    :show-default-buttons="true"
                     presentation="time"
-                    @ionChange="handleStartTimeChange"
+                    :value="editForm.startTime"
+                    @ionChange="(event) => { editForm.startTime = event.detail.value }"
                   ></ion-datetime>
-                </ion-content>
-              </ion-modal>
+                </ion-modal>
+              </ion-item>
 
-              <!-- Modal pour l'heure de fin -->
-              <ion-modal :is-open="openEndTimeModal" @didDismiss="openEndTimeModal = false">
-                <ion-header>
-                  <ion-toolbar color="primary">
-                    <ion-title>Sélectionner une heure de fin</ion-title>
-                    <ion-buttons slot="end">
-                      <ion-button @click="openEndTimeModal = false">Fermer</ion-button>
-                    </ion-buttons>
-                  </ion-toolbar>
-                </ion-header>
-                <ion-content>
+              <!-- Heure de fin -->
+              <ion-item lines="none" class="form-item">
+                <ion-label>Heure de fin</ion-label>
+                <ion-datetime-button datetime="edit-end-time"></ion-datetime-button>
+                <ion-modal :keep-contents-mounted="true">
                   <ion-datetime
-                    v-model="editForm.endTime"
+                    id="edit-end-time"
+                    :show-default-buttons="true"
                     presentation="time"
-                    @ionChange="handleEndTimeChange"
+                    :value="editForm.endTime"
+                    @ionChange="(event) => { editForm.endTime = event.detail.value }"
                   ></ion-datetime>
-                </ion-content>
-              </ion-modal>
+                </ion-modal>
+              </ion-item>
+
 
               <ion-item lines="none" class="form-item">
                 <ion-label position="stacked">Raison de la réservation</ion-label>
@@ -282,11 +247,11 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonBackButton, IonButton, IonIcon, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonBadge, IonItem, IonLabel, IonTextarea, IonInput, IonSelect, IonSelectOption, IonModal, IonDatetime, IonSpinner, loadingController, toastController, alertController } from '@ionic/vue'
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonBackButton, IonButton, IonIcon, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonBadge, IonItem, IonLabel, IonTextarea, IonInput, IonSelect, IonSelectOption, IonModal, IonDatetime, IonDatetimeButton, IonSpinner, loadingController, toastController, alertController } from '@ionic/vue'
 import { create, close, trash, checkmark, calendar, person, time, alertCircle } from 'ionicons/icons'
 import { supabase } from '@/services/supabase'
 import { formatDateTime, formatDateForDB, formatTime } from '@/utils/date'
-import { getUserContact } from '@/utils/storage'
+import { getUserContact, getCityInfo } from '@/utils/storage'
 
 const route = useRoute()
 const router = useRouter()
@@ -298,14 +263,12 @@ const saving = ref(false)
 const isDeleting = ref(false)
 const isOwner = ref(false)
 
-const openDateModal = ref(false)
-const openStartTimeModal = ref(false)
-const openEndTimeModal = ref(false)
+const salles = ref([])
 
 const minDate = new Date().toISOString()
 
 const editForm = ref({
-  roomName: '',
+  salleId: '',
   date: '',
   startTime: '',
   endTime: '',
@@ -352,29 +315,65 @@ const formatDisplayTime = (timeString) => {
   return timeString
 }
 
-const handleDateChange = (event) => {
-  editForm.value.date = event.detail.value
-  setTimeout(() => {
-    openDateModal.value = false
-  }, 300)
+// Convertir une date YYYY-MM-DD vers le format ISO pour ion-datetime
+const convertDateForDatetime = (dateString) => {
+  if (!dateString) return ''
+  try {
+    // Si c'est déjà au format ISO, le retourner tel quel
+    if (dateString.includes('T')) {
+      const testDate = new Date(dateString)
+      if (isNaN(testDate.getTime())) return ''
+      return dateString
+    }
+    // Si c'est au format YYYY-MM-DD, le convertir en ISO
+    if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      const date = new Date(dateString + 'T00:00:00')
+      if (isNaN(date.getTime())) return ''
+      return date.toISOString()
+    }
+  } catch (error) {
+    console.error('Error converting date:', error, dateString)
+    return ''
+  }
+  return dateString
 }
 
-const handleStartTimeChange = (event) => {
-  editForm.value.startTime = event.detail.value
-  setTimeout(() => {
-    openStartTimeModal.value = false
-  }, 300)
+// Convertir une heure HH:mm vers le format ISO pour ion-datetime
+const convertTimeForDatetime = (timeString) => {
+  if (!timeString) return ''
+  try {
+    // Si c'est déjà au format ISO, le retourner tel quel
+    if (timeString.includes('T')) {
+      const testDate = new Date(timeString)
+      if (isNaN(testDate.getTime())) return ''
+      return timeString
+    }
+    // Si c'est au format HH:mm, le convertir en ISO avec la date d'aujourd'hui
+    if (timeString.match(/^\d{2}:\d{2}/)) {
+      const timeMatch = timeString.match(/^(\d{2}):(\d{2})/)
+      if (timeMatch) {
+        const hours = parseInt(timeMatch[1], 10)
+        const minutes = parseInt(timeMatch[2], 10)
+        // Valider que les heures et minutes sont valides
+        if (hours >= 0 && hours < 24 && minutes >= 0 && minutes < 60) {
+          const today = new Date().toISOString().split('T')[0]
+          const date = new Date(`${today}T${timeMatch[0]}:00`)
+          if (isNaN(date.getTime())) return ''
+          return date.toISOString()
+        }
+      }
+      return ''
+    }
+  } catch (error) {
+    console.error('Error converting time:', error, timeString)
+    return ''
+  }
+  return ''
 }
 
-const handleEndTimeChange = (event) => {
-  editForm.value.endTime = event.detail.value
-  setTimeout(() => {
-    openEndTimeModal.value = false
-  }, 300)
-}
 
 const isFormValid = computed(() => {
-  return editForm.value.roomName && 
+  return editForm.value.salleId && 
          editForm.value.date && 
          editForm.value.startTime && 
          editForm.value.endTime && 
@@ -386,14 +385,21 @@ const loadReservation = async () => {
   loading.value = true
   try {
     const { data, error } = await supabase
-      .from('reservations')
-      .select('*')
+      .from('reservations_salles')
+      .select(`
+        *,
+        salle:salles(id, nom)
+      `)
       .eq('id', route.params.id)
       .single()
 
     if (error) throw error
 
     reservation.value = data
+    // Extraire le nom de la salle pour l'affichage
+    if (data.salle) {
+      reservation.value.salle_nom = data.salle.nom
+    }
     
     // Vérifier si l'utilisateur actuel est le propriétaire de la réservation
     const userContact = getUserContact()
@@ -406,16 +412,35 @@ const loadReservation = async () => {
       }
     }
     
-    // Initialiser le formulaire d'édition
+    // Initialiser le formulaire d'édition avec conversion des formats
+    // Utiliser des valeurs par défaut si les conversions échouent
+    const convertedDate = convertDateForDatetime(data.date)
+    const convertedStartTime = convertTimeForDatetime(data.start_time)
+    const convertedEndTime = convertTimeForDatetime(data.end_time)
+    
+    // Valeurs par défaut si les conversions échouent
+    const defaultDate = new Date()
+    defaultDate.setHours(0, 0, 0, 0)
+    const defaultTime = new Date()
+    
     editForm.value = {
-      roomName: data.room_name || '',
-      date: data.date || '',
-      startTime: data.start_time || '',
-      endTime: data.end_time || '',
+      salleId: data.salle_id || '',
+      date: convertedDate || defaultDate.toISOString(),
+      startTime: convertedStartTime || defaultTime.toISOString(),
+      endTime: convertedEndTime || defaultTime.toISOString(),
       reason: data.reason || '',
       name: data.name || '',
       email: data.email || '',
       phone: data.phone || ''
+    }
+    
+    // Log pour débogage si des valeurs sont invalides
+    if (!convertedDate || !convertedStartTime || !convertedEndTime) {
+      console.warn('Some date/time values could not be converted:', {
+        date: data.date,
+        start_time: data.start_time,
+        end_time: data.end_time
+      })
     }
   } catch (error) {
     console.error('Error loading reservation:', error)
@@ -430,15 +455,28 @@ const loadReservation = async () => {
   }
 }
 
-const toggleEditMode = () => {
+const toggleEditMode = async () => {
   isEditing.value = !isEditing.value
   if (isEditing.value && reservation.value) {
-    // Réinitialiser le formulaire avec les valeurs actuelles
+    // S'assurer que les salles sont chargées avant d'entrer en mode édition
+    if (salles.value.length === 0) {
+      await loadSalles()
+    }
+    // Réinitialiser le formulaire avec les valeurs actuelles (avec conversion des formats)
+    const convertedDate = convertDateForDatetime(reservation.value.date)
+    const convertedStartTime = convertTimeForDatetime(reservation.value.start_time)
+    const convertedEndTime = convertTimeForDatetime(reservation.value.end_time)
+    
+    // Valeurs par défaut si les conversions échouent
+    const defaultDate = new Date()
+    defaultDate.setHours(0, 0, 0, 0)
+    const defaultTime = new Date()
+    
     editForm.value = {
-      roomName: reservation.value.room_name || '',
-      date: reservation.value.date || '',
-      startTime: reservation.value.start_time || '',
-      endTime: reservation.value.end_time || '',
+      salleId: reservation.value.salle_id || '',
+      date: convertedDate || defaultDate.toISOString(),
+      startTime: convertedStartTime || defaultTime.toISOString(),
+      endTime: convertedEndTime || defaultTime.toISOString(),
       reason: reservation.value.reason || '',
       name: reservation.value.name || '',
       email: reservation.value.email || '',
@@ -493,9 +531,9 @@ const saveChanges = async () => {
   try {
     // Mettre à jour uniquement si l'email correspond
     const { data, error } = await supabase
-      .from('reservations')
+      .from('reservations_salles')
       .update({
-        room_name: editForm.value.roomName,
+        salle_id: editForm.value.salleId,
         date: formatDateForDB(editForm.value.date),
         start_time: formatTime(editForm.value.startTime),
         end_time: formatTime(editForm.value.endTime),
@@ -594,7 +632,7 @@ const deleteReservation = async () => {
   try {
     // Supprimer uniquement si l'email correspond
     const { error } = await supabase
-      .from('reservations')
+      .from('reservations_salles')
       .delete()
       .eq('id', route.params.id)
       .eq('email', userContact.email.toLowerCase())
@@ -651,8 +689,56 @@ const getStatusLabel = (status) => {
   }
 }
 
-onMounted(() => {
-  loadReservation()
+// Charger les salles depuis Supabase pour la commune sélectionnée
+const loadSalles = async () => {
+  try {
+    // Récupérer l'ID de la commune depuis le localStorage
+    const cityInfo = getCityInfo()
+    const communeId = cityInfo?.id
+
+    if (!communeId) {
+      console.warn(
+        'Aucune commune sélectionnée, chargement de toutes les salles'
+      )
+      // Si aucune commune n'est sélectionnée, charger toutes les salles
+      const { data, error } = await supabase
+        .from('salles')
+        .select('id, nom')
+        .order('nom', { ascending: true })
+
+      if (error) throw error
+      if (data) {
+        salles.value = data
+      }
+      return
+    }
+
+    // Filtrer les salles par commune_id
+    const { data, error } = await supabase
+      .from('salles')
+      .select('id, nom')
+      .eq('commune_id', communeId)
+      .order('nom', { ascending: true })
+
+    if (error) throw error
+
+    if (data) {
+      salles.value = data
+    }
+  } catch (error) {
+    console.error('Error loading salles:', error)
+    const toast = await toastController.create({
+      message: 'Erreur lors du chargement des salles',
+      duration: 2000,
+      color: 'warning'
+    })
+    await toast.present()
+  }
+}
+
+onMounted(async () => {
+  await loadSalles()
+  await loadReservation()
 })
 </script>
 

@@ -25,9 +25,9 @@ CREATE TABLE IF NOT EXISTS signalements (
 );
 
 -- Table pour les réservations
-CREATE TABLE IF NOT EXISTS reservations (
+CREATE TABLE IF NOT EXISTS reservations_salles (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  room_name TEXT NOT NULL,
+  salle_id UUID NOT NULL REFERENCES salles(id) ON DELETE CASCADE,
   date DATE NOT NULL,
   start_time TIME NOT NULL,
   end_time TIME NOT NULL,
@@ -57,7 +57,8 @@ CREATE INDEX IF NOT EXISTS idx_signalements_created_at ON signalements(created_a
 -- CREATE INDEX IF NOT EXISTS idx_signalements_location ON signalements USING GIST (point(longitude, latitude));
 -- Index simple pour les coordonnées GPS (fonctionne sans PostGIS)
 CREATE INDEX IF NOT EXISTS idx_signalements_lat_lng ON signalements(latitude, longitude) WHERE latitude IS NOT NULL AND longitude IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_reservations_date ON reservations(date DESC);
+CREATE INDEX IF NOT EXISTS idx_reservations_salles_date ON reservations_salles(date DESC);
+CREATE INDEX IF NOT EXISTS idx_reservations_salles_salle_id ON reservations_salles(salle_id);
 CREATE INDEX IF NOT EXISTS idx_municipal_info_created_at ON municipal_info(created_at DESC);
 
 -- Fonction pour mettre à jour updated_at automatiquement
@@ -73,7 +74,7 @@ $$ language 'plpgsql';
 CREATE TRIGGER update_signalements_updated_at BEFORE UPDATE ON signalements
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_reservations_updated_at BEFORE UPDATE ON reservations
+CREATE TRIGGER update_reservations_salles_updated_at BEFORE UPDATE ON reservations_salles
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_municipal_info_updated_at BEFORE UPDATE ON municipal_info
@@ -81,7 +82,7 @@ CREATE TRIGGER update_municipal_info_updated_at BEFORE UPDATE ON municipal_info
 
 -- RLS (Row Level Security) - Activer la sécurité au niveau des lignes
 ALTER TABLE signalements ENABLE ROW LEVEL SECURITY;
-ALTER TABLE reservations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE reservations_salles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE municipal_info ENABLE ROW LEVEL SECURITY;
 
 -- Politiques RLS pour permettre la lecture publique des informations municipales
@@ -99,11 +100,11 @@ CREATE POLICY "Tout le monde peut lire ses propres signalements"
     USING (true);
 
 CREATE POLICY "Tout le monde peut créer des réservations"
-    ON reservations FOR INSERT
+    ON reservations_salles FOR INSERT
     WITH CHECK (true);
 
 CREATE POLICY "Tout le monde peut lire ses propres réservations"
-    ON reservations FOR SELECT
+    ON reservations_salles FOR SELECT
     USING (true);
 
 -- Note: Pour un environnement de production, vous devriez ajouter des politiques plus restrictives

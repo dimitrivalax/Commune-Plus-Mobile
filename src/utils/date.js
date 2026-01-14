@@ -8,7 +8,8 @@ export const formatDate = (dateString) => {
   return date.toLocaleDateString('fr-FR', {
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
+    weekday: "long",
   })
 }
 
@@ -34,7 +35,7 @@ export const formatTime = (timeString) => {
   if (timeString.includes('T')) {
     return timeString.split('T')[1]?.substring(0, 5) || timeString
   }
-  return timeString
+  return timeString.length > 5 ? timeString.substring(0, 5) : timeString
 }
 
 export const formatDateForDB = (dateString) => {

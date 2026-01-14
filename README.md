@@ -125,11 +125,11 @@ CREATE TABLE signalements (
 - Le schéma accepte soit les coordonnées GPS (latitude/longitude) soit une adresse textuelle
 - Si vous avez déjà créé la table `incivilities`, utilisez d'abord le script `supabase-migration-rename-table.sql` pour la renommer en `signalements`, puis `supabase-migration-gps.sql` pour ajouter le support GPS
 
-### Table `reservations`
+### Table `reservations_salles`
 ```sql
-CREATE TABLE reservations (
+CREATE TABLE reservations_salles (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  room_name TEXT NOT NULL,
+  salle_id UUID NOT NULL REFERENCES salles(id) ON DELETE CASCADE,
   date DATE NOT NULL,
   start_time TIME NOT NULL,
   end_time TIME NOT NULL,
@@ -138,7 +138,8 @@ CREATE TABLE reservations (
   email TEXT NOT NULL,
   phone TEXT,
   status TEXT DEFAULT 'en_attente',
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 ```
 

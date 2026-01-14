@@ -2,7 +2,7 @@
 
 ## Erreur : Table non trouvée
 
-Si vous voyez l'erreur `Could not find the table 'public.reservations'`, cela signifie que les tables n'ont pas encore été créées dans votre projet Supabase.
+Si vous voyez l'erreur `Could not find the table 'public.reservations_salles'`, cela signifie que les tables n'ont pas encore été créées dans votre projet Supabase.
 
 ## Étapes pour créer les tables
 
@@ -25,7 +25,7 @@ Si vous voyez l'erreur `Could not find the table 'public.reservations'`, cela si
 1. Dans le menu de gauche, cliquez sur **Table Editor**
 2. Vous devriez voir 3 tables :
    - `signalements`
-   - `reservations`
+   - `reservations_salles`
    - `municipal_info`
 
 ## Structure des tables
@@ -35,7 +35,7 @@ Si vous voyez l'erreur `Could not find the table 'public.reservations'`, cela si
 - Supporte GPS (latitude/longitude) ou adresse textuelle
 - Contient les coordonnées du déclarant
 
-### Table `reservations`
+### Table `reservations_salles`
 - Stocke les demandes de réservation de salles
 - Contient les informations de contact du demandeur
 
@@ -65,7 +65,7 @@ FROM
   information_schema.tables 
 WHERE 
   table_schema = 'public' 
-  AND table_name IN ('signalements', 'reservations', 'municipal_info');
+  AND table_name IN ('signalements', 'reservations_salles', 'municipal_info');
 ```
 
 Vous devriez voir les 3 tables listées.

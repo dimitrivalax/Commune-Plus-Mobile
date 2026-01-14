@@ -23,7 +23,7 @@
           >
             <IonIcon :icon="calendar" slot="start" class="reservation-icon" />
             <IonLabel>
-              <h2>{{ reservation.room_name }}</h2>
+              <h2>{{ reservation.salle_nom || reservation.salle?.nom || 'Salle inconnue' }}</h2>
               <div class="item-meta">
                 <span class="date-text">{{
                   formatDate(reservation.date)
@@ -37,7 +37,7 @@
                 :color="getStatusColor(reservation.status)"
                 class="status-badge"
               >
-                {{ reservation.status || 'En attente' }}
+                {{ getStatusLabel(reservation.status) }}
               </IonBadge>
             </IonLabel>
           </IonItem>
@@ -86,13 +86,20 @@ const reservations = ref([])
 const loadReservations = async (event) => {
   try {
     const { data, error } = await supabase
-      .from('reservations')
-      .select('*')
+      .from('reservations_salles')
+      .select(`
+        *,
+        salle:salles(id, nom)
+      `)
       .order('date', { ascending: false })
 
     if (error) throw error
 
-    reservations.value = data || []
+    // Extraire le nom de la salle pour chaque réservation
+    reservations.value = (data || []).map(reservation => ({
+      ...reservation,
+      salle_nom: reservation.salle?.nom || 'Salle inconnue'
+    }))
   } catch (error) {
     console.error('Error loading reservations:', error)
   } finally {
@@ -111,6 +118,18 @@ const getStatusColor = (status) => {
     case 'en_attente':
     default:
       return 'warning'
+  }
+}
+
+const getStatusLabel = (status) => {
+  switch (status) {
+    case 'confirmée':
+      return 'Confirmée'
+    case 'refusée':
+      return 'Refusée'
+    case 'en_attente':
+    default:
+      return 'En attente'
   }
 }
 
@@ -151,7 +170,7 @@ onActivated(() => {
 
 .date-text {
   font-size: 14px;
-  color: var(--ion-color-light);
+  color: var(--ion-color-dark);
   font-weight: 500;
 }
 

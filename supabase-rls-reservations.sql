@@ -2,14 +2,14 @@
 -- des réservations par leur créateur (basé sur l'email)
 
 -- Supprimer les anciennes politiques si elles existent
-DROP POLICY IF EXISTS "Tout le monde peut mettre à jour ses propres réservations" ON reservations;
-DROP POLICY IF EXISTS "Tout le monde peut supprimer ses propres réservations" ON reservations;
+DROP POLICY IF EXISTS "Tout le monde peut mettre à jour ses propres réservations" ON reservations_salles;
+DROP POLICY IF EXISTS "Tout le monde peut supprimer ses propres réservations" ON reservations_salles;
 
 -- Politique pour permettre la mise à jour des réservations par leur créateur (basé sur l'email)
 -- Note: Cette politique nécessite que l'email soit passé dans la requête WHERE
 -- Le code de l'application doit inclure .eq('email', userEmail) dans la requête UPDATE
 CREATE POLICY "Tout le monde peut mettre à jour ses propres réservations"
-    ON reservations FOR UPDATE
+    ON reservations_salles FOR UPDATE
     USING (true)
     WITH CHECK (true);
 
@@ -17,7 +17,7 @@ CREATE POLICY "Tout le monde peut mettre à jour ses propres réservations"
 -- Note: Cette politique nécessite que l'email soit passé dans la requête WHERE
 -- Le code de l'application doit inclure .eq('email', userEmail) dans la requête DELETE
 CREATE POLICY "Tout le monde peut supprimer ses propres réservations"
-    ON reservations FOR DELETE
+    ON reservations_salles FOR DELETE
     USING (true);
 
 -- Note importante:
