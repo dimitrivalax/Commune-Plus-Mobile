@@ -19,38 +19,37 @@
         <ion-item>
           <ion-label position="stacked">Salle</ion-label>
           <ion-select v-model="roomName" placeholder="Sélectionner une salle">
-            <ion-select-option value="Salle des fêtes">Salle des fêtes</ion-select-option>
-            <ion-select-option value="Salle polyvalente">Salle polyvalente</ion-select-option>
-            <ion-select-option value="Salle de réunion">Salle de réunion</ion-select-option>
-            <ion-select-option value="Salle de sport">Salle de sport</ion-select-option>
+            <ion-select-option v-for="salle in salles" :key="salle.id" :value="salle.nom">
+              {{ salle.nom }}
+            </ion-select-option>
           </ion-select>
         </ion-item>
 
-        <ion-item button @click="openDateModal = true">
+        <!-- Modal pour la date -->
+        <ion-item>
           <ion-label position="stacked">Date</ion-label>
-          <ion-input
-            :value="date ? formatDisplayDate(date) : 'Sélectionner une date'"
-            readonly
-            placeholder="Sélectionner une date"
-          ></ion-input>
+          <ion-datetime-button datetime="datetime"></ion-datetime-button>
+          <ion-modal :keep-contents-mounted="true">
+            <ion-datetime id="datetime" :show-default-buttons="true" presentation="date"></ion-datetime>
+          </ion-modal>
+        </ion-item>
+
+        <ion-item button @click=" openDateModal = true">
+          <ion-label position="stacked">Date</ion-label>
+          <ion-input :value="date ? formatDisplayDate(date) : 'Sélectionner une date'" readonly
+            placeholder="Sélectionner une date"></ion-input>
         </ion-item>
 
         <ion-item button @click="openStartTimeModal = true">
           <ion-label position="stacked">Heure de début</ion-label>
-          <ion-input
-            :value="startTime ? formatDisplayTime(startTime) : 'Sélectionner une heure'"
-            readonly
-            placeholder="Sélectionner une heure"
-          ></ion-input>
+          <ion-input :value="startTime ? formatDisplayTime(startTime) : 'Sélectionner une heure'" readonly
+            placeholder="Sélectionner une heure"></ion-input>
         </ion-item>
 
         <ion-item button @click="openEndTimeModal = true">
           <ion-label position="stacked">Heure de fin</ion-label>
-          <ion-input
-            :value="endTime ? formatDisplayTime(endTime) : 'Sélectionner une heure'"
-            readonly
-            placeholder="Sélectionner une heure"
-          ></ion-input>
+          <ion-input :value="endTime ? formatDisplayTime(endTime) : 'Sélectionner une heure'" readonly
+            placeholder="Sélectionner une heure"></ion-input>
         </ion-item>
 
         <!-- Modal pour la date -->
@@ -64,12 +63,8 @@
             </ion-toolbar>
           </ion-header>
           <ion-content>
-            <ion-datetime
-              v-model="date"
-              presentation="date"
-              :min="minDate"
-              @ionChange="handleDateChange"
-            ></ion-datetime>
+            <ion-datetime v-model="date" presentation="date" :min="minDate"
+              @ionChange="handleDateChange"></ion-datetime>
           </ion-content>
         </ion-modal>
 
@@ -84,11 +79,7 @@
             </ion-toolbar>
           </ion-header>
           <ion-content>
-            <ion-datetime
-              v-model="startTime"
-              presentation="time"
-              @ionChange="handleStartTimeChange"
-            ></ion-datetime>
+            <ion-datetime v-model="startTime" presentation="time" @ionChange="handleStartTimeChange"></ion-datetime>
           </ion-content>
         </ion-modal>
 
@@ -103,21 +94,13 @@
             </ion-toolbar>
           </ion-header>
           <ion-content>
-            <ion-datetime
-              v-model="endTime"
-              presentation="time"
-              @ionChange="handleEndTimeChange"
-            ></ion-datetime>
+            <ion-datetime v-model="endTime" presentation="time" @ionChange="handleEndTimeChange"></ion-datetime>
           </ion-content>
         </ion-modal>
 
         <ion-item>
           <ion-label position="stacked">Raison de la réservation</ion-label>
-          <ion-textarea
-            v-model="reason"
-            placeholder="Décrivez l'événement..."
-            rows="4"
-          ></ion-textarea>
+          <ion-textarea v-model="reason" placeholder="Décrivez l'événement..." rows="4"></ion-textarea>
         </ion-item>
 
         <p v-if="hasSavedContact" class="saved-contact-info">
@@ -140,11 +123,7 @@
           <ion-input v-model="phone" type="tel" placeholder="Votre téléphone"></ion-input>
         </ion-item>
 
-        <ion-button
-          expand="block"
-          @click="submitReservation"
-          :disabled="loading || !isFormValid"
-        >
+        <ion-button expand="block" @click="submitReservation" :disabled="loading || !isFormValid">
           <ion-icon :icon="checkmark" slot="start" />
           Envoyer la demande
         </ion-button>
@@ -160,7 +139,7 @@ import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonBa
 import { checkmark, checkmarkCircleOutline } from 'ionicons/icons'
 import { supabase } from '@/services/supabase'
 import { formatDateForDB, formatTime } from '@/utils/date'
-import { saveUserContact, getUserContact } from '@/utils/storage'
+import { saveUserContact, getUserContact, getCityInfo } from '@/utils/storage'
 
 const router = useRouter()
 const roomName = ref('')
@@ -176,6 +155,7 @@ const openDateModal = ref(false)
 const openStartTimeModal = ref(false)
 const openEndTimeModal = ref(false)
 const hasSavedContact = ref(false)
+const salles = ref([])
 
 const minDate = new Date().toISOString()
 
@@ -271,7 +251,7 @@ const submitReservation = async () => {
     const nameParts = name.value.trim().split(' ')
     const firstName = nameParts[0] || ''
     const lastName = nameParts.slice(1).join(' ') || ''
-    
+
     saveUserContact({
       firstName: firstName,
       lastName: lastName,
@@ -305,8 +285,57 @@ const submitReservation = async () => {
   }
 }
 
+// Charger les salles depuis Supabase pour la commune sélectionnée
+const loadSalles = async () => {
+  try {
+    // Récupérer l'ID de la commune depuis le localStorage
+    const cityInfo = getCityInfo()
+    const communeId = cityInfo?.id
+
+    if (!communeId) {
+      console.warn('Aucune commune sélectionnée, chargement de toutes les salles')
+      // Si aucune commune n'est sélectionnée, charger toutes les salles
+      const { data, error } = await supabase
+        .from('salles')
+        .select('id, nom')
+        .order('nom', { ascending: true })
+
+      if (error) throw error
+      if (data) {
+        salles.value = data
+      }
+      return
+    }
+
+    // Filtrer les salles par commune_id
+    const { data, error } = await supabase
+      .from('salles')
+      .select('id, nom')
+      .eq('commune_id', communeId)
+      .order('nom', { ascending: true })
+
+    if (error) throw error
+
+    if (data) {
+      salles.value = data
+    }
+  } catch (error) {
+    console.error('Error loading salles:', error)
+    const toast = await toastController.create({
+      message: 'Erreur lors du chargement des salles',
+      duration: 2000,
+      color: 'warning'
+    })
+    await toast.present()
+  }
+}
+
 // Charger les coordonnées sauvegardées au chargement de la page
-onMounted(() => {
+onMounted(async () => {
+  // Charger les salles
+  await loadSalles()
+
+  // Charger les coordonnées sauvegardées
   const savedContact = getUserContact()
   if (savedContact) {
     hasSavedContact.value = true
@@ -337,4 +366,3 @@ onMounted(() => {
   font-size: 18px;
 }
 </style>
-
