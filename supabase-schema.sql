@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS signalements (
   location_accuracy DOUBLE PRECISION,
   address TEXT,
   comment TEXT,
+  reponse TEXT,
   photo_url TEXT,
   last_name TEXT NOT NULL,
   first_name TEXT NOT NULL,

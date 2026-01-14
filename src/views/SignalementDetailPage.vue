@@ -25,6 +25,7 @@
           <!-- Photo -->
           <div v-if="signalement.photo_url" class="photo-section">
             <img :src="signalement.photo_url" alt="Photo du signalement" class="detail-photo" />
+            <p v-if="signalement.comment" class="photo-comment">{{ signalement.comment }}</p>
           </div>
 
           <!-- Informations principales -->
@@ -43,14 +44,14 @@
           </ion-card>
 
           <!-- Réponse de l'administration -->
-          <ion-card v-if="signalement.comment" class="info-card response-card">
+          <ion-card v-if="signalement.reponse" class="info-card response-card">
             <ion-card-header>
               <ion-card-title>
                 <ion-icon :icon="checkmarkCircle" /> Réponse de la mairie
               </ion-card-title>
             </ion-card-header>
             <ion-card-content>
-              <p class="response-text">{{ signalement.comment }}</p>
+              <p class="response-text">{{ signalement.reponse }}</p>
             </ion-card-content>
           </ion-card>
 
@@ -105,8 +106,12 @@
             </ion-card-content>
           </ion-card>
 
-          <!-- Bouton d'archivage -->
+          <!-- Boutons d'action -->
           <div class="action-buttons" v-if="signalement.status !== 'archive'">
+            <ion-button expand="block" color="primary" @click="toggleEditMode">
+              <ion-icon :icon="create" slot="start" />
+              Modifier le signalement
+            </ion-button>
             <ion-button expand="block" color="medium" @click="confirmArchive" :disabled="isArchiving">
               <ion-icon :icon="archive" slot="start" />
               Archiver le signalement
@@ -116,52 +121,51 @@
 
         <!-- Mode édition -->
         <div v-else class="edit-mode">
+          <div class="edit-header">
+            <h2 class="edit-title">Modifier le signalement</h2>
+            <p class="edit-subtitle">Modifiez les informations de votre signalement</p>
+          </div>
           <div class="form-container">
             <div class="form-section">
               <h3 class="section-title">Description</h3>
               <ion-item lines="none" class="form-item">
-                <ion-label position="stacked">Description du signalement</ion-label>
+                <ion-label position="stacked" class="label-with-icon">
+                  <ion-icon :icon="createOutline" class="edit-icon" />
+                  Description du signalement
+                </ion-label>
                 <ion-textarea v-model="editForm.description" placeholder="Décrivez le signalement..."
                   rows="4"></ion-textarea>
               </ion-item>
+            </div>
 
+            <div class="form-section">
+              <h3 class="section-title">Photo</h3>
+              <ion-button expand="block" @click="takePhoto" :disabled="saving" class="photo-button">
+                <ion-icon :icon="camera" slot="start" />
+                {{ editPhoto ? 'Reprendre la photo' : 'Prendre une photo' }}
+              </ion-button>
+
+              <div v-if="editPhoto" class="photo-preview">
+                <img :src="editPhoto" alt="Photo du signalement" />
+                <ion-button fill="clear" @click="removePhoto" class="remove-photo-btn" :disabled="saving">
+                  <ion-icon :icon="close" />
+                </ion-button>
+              </div>
               <ion-item lines="none" class="form-item">
-                <ion-label position="stacked">Commentaire</ion-label>
+                <ion-label position="stacked" class="label-with-icon">
+                  <ion-icon :icon="createOutline" class="edit-icon" />
+                  Commentaire
+                </ion-label>
                 <ion-textarea v-model="editForm.comment" placeholder="Commentaire sur la photo (optionnel)..."
                   rows="3"></ion-textarea>
               </ion-item>
             </div>
 
-            <div class="form-section">
-              <h3 class="section-title">Coordonnées</h3>
-              <ion-card class="contact-card">
-                <ion-card-content>
-                  <ion-item lines="none" class="form-item">
-                    <ion-label position="stacked">Nom *</ion-label>
-                    <ion-input v-model="editForm.lastName" placeholder="Votre nom" required></ion-input>
-                  </ion-item>
 
-                  <ion-item lines="none" class="form-item">
-                    <ion-label position="stacked">Prénom *</ion-label>
-                    <ion-input v-model="editForm.firstName" placeholder="Votre prénom" required></ion-input>
-                  </ion-item>
-
-                  <ion-item lines="none" class="form-item">
-                    <ion-label position="stacked">Email</ion-label>
-                    <ion-input v-model="editForm.email" type="email" placeholder="votre.email@exemple.com"></ion-input>
-                  </ion-item>
-
-                  <ion-item lines="none" class="form-item">
-                    <ion-label position="stacked">Téléphone</ion-label>
-                    <ion-input v-model="editForm.phone" type="tel" placeholder="06 12 34 56 78"></ion-input>
-                  </ion-item>
-                </ion-card-content>
-              </ion-card>
-            </div>
 
             <div class="action-buttons">
               <ion-button expand="block" @click="saveChanges"
-                :disabled="saving || !editForm.lastName || !editForm.firstName" class="save-button">
+                :disabled="saving" class="save-button">
                 <ion-icon :icon="checkmark" slot="start" />
                 Enregistrer les modifications
               </ion-button>
@@ -187,11 +191,13 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonBackButton, IonButton, IonIcon, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonBadge, IonItem, IonLabel, IonTextarea, IonInput, IonSelect, IonSelectOption, IonSpinner, loadingController, toastController, alertController } from '@ionic/vue'
-import { create, close, trash, checkmark, checkmarkCircle, archive, location as locationIcon, person, time, alertCircle } from 'ionicons/icons'
+import { create, close, trash, checkmark, checkmarkCircle, archive, location as locationIcon, person, time, alertCircle, camera, createOutline } from 'ionicons/icons'
 import { supabase } from '@/services/supabase'
 import { formatDateTime } from '@/utils/date'
 import { trackEvent } from '@/services/posthog'
+import { uploadImageToCloudinary } from '@/services/cloudinary'
 
 const route = useRoute()
 const router = useRouter()
@@ -205,12 +211,11 @@ const isArchiving = ref(false)
 const editForm = ref({
   description: '',
   comment: '',
-  status: '',
-  firstName: '',
-  lastName: '',
-  email: '',
-  phone: ''
+  status: ''
 })
+
+const editPhoto = ref(null)
+const photoChanged = ref(false)
 
 const loadSignalement = async () => {
   loading.value = true
@@ -228,12 +233,10 @@ const loadSignalement = async () => {
     editForm.value = {
       description: data.description || '',
       comment: data.comment || '',
-      status: data.status || 'en_attente',
-      firstName: data.first_name || '',
-      lastName: data.last_name || '',
-      email: data.email || '',
-      phone: data.phone || ''
+      status: data.status || 'en_attente'
     }
+    editPhoto.value = data.photo_url || null
+    photoChanged.value = false
   } catch (error) {
     console.error('Error loading signalement:', error)
     const toast = await toastController.create({
@@ -260,12 +263,10 @@ const toggleEditMode = () => {
     editForm.value = {
       description: signalement.value.description || '',
       comment: signalement.value.comment || '',
-      status: signalement.value.status || 'en_attente',
-      firstName: signalement.value.first_name || '',
-      lastName: signalement.value.last_name || '',
-      email: signalement.value.email || '',
-      phone: signalement.value.phone || ''
+      status: signalement.value.status || 'en_attente'
     }
+    editPhoto.value = signalement.value.photo_url || null
+    photoChanged.value = false
   } else if (!isEditing.value) {
     // Track edit cancelled
     trackEvent('signalement_edit_cancelled', {
@@ -274,8 +275,46 @@ const toggleEditMode = () => {
   }
 }
 
+const takePhoto = async () => {
+  try {
+    const image = await Camera.getPhoto({
+      quality: 90,
+      allowEditing: false,
+      resultType: CameraResultType.DataUrl,
+      source: CameraSource.Camera
+    })
+
+    editPhoto.value = image.dataUrl
+    photoChanged.value = true
+    
+    trackEvent('signalement_photo_changed', {
+      signalement_id: signalement.value?.id
+    })
+  } catch (error) {
+    console.error('Error taking photo:', error)
+    
+    const toast = await toastController.create({
+      message: 'Erreur lors de la prise de photo',
+      duration: 2000,
+      color: 'danger'
+    })
+    await toast.present()
+  }
+}
+
+const removePhoto = () => {
+  editPhoto.value = null
+  photoChanged.value = true
+  
+  trackEvent('signalement_photo_removed', {
+    signalement_id: signalement.value?.id
+  })
+}
+
 const cancelEdit = () => {
   isEditing.value = false
+  editPhoto.value = signalement.value?.photo_url || null
+  photoChanged.value = false
 
   // Track edit cancelled
   trackEvent('signalement_edit_cancelled', {
@@ -284,16 +323,6 @@ const cancelEdit = () => {
 }
 
 const saveChanges = async () => {
-  if (!editForm.value.lastName || !editForm.value.firstName) {
-    const toast = await toastController.create({
-      message: 'Le nom et le prénom sont obligatoires',
-      duration: 2000,
-      color: 'warning'
-    })
-    await toast.present()
-    return
-  }
-
   saving.value = true
   const loadingToast = await loadingController.create({
     message: 'Enregistrement en cours...'
@@ -301,25 +330,64 @@ const saveChanges = async () => {
   await loadingToast.present()
 
   try {
+    let photoUrl = signalement.value?.photo_url || null
+
+    // Si la photo a été modifiée, uploader la nouvelle photo
+    if (photoChanged.value) {
+      if (editPhoto.value) {
+        // Convertir dataUrl en File pour Cloudinary
+        const response = await fetch(editPhoto.value)
+        const blob = await response.blob()
+        
+        // Déterminer l'extension et le type MIME
+        let extension = 'jpg'
+        let mimeType = 'image/jpeg'
+        
+        if (blob.type) {
+          mimeType = blob.type
+          if (blob.type === 'image/png') {
+            extension = 'png'
+          } else if (blob.type === 'image/webp') {
+            extension = 'webp'
+          } else if (blob.type === 'image/jpeg' || blob.type === 'image/jpg') {
+            extension = 'jpg'
+            mimeType = 'image/jpeg'
+          }
+        }
+        
+        const file = new File([blob], `signalement-${route.params.id}.${extension}`, { type: mimeType })
+        photoUrl = await uploadImageToCloudinary(file)
+      } else {
+        // Photo supprimée
+        photoUrl = null
+      }
+    }
+
+    const updateData = {
+      description: editForm.value.description,
+      comment: editForm.value.comment,
+      status: editForm.value.status
+    }
+
+    // Ajouter la photo seulement si elle a été modifiée
+    if (photoChanged.value) {
+      updateData.photo_url = photoUrl
+    }
+
     const { data, error } = await supabase
       .from('signalements')
-      .update({
-        description: editForm.value.description,
-        comment: editForm.value.comment,
-        status: editForm.value.status,
-        first_name: editForm.value.firstName,
-        last_name: editForm.value.lastName,
-        email: editForm.value.email || null,
-        phone: editForm.value.phone || null
-      })
+      .update(updateData)
       .eq('id', route.params.id)
       .select()
       .single()
 
     if (error) throw error
 
+    const wasPhotoChanged = photoChanged.value
+    
     signalement.value = data
     isEditing.value = false
+    photoChanged.value = false
 
     // Track successful modification
     trackEvent('signalement_modified', {
@@ -329,11 +397,8 @@ const saveChanges = async () => {
       fields_modified: {
         description: editForm.value.description !== (signalement.value?.description || ''),
         comment: editForm.value.comment !== (signalement.value?.comment || ''),
-        status: editForm.value.status !== (signalement.value?.status || ''),
-        contact_info: editForm.value.firstName !== (signalement.value?.first_name || '') ||
-          editForm.value.lastName !== (signalement.value?.last_name || '') ||
-          editForm.value.email !== (signalement.value?.email || '') ||
-          editForm.value.phone !== (signalement.value?.phone || '')
+        photo: wasPhotoChanged,
+        status: editForm.value.status !== (signalement.value?.status || '')
       }
     })
 
@@ -520,6 +585,28 @@ onMounted(() => {
   gap: 16px;
 }
 
+.edit-header {
+  background: var(--ion-color-light);
+  border-radius: 12px;
+  margin-bottom: 16px;
+  margin-top: 16px;
+  padding: 4px 0;
+  text-align: center;
+}
+
+.edit-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ion-color-primary);
+  margin: 0 0 8px 0;
+}
+
+.edit-subtitle {
+  font-size: 14px;
+  color: var(--ion-color-medium);
+  margin: 0;
+}
+
 .photo-section {
   width: 100%;
   border-radius: 12px;
@@ -531,6 +618,17 @@ onMounted(() => {
   width: 100%;
   height: auto;
   display: block;
+}
+
+.photo-comment {
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--ion-color-light);
+  border-radius: 8px;
+  font-style: italic;
+  color: var(--ion-color-medium);
+  white-space: pre-wrap;
+  line-height: 1.5;
 }
 
 .info-card {
@@ -604,9 +702,46 @@ onMounted(() => {
   padding: 4px 0;
 }
 
-.contact-card {
-  margin: 0;
-  background: var(--ion-color-light);
+.label-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.edit-icon {
+  font-size: 16px;
+  color: var(--ion-color-primary);
+  opacity: 0.7;
+}
+
+.photo-button {
+  margin-bottom: 16px;
+}
+
+.photo-preview {
+  position: relative;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.photo-preview img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.remove-photo-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  --color: white;
+  --background: rgba(0, 0, 0, 0.5);
+  --border-radius: 50%;
+  width: 40px;
+  height: 40px;
 }
 
 .error-container {
