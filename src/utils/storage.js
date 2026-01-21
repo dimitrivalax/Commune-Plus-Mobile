@@ -147,7 +147,7 @@ export const getCityIdFromDatabase = async () => {
     }
 
     const { data, error } = await supabase
-      .from('city_info')
+      .from('commune')
       .select('id')
       .eq('name', cityInfo.name)
       .eq('postal_code', cityInfo.postalCode)
@@ -211,7 +211,7 @@ export const saveCityInfoToDatabase = async (cityData) => {
 
     // Vérifier s'il existe déjà une entrée avec le même nom et code postal
     const { data: existingData, error: checkError } = await supabase
-      .from('city_info')
+      .from('commune')
       .select('id')
       .eq('name', dataToSave.name)
       .eq('postal_code', dataToSave.postal_code)
@@ -228,7 +228,7 @@ export const saveCityInfoToDatabase = async (cityData) => {
     if (existingData && existingData.id) {
       // Mettre à jour l'entrée existante
       const { data, error } = await supabase
-        .from('city_info')
+        .from('commune')
         .update(dataToSave)
         .eq('id', existingData.id)
         .select()
@@ -257,7 +257,7 @@ export const saveCityInfoToDatabase = async (cityData) => {
       console.log('Inserting city info:', insertData)
 
       const { data, error } = await supabase
-        .from('city_info')
+        .from('commune')
         .insert(insertData)
         .select()
         .single()
@@ -307,7 +307,7 @@ export const getCityInfoFromDatabase = async () => {
 
   try {
     const { data, error } = await supabase
-      .from('city_info')
+      .from('commune')
       .select('*')
       .limit(1)
       .single()
@@ -361,7 +361,7 @@ export const searchCitiesInDatabase = async (searchTerm) => {
     // Recherche avec OR pour le nom ou le code postal
     // Syntaxe PostgREST : colonne.opérateur.valeur
     const { data, error } = await supabase
-      .from('city_info')
+      .from('commune')
       .select('id, name, postal_code, email, logo_url')
       .or(`name.ilike.%${search}%,postal_code.ilike.%${search}%`)
       .limit(10)

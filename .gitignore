@@ -14,4 +14,7 @@ node_modules
 .vscode
 .history
 
+# Firebase
+.firebase
+
 

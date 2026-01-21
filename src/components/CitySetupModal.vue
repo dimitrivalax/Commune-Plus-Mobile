@@ -177,6 +177,12 @@ const handleSubmit = async () => {
       throw new Error('Aucune donnée retournée par la sauvegarde')
     }
 
+    // Mettre à jour le token push avec la nouvelle commune
+    if (result.id) {
+      const { updatePushTokenCommune } = await import('@/services/push-notifications')
+      await updatePushTokenCommune(result.id)
+    }
+
     isSaved.value = true
     await showToast(
       'Informations de la commune enregistrées avec succès',
