@@ -7,7 +7,7 @@
         </ion-buttons>
         <ion-title>Détail du signalement</ion-title>
         <ion-buttons slot="end">
-          <ion-button @click="toggleEditMode" v-if="!isArchiving">
+          <ion-button @click="toggleEditMode" v-if="!isArchiving" color="light">
             <ion-icon :icon="isEditing ? close : create" />
           </ion-button>
         </ion-buttons>
@@ -108,10 +108,6 @@
 
           <!-- Boutons d'action -->
           <div class="action-buttons" v-if="signalement.status !== 'archive'">
-            <ion-button expand="block" color="primary" @click="toggleEditMode">
-              <ion-icon :icon="create" slot="start" />
-              Modifier le signalement
-            </ion-button>
             <ion-button expand="block" color="medium" @click="confirmArchive" :disabled="isArchiving">
               <ion-icon :icon="archive" slot="start" />
               Archiver le signalement
