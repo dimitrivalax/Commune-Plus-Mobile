@@ -18,10 +18,13 @@ ANDROID_ICON_SIZES = {
 # Couleur de fond (couleur primaire du projet #2563eb)
 BACKGROUND_COLOR = (37, 99, 235, 255)  # RGBA
 
+# Marge autour de l'icône (en pourcentage de la taille totale, 0.15 = 15% de marge de chaque côté)
+ICON_PADDING_RATIO = 0.15  # 15% de marge autour de l'icône
+
 def generate_android_icons():
     # Chemin de l'icône source
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    source_icon = os.path.join(script_dir, 'public', 'assets', 'logo.png')
+    source_icon = os.path.join(script_dir, 'public', 'assets', 'icon.png')
     android_res_path = os.path.join(script_dir, 'android', 'app', 'src', 'main', 'res')
     
     # Vérifier que l'icône source existe
@@ -53,30 +56,36 @@ def generate_android_icons():
     for density, size in ANDROID_ICON_SIZES.items():
         output_path = os.path.join(android_res_path, density, 'ic_launcher.png')
         
+        # Calculer la taille avec marge (l'icône prendra 85% de l'espace, 15% de marge)
+        icon_size = int(size * (1 - 2 * ICON_PADDING_RATIO))
+        
         # Redimensionner l'image en conservant les proportions
         resized = source_image.copy()
-        resized.thumbnail((size, size), Image.Resampling.LANCZOS)
+        resized.thumbnail((icon_size, icon_size), Image.Resampling.LANCZOS)
         
         # Créer une nouvelle image avec fond transparent
         icon = Image.new('RGBA', (size, size), (0, 0, 0, 0))
         
-        # Centrer l'image redimensionnée
+        # Centrer l'image redimensionnée avec marge
         x = (size - resized.size[0]) // 2
         y = (size - resized.size[1]) // 2
         icon.paste(resized, (x, y), resized)
         
         # Sauvegarder
         icon.save(output_path, 'PNG')
-        print(f'✓ Généré: {output_path} ({size}x{size})')
+        print(f'✓ Généré: {output_path} ({size}x{size}, icône: {icon_size}x{icon_size})')
     
     # Générer aussi ic_launcher_foreground.png et ic_launcher_background.png pour Android 8.0+
     # (Adaptive icons)
     print('\nGénération des icônes adaptatives (Android 8.0+)...')
     for density, size in ANDROID_ICON_SIZES.items():
+        # Calculer la taille avec marge pour le foreground
+        icon_size = int(size * (1 - 2 * ICON_PADDING_RATIO))
+        
         # Foreground (l'icône elle-même)
         foreground_path = os.path.join(android_res_path, density, 'ic_launcher_foreground.png')
         resized = source_image.copy()
-        resized.thumbnail((size, size), Image.Resampling.LANCZOS)
+        resized.thumbnail((icon_size, icon_size), Image.Resampling.LANCZOS)
         foreground = Image.new('RGBA', (size, size), (0, 0, 0, 0))
         x = (size - resized.size[0]) // 2
         y = (size - resized.size[1]) // 2
@@ -88,7 +97,31 @@ def generate_android_icons():
         background = Image.new('RGBA', (size, size), BACKGROUND_COLOR)
         background.save(background_path, 'PNG')
         
-        print(f'✓ Généré: {foreground_path} et {background_path} ({size}x{size})')
+        print(f'✓ Généré: {foreground_path} et {background_path} ({size}x{size}, icône: {icon_size}x{icon_size})')
+    
+    # Générer les icônes rondes pour les anciennes versions d'Android
+    print('\nGénération des icônes rondes (Android < 8.0)...')
+    for density, size in ANDROID_ICON_SIZES.items():
+        round_path = os.path.join(android_res_path, density, 'ic_launcher_round.png')
+        
+        # Calculer la taille avec marge
+        icon_size = int(size * (1 - 2 * ICON_PADDING_RATIO))
+        
+        # Redimensionner l'image en conservant les proportions
+        resized = source_image.copy()
+        resized.thumbnail((icon_size, icon_size), Image.Resampling.LANCZOS)
+        
+        # Créer une nouvelle image avec fond transparent
+        icon = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+        
+        # Centrer l'image redimensionnée avec marge
+        x = (size - resized.size[0]) // 2
+        y = (size - resized.size[1]) // 2
+        icon.paste(resized, (x, y), resized)
+        
+        # Sauvegarder (Android appliquera automatiquement la forme ronde)
+        icon.save(round_path, 'PNG')
+        print(f'✓ Généré: {round_path} ({size}x{size}, icône: {icon_size}x{icon_size})')
     
     print('\n✅ Toutes les icônes Android ont été générées avec succès!')
     print('\nNote: Si le dossier android n\'existe pas encore, exécutez:')

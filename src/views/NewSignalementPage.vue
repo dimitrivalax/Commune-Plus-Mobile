@@ -541,7 +541,7 @@ const submitSignalement = async () => {
     const userId = getOrCreateUserId()
 
     // Préparer les données à sauvegarder
-    const dataToInsert: any = {
+    const dataToInsert = {
       description: description.value,
       comment: comment.value,
       photo_url: photoUrl,
