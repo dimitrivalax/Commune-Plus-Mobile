@@ -46,6 +46,28 @@ export async function initializePushNotifications() {
       }
     }
 
+    // Fonction helper pour naviguer vers un signalement
+    const navigateToSignalement = async (signalementId) => {
+      if (!signalementId) {
+        console.warn('No signalement ID provided for navigation')
+        return
+      }
+      
+      try {
+        const router = (await import('@/router')).default
+        
+        // Attendre que le router soit prêt
+        await router.isReady()
+        
+        console.log('Navigating to signalement page:', `/signalement/${signalementId}`)
+        
+        // Naviguer vers la page de détail du signalement
+        router.push(`/signalement/${signalementId}`)
+      } catch (error) {
+        console.error('Error navigating to signalement:', error)
+      }
+    }
+
     // IMPORTANT: Ajouter TOUS les listeners AVANT l'enregistrement
     // pour s'assurer qu'ils sont prêts même si l'app est ouverte depuis une notification
     
@@ -70,10 +92,21 @@ export async function initializePushNotifications() {
       
       console.log('Foreground notification data:', data)
       
-      // Pour les notifications en premier plan, on peut naviguer directement
-      if (data?.info_id || data?.infoId) {
+      // Gérer les différents types de notifications
+      const notificationType = data?.type || data?.notification_type
+      
+      if (notificationType === 'signalement') {
+        // Notification pour un signalement
+        const signalementId = data?.signalement_id || data?.signalementId
+        if (signalementId) {
+          await navigateToSignalement(signalementId)
+        }
+      } else if (notificationType === 'municipal_info' || data?.info_id || data?.infoId) {
+        // Notification pour une information municipale
         const infoId = data.info_id || data.infoId
-        await navigateToInfo(infoId)
+        if (infoId) {
+          await navigateToInfo(infoId)
+        }
       }
     })
 
@@ -102,17 +135,35 @@ export async function initializePushNotifications() {
       console.log('Notification data extracted (raw):', data)
       console.log('Full notification object keys:', Object.keys(notification))
       
-      // Extraire l'ID de l'information (peut être string ou déjà parsé)
-      const infoId = data?.info_id || data?.infoId
+      // Gérer les différents types de notifications
+      const notificationType = data?.type || data?.notification_type
       
-      if (infoId) {
-        console.log('Found info_id in notification, navigating to:', infoId)
-        // Attendre un peu pour que l'app soit complètement initialisée
-        setTimeout(async () => {
-          await navigateToInfo(infoId)
-        }, 500)
+      if (notificationType === 'signalement') {
+        // Notification pour un signalement
+        const signalementId = data?.signalement_id || data?.signalementId
+        if (signalementId) {
+          console.log('Found signalement_id in notification, navigating to:', signalementId)
+          // Attendre un peu pour que l'app soit complètement initialisée
+          setTimeout(async () => {
+            await navigateToSignalement(signalementId)
+          }, 500)
+        } else {
+          console.warn('No signalement_id found in notification data. Available keys:', Object.keys(data))
+        }
+      } else if (notificationType === 'municipal_info' || data?.info_id || data?.infoId) {
+        // Notification pour une information municipale
+        const infoId = data.info_id || data.infoId
+        if (infoId) {
+          console.log('Found info_id in notification, navigating to:', infoId)
+          // Attendre un peu pour que l'app soit complètement initialisée
+          setTimeout(async () => {
+            await navigateToInfo(infoId)
+          }, 500)
+        } else {
+          console.warn('No info_id found in notification data. Available keys:', Object.keys(data))
+        }
       } else {
-        console.warn('No info_id found in notification data. Available keys:', Object.keys(data))
+        console.warn('Unknown notification type or missing ID. Available keys:', Object.keys(data))
         console.warn('Full notification structure:', notification)
       }
     })
@@ -154,14 +205,25 @@ export async function initializePushNotifications() {
         // Extraire les données
         const data = firstNotification.data || firstNotification.additionalData || {}
         
-        if (data?.info_id || data?.infoId) {
+        // Gérer les différents types de notifications
+        const notificationType = data?.type || data?.notification_type
+        
+        if (notificationType === 'signalement') {
+          const signalementId = data?.signalement_id || data?.signalementId
+          if (signalementId) {
+            console.log('Found signalement_id in pending notification, will navigate after app is ready')
+            setTimeout(async () => {
+              await navigateToSignalement(signalementId)
+            }, 1500)
+          }
+        } else if (notificationType === 'municipal_info' || data?.info_id || data?.infoId) {
           const infoId = data.info_id || data.infoId
-          console.log('Found info_id in pending notification, will navigate after app is ready')
-          
-          // Attendre que l'app soit montée avant de naviguer
-          setTimeout(async () => {
-            await navigateToInfo(infoId)
-          }, 1500)
+          if (infoId) {
+            console.log('Found info_id in pending notification, will navigate after app is ready')
+            setTimeout(async () => {
+              await navigateToInfo(infoId)
+            }, 1500)
+          }
         }
       }
     } catch (error) {
@@ -176,7 +238,7 @@ export async function initializePushNotifications() {
 /**
  * Génère ou récupère un identifiant utilisateur unique stocké localement
  */
-function getOrCreateUserId() {
+export function getOrCreateUserId() {
   const STORAGE_KEY = 'commune-plus-user-id'
   let userId = localStorage.getItem(STORAGE_KEY)
   

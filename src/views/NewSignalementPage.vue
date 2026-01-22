@@ -195,6 +195,7 @@ import { saveUserContact, getUserContact, getCityInfo, getCityIdFromDatabase } f
 import { sendSignalementEmail } from '@/services/email'
 import CitySetupModal from '@/components/CitySetupModal.vue'
 import { trackEvent } from '@/services/posthog'
+import { getOrCreateUserId } from '@/services/push-notifications'
 
 const router = useRouter()
 const description = ref('')
@@ -536,8 +537,11 @@ const submitSignalement = async () => {
     // Récupérer l'ID de la commune
     const cityId = await getCityIdFromDatabase()
 
+    // Récupérer ou créer l'ID utilisateur pour les notifications push
+    const userId = getOrCreateUserId()
+
     // Préparer les données à sauvegarder
-    const dataToInsert = {
+    const dataToInsert: any = {
       description: description.value,
       comment: comment.value,
       photo_url: photoUrl,
@@ -547,6 +551,12 @@ const submitSignalement = async () => {
       phone: phone.value || null,
       status: 'en_attente'
     }
+
+    // Ajouter l'ID utilisateur pour les notifications
+    // NOTE: La migration SQL doit être exécutée dans Supabase pour que cette colonne existe
+    // Si la colonne n'existe pas encore, l'insertion échouera avec une erreur PGRST204
+    // Dans ce cas, on réessaiera sans user_id
+    dataToInsert.user_id = userId
 
     // Ajouter l'ID de la commune si disponible
     if (cityId) {
@@ -563,12 +573,29 @@ const submitSignalement = async () => {
     }
 
     // Sauvegarder dans Supabase
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('signalements')
       .insert([dataToInsert])
       .select()
 
-    if (error) throw error
+    // Si l'erreur est due à l'absence de la colonne user_id (migration non exécutée),
+    // réessayer sans user_id
+    if (error && error.code === 'PGRST204' && error.message?.includes('user_id')) {
+      console.warn('Column user_id does not exist yet, retrying without it. Please run the migration SQL.')
+      // Retirer user_id et réessayer
+      const dataWithoutUserId = { ...dataToInsert }
+      delete dataWithoutUserId.user_id
+      
+      const retryResult = await supabase
+        .from('signalements')
+        .insert([dataWithoutUserId])
+        .select()
+      
+      if (retryResult.error) throw retryResult.error
+      data = retryResult.data
+    } else if (error) {
+      throw error
+    }
 
     // Sauvegarder les coordonnées dans le localStorage pour les prochaines fois
     saveUserContact({
