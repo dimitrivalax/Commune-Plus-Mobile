@@ -28,11 +28,11 @@
           </div>
 
 
-          <ion-item v-if="formData.logo">
+          <ion-item v-if="formData.logo" lines="none">
             <IonImg :src="formData.logo" alt="Logo" class="logo-image" />
           </ion-item>
 
-          <ion-item>
+          <ion-item lines="none">
             <ion-label position="stacked"
               >Nom de la commune
               <ion-text color="danger">*</ion-text></ion-label
@@ -46,7 +46,7 @@
             ></ion-input>
           </ion-item>
 
-          <ion-item>
+          <ion-item lines="none">
             <ion-label position="stacked"
               >Code postal <ion-text color="danger">*</ion-text></ion-label
             >
@@ -61,7 +61,7 @@
             ></ion-input>
           </ion-item>
 
-          <ion-item>
+          <ion-item lines="none">
             <ion-label position="stacked"
               >Email de la commune
               <ion-text color="danger">*</ion-text></ion-label

@@ -5,7 +5,7 @@
         <ion-buttons slot="start">
           <ion-back-button default-href="/tabs/info"></ion-back-button>
         </ion-buttons>
-        <ion-title>Détail</ion-title>
+        <ion-title>Détail de l'information</ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
