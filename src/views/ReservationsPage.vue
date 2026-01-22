@@ -15,6 +15,7 @@
 
         <IonList v-if="reservations.length > 0" class="reservations-list">
           <IonItem
+            lines="none"
             v-for="reservation in reservations"
             :key="reservation.id"
             class="reservation-item"

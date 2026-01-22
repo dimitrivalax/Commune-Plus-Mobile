@@ -9,6 +9,7 @@
 
         <IonList v-if="infoItems.length > 0" class="info-list">
           <IonItem
+            lines="none"
             v-for="item in infoItems"
             :key="item.id"
             button

@@ -14,7 +14,8 @@
         </IonRefresher>
 
         <!-- Filtre par statut -->
-        <IonItem class="filter-item">
+        <IonItem class="filter-item"
+        lines="none">
           <IonLabel>Filtrer par statut</IonLabel>
           <IonSelect v-model="selectedStatus" placeholder="Tous les statuts" interface="popover">
             <IonSelectOption value="all">Tous</IonSelectOption>
@@ -26,7 +27,7 @@
         </IonItem>
 
         <IonList v-if="filteredSignalements.length > 0" class="signalements-list">
-          <IonItem v-for="signalement in filteredSignalements" :key="signalement.id" class="signalement-item" button
+          <IonItem v-for="signalement in filteredSignalements" :key="signalement.id" class="signalement-item" button lines="none"
             @click="$router.push(`/signalement/${signalement.id}`)">
             <IonThumbnail v-if="signalement.photo_url" slot="start">
               <img :src="signalement.photo_url" :alt="signalement.description" />

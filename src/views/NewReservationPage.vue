@@ -16,7 +16,7 @@
       </ion-header>
 
       <div class="ion-padding">
-        <ion-item>
+        <ion-item lines="none">
           <ion-label position="stacked">Salle</ion-label>
           <ion-select v-model="newForm.salleId" placeholder="Sélectionner une salle">
             <ion-select-option
@@ -30,7 +30,7 @@
         </ion-item>
 
         <!-- Modal pour la date -->
-        <ion-item>
+        <ion-item lines="none">
           <ion-label>Date</ion-label>
           <ion-datetime-button datetime="datetime"></ion-datetime-button>
           <ion-modal :keep-contents-mounted="true">
@@ -44,7 +44,7 @@
           </ion-modal>
         </ion-item>
 
-        <ion-item>
+        <ion-item lines="none">
           <ion-label>Heure de début</ion-label>
           <ion-datetime-button datetime="start-time"></ion-datetime-button>
           <ion-modal :keep-contents-mounted="true">
@@ -58,7 +58,7 @@
           </ion-modal>
         </ion-item>
 
-        <ion-item>
+        <ion-item lines="none">
           <ion-label>Heure de fin</ion-label>
           <ion-datetime-button datetime="end-time"></ion-datetime-button>
           <ion-modal :keep-contents-mounted="true">
@@ -72,7 +72,7 @@
           </ion-modal>
         </ion-item>
 
-        <ion-item>
+        <ion-item lines="none">
           <ion-label position="stacked">Raison de la réservation</ion-label>
           <ion-textarea
             v-model="newForm.reason"
@@ -86,12 +86,12 @@
           Coordonnées pré-remplies depuis votre dernière utilisation
         </p>
 
-        <ion-item>
+        <ion-item lines="none">
           <ion-label position="stacked">Nom</ion-label>
           <ion-input v-model="newForm.name" placeholder="Votre nom"></ion-input>
         </ion-item>
 
-        <ion-item>
+        <ion-item lines="none">
           <ion-label position="stacked">Email</ion-label>
           <ion-input
             v-model="newForm.email"
@@ -100,7 +100,7 @@
           ></ion-input>
         </ion-item>
 
-        <ion-item>
+        <ion-item lines="none">
           <ion-label position="stacked">Téléphone</ion-label>
           <ion-input
             v-model="newForm.phone"
