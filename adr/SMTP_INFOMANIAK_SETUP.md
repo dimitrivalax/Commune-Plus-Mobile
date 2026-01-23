@@ -1,10 +1,16 @@
 # Configuration SMTP Infomaniak pour l'envoi d'emails de signalements
 
+⚠️ **OBSOLÈTE** : Ce guide est obsolète. L'application utilise maintenant **Resend** pour l'envoi d'emails. Consultez `RESEND_SETUP.md` pour la configuration actuelle.
+
+---
+
 Ce guide explique comment configurer l'envoi automatique d'emails lorsque des signalements sont créés dans l'application Commune Plus.
 
 ## Vue d'ensemble
 
 Lorsqu'un utilisateur crée un signalement, un email est automatiquement envoyé à la mairie au nom de l'utilisateur. L'envoi se fait via une Edge Function Supabase qui utilise SMTP Infomaniak.
+
+**Note** : Cette configuration n'est plus utilisée. Voir `RESEND_SETUP.md` pour la configuration actuelle.
 
 ## Configuration Supabase Edge Function
 

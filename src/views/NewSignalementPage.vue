@@ -28,22 +28,6 @@
           </ion-item>
 
           <div class="location-section">
-            <h4 class="location-title">Localisation</h4>
-            <div v-if="hasCityInfo" class="city-info-container">
-              <p class="city-info-badge">
-                <ion-icon :icon="checkmarkCircleOutline" />
-                Commune : {{ cityInfo.name }} ({{ cityInfo.postalCode }})
-              </p>
-              <ion-button 
-                fill="clear" 
-                size="small" 
-                @click="openCityModal"
-                class="change-city-button"
-              >
-                <ion-icon :icon="createOutline" slot="start" />
-                Changer de commune
-              </ion-button>
-            </div>
             <ion-button 
               expand="block" 
               @click="getCurrentLocation" 

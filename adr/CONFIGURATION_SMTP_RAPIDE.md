@@ -1,8 +1,14 @@
 # Configuration SMTP Rapide
 
+⚠️ **OBSOLÈTE** : Ce guide est obsolète. L'application utilise maintenant **Resend** pour l'envoi d'emails. Consultez `RESEND_SETUP.md` pour la configuration actuelle.
+
+---
+
 ## ⚠️ Erreur : "SMTP credentials are not configured"
 
 Cette erreur signifie que les secrets SMTP ne sont pas configurés dans votre projet Supabase.
+
+**Note** : Cette configuration n'est plus utilisée. Voir `RESEND_SETUP.md` pour la configuration actuelle.
 
 ## Solution rapide
 

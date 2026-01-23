@@ -1,7 +1,6 @@
-// Edge Function Supabase pour envoyer un email de signalement via SMTP Infomaniak
+// Edge Function Supabase pour envoyer un email de signalement via Resend
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { SMTPClient } from 'https://deno.land/x/denomailer@1.6.0/mod.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,25 +15,18 @@ serve(async (req) => {
 
   try {
     // Récupérer les variables d'environnement (secrets Supabase)
-    const smtpHost = Deno.env.get('SMTP_HOST') || 'mail.infomaniak.com'
-    const smtpPort = parseInt(Deno.env.get('SMTP_PORT') || '587')
-    const smtpUser = Deno.env.get('SMTP_USER')
-    const smtpPassword = Deno.env.get('SMTP_PASSWORD')
-    const smtpFromEmail = Deno.env.get('SMTP_FROM_EMAIL') || smtpUser
+    const resendApiKey = Deno.env.get('RESEND_API_KEY')
+    const resendFromEmail = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@commune-plus.fr'
 
     // Vérifier que les secrets sont configurés
-    const missingSecrets = []
-    if (!smtpUser) missingSecrets.push('SMTP_USER')
-    if (!smtpPassword) missingSecrets.push('SMTP_PASSWORD')
-
-    if (missingSecrets.length > 0) {
-      const errorMessage = `SMTP credentials are not configured. Missing secrets: ${missingSecrets.join(', ')}. Please configure them in Supabase Dashboard > Settings > Edge Functions > Secrets.`
+    if (!resendApiKey) {
+      const errorMessage = 'RESEND_API_KEY is not configured. Please configure it in Supabase Dashboard > Settings > Edge Functions > Secrets.'
       console.error(errorMessage)
       return new Response(
         JSON.stringify({ 
           error: errorMessage,
-          missingSecrets: missingSecrets,
-          hint: 'Configure secrets in Supabase Dashboard > Settings > Edge Functions > Secrets'
+          missingSecrets: ['RESEND_API_KEY'],
+          hint: 'Configure RESEND_API_KEY in Supabase Dashboard > Settings > Edge Functions > Secrets'
         }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
@@ -53,7 +45,9 @@ serve(async (req) => {
 
     // Construire le contenu de l'email
     const emailSubject = 'Signalement automatique via Commune Plus'
-    let emailBody = `Madame, Monsieur,
+    
+    // Version texte de l'email
+    let emailText = `Madame, Monsieur,
 
 Je me permets de vous transmettre un signalement automatique généré via l'application Commune Plus, qui facilite la communication entre les habitants et la mairie.
 
@@ -63,67 +57,96 @@ Description du signalement : ${signalementData.description}`
 
     // Ajouter l'URL de la photo si disponible
     if (signalementData.photoUrl) {
-      emailBody += `\n\nPhoto du signalement : ${signalementData.photoUrl}`
+      emailText += `\n\nPhoto du signalement : ${signalementData.photoUrl}`
     }
 
-    emailBody += `\n\nJe vous remercie pour votre attention et votre suivi.
+    emailText += `\n\nJe vous remercie pour votre attention et votre suivi.
 
 Cordialement,
 ${signalementData.lastName} ${signalementData.firstName}
 
 Envoyé via Commune Plus — L'application qui simplifie la communication entre habitants et mairie.`
 
-    // Configurer le client SMTP
-    // Le port 465 utilise SSL direct (plus fiable avec Deno)
-    // Le port 587 utilise STARTTLS (peut causer des problèmes avec InvalidContentType)
-    // Si possible, utilisez le port 465 pour éviter les problèmes TLS
-    
-    // Forcer l'utilisation du port 465 si disponible, sinon utiliser le port configuré
-    const effectivePort = smtpPort === 465 ? 465 : (smtpPort === 587 ? 587 : smtpPort)
-    
-    const connectionConfig = {
-      hostname: smtpHost,
-      port: effectivePort,
-      auth: {
-        username: smtpUser,
-        password: smtpPassword,
-      },
-      tls: true, // TLS activé pour les deux ports
-    }
+    // Version HTML de l'email
+    let emailHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signalement automatique</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+    <h1 style="color: #10b981; margin-top: 0;">Signalement automatique via Commune Plus</h1>
+    <p>Madame, Monsieur,</p>
+    <p>Je me permets de vous transmettre un signalement automatique généré via l'application Commune Plus, qui facilite la communication entre les habitants et la mairie.</p>
+  </div>
 
-    console.log(`Connecting to SMTP server ${smtpHost}:${effectivePort} with TLS`)
+  <div style="background-color: #ffffff; border: 1px solid #e5e7eb; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+    <h2 style="color: #374151; margin-top: 0; border-bottom: 2px solid #10b981; padding-bottom: 10px;">Détails du signalement</h2>
+    <table style="width: 100%; border-collapse: collapse;">
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; width: 40%;">Nom :</td>
+        <td style="padding: 8px 0;">${signalementData.lastName} ${signalementData.firstName}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold;">Commune :</td>
+        <td style="padding: 8px 0;">${signalementData.commune}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; vertical-align: top;">Description :</td>
+        <td style="padding: 8px 0;">${signalementData.description}</td>
+      </tr>
+      ${signalementData.photoUrl ? `
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold;">Photo :</td>
+        <td style="padding: 8px 0;"><a href="${signalementData.photoUrl}" style="color: #10b981; text-decoration: none;">Voir la photo</a></td>
+      </tr>
+      ` : ''}
+    </table>
+  </div>
 
-    const client = new SMTPClient({
-      connection: connectionConfig,
-    })
+  <div style="text-align: center; color: #6b7280; font-size: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+    <p>Cordialement,<br>${signalementData.lastName} ${signalementData.firstName}</p>
+    <p>Envoyé via Commune Plus — L'application qui simplifie la communication entre habitants et mairie.</p>
+  </div>
+</body>
+</html>
+    `.trim()
 
-    // Préparer l'adresse d'expéditeur
-    // Utiliser l'email SMTP configuré comme expéditeur principal
-    // L'email sera envoyé "au nom de" l'utilisateur via le nom d'affichage
-    const fromEmail = smtpFromEmail
-    
-    // Préparer les options d'envoi
-    const sendOptions = {
-      from: `${signalementData.lastName} ${signalementData.firstName} <${fromEmail}>`,
-      to: signalementData.mairieEmail,
+    // Préparer les options d'envoi Resend
+    const resendPayload: any = {
+      from: `${signalementData.lastName} ${signalementData.firstName} <${resendFromEmail}>`,
+      to: [signalementData.mairieEmail],
       subject: emailSubject,
-      content: emailBody,
+      html: emailHtml,
+      text: emailText
     }
 
     // Ajouter Reply-To avec l'email de l'utilisateur si disponible
     // Cela permet à la mairie de répondre directement à l'utilisateur
     if (signalementData.email && signalementData.email.includes('@')) {
-      sendOptions.replyTo = `${signalementData.lastName} ${signalementData.firstName} <${signalementData.email}>`
+      resendPayload.reply_to = signalementData.email
     }
 
-    // L'URL de la photo Cloudinary est déjà incluse dans le corps de l'email (emailBody)
-    // Pas de pièce jointe : l'URL est directement cliquable et accessible
+    // Envoyer l'email via Resend API
+    const resendResponse = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${resendApiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(resendPayload)
+    })
 
-    // Envoyer l'email
-    await client.send(sendOptions)
+    if (!resendResponse.ok) {
+      const errorData = await resendResponse.json().catch(() => ({}))
+      throw new Error(`Resend API error: ${resendResponse.status} ${resendResponse.statusText} - ${JSON.stringify(errorData)}`)
+    }
 
-    // Fermer la connexion SMTP
-    await client.close()
+    const resendData = await resendResponse.json()
+    console.log('Email sent successfully via Resend:', resendData.id)
 
     return new Response(
       JSON.stringify({ success: true, message: 'Email sent successfully' }),
