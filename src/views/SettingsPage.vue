@@ -138,6 +138,15 @@
                   </ion-item>
                 </div>
 
+                <ion-button
+                  expand="block"
+                  @click="openCityModal"
+                  fill="outline"
+                  class="change-city-button"
+                >
+                  Changer de commune
+                </ion-button>
+
                 <div class="modification-info">
                   <ion-icon :icon="mailOutline" class="info-icon" />
                   <p class="info-text">
@@ -322,7 +331,8 @@ ion-item:last-child {
 }
 
 .save-button,
-.edit-button {
+.edit-button,
+.change-city-button {
   margin-top: 16px;
 }
 
