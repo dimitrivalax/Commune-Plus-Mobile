@@ -83,6 +83,7 @@ router.isReady().then(async () => {
   try {
     const { App } = await import('@capacitor/app')
     const { PushNotifications } = await import('@capacitor/push-notifications')
+
     
     // Vérifier les notifications en attente (quand l'app était fermée)
     const pendingNotifications = await PushNotifications.getDeliveredNotifications()
