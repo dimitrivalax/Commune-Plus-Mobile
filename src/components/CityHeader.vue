@@ -1,12 +1,11 @@
 <template>
   <div class="city-header">
-    <div class="city-header-content">
+    <ion-row
+      class="ion-justify-content-center ion-align-content-center ion-align-items-center gap-8"
+    >
       <img v-if="showLogo" :src="logoUrl" alt="Logo" class="city-logo" />
-      <div class="city-info">
-        <h1 class="city-name">{{ cityName }}</h1>
-        <p class="city-subtitle" v-if="subtitle">{{ subtitle }}</p>
-      </div>
-    </div>
+      <h1 class="city-name">{{ cityName }}</h1>
+    </ion-row>
   </div>
 </template>
 
@@ -34,18 +33,19 @@ const logoUrl = computed(() => cityInfo?.logo || cityConfig.logo)
 
 <style scoped>
 .city-header {
-  background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-primary-shade) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--ion-color-primary) 0%,
+    var(--ion-color-primary-shade) 100%
+  );
   padding: 20px 16px;
   color: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 
 .city-header-content {
-  display: flex;
   align-items: center;
-  gap: 16px;
-  max-width: 1200px;
-  margin: 0 auto;
 }
 
 .city-logo {
@@ -62,8 +62,7 @@ const logoUrl = computed(() => cityInfo?.logo || cityConfig.logo)
 }
 
 .city-name {
-  margin: 0;
-  font-size: 24px;
+  margin: 0 0 0 16px;
   font-weight: 600;
   color: white;
   letter-spacing: -0.5px;
@@ -80,12 +79,10 @@ const logoUrl = computed(() => cityInfo?.logo || cityConfig.logo)
   .city-name {
     font-size: 20px;
   }
-  
+
   .city-logo {
     width: 40px;
     height: 40px;
   }
 }
 </style>
-
-

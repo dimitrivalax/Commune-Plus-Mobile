@@ -5,9 +5,7 @@
       <CityHeader />
 
       <div class="ion-padding">
-        <div class="welcome-section">
-          <h2 class="section-title">Services disponibles</h2>
-
+        <div>
           <IonCard
             button
             @click="$router.push('/tabs/signalements')"
@@ -69,17 +67,6 @@ import AppHeader from '@/components/AppHeader.vue'
 </script>
 
 <style scoped>
-.welcome-section {
-  margin-top: 16px;
-}
-
-.section-title {
-  font-size: 24px;
-  font-weight: 600;
-  margin-bottom: 20px;
-  padding: 0;
-}
-
 .service-card {
   margin-bottom: 16px;
   transition:

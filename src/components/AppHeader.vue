@@ -40,6 +40,6 @@ defineProps({
   object-fit: contain;
   background: white;
   border-radius: 24px;
-  margin: 4px;
+  margin: 8px;
 }
 </style>

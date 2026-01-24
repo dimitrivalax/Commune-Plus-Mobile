@@ -9,17 +9,42 @@
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
-      <div class="ion-padding" v-if="infoItem">
-        <h1>{{ infoItem.title }}</h1>
-        <p class="meta-info">
-          <ion-badge v-if="infoItem.category">{{ infoItem.category }}</ion-badge>
-          <span>{{ formatDate(infoItem.created_at) }}</span>
-        </p>
-        <div v-html="infoItem.content"></div>
-        <img v-if="infoItem.image_url" :src="infoItem.image_url" :alt="infoItem.title" class="info-image" />
-      </div>
-      <div v-else class="ion-padding">
+      <div v-if="loading" class="ion-padding ion-text-center">
+        <ion-spinner name="crescent"></ion-spinner>
         <p>Chargement...</p>
+      </div>
+
+      <swiper
+        v-else-if="infoItems.length > 0"
+        :initial-slide="initialSlide"
+        :modules="[Pagination]"
+        :pagination="{
+          dynamicBullets: true,
+          clickable: true
+        }"
+        class="info-swiper"
+        @slideChange="onSlideChange"
+      >
+        <swiper-slide v-for="item in infoItems" :key="item.id">
+          <div class="ion-padding info-content">
+            <h1>{{ item.title }}</h1>
+            <p class="meta-info">
+              <ion-badge v-if="item.category">{{ item.category }}</ion-badge>
+              <span>{{ formatDate(item.created_at) }}</span>
+            </p>
+            <div class="content-body" v-html="item.content"></div>
+            <img
+              v-if="item.image_url"
+              :src="item.image_url"
+              :alt="item.title"
+              class="info-image"
+            />
+          </div>
+        </swiper-slide>
+      </swiper>
+
+      <div v-else class="ion-padding ion-text-center">
+        <p>Aucune information trouvée.</p>
       </div>
     </ion-content>
   </ion-page>
@@ -27,42 +52,93 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonBackButton, IonBadge } from '@ionic/vue'
+import { useRoute, useRouter } from 'vue-router'
+import {
+  IonPage,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonButtons,
+  IonBackButton,
+  IonBadge,
+  IonSpinner
+} from '@ionic/vue'
+import { Swiper, SwiperSlide } from 'swiper/vue'
+import { Pagination } from 'swiper/modules'
+import 'swiper/css'
+import 'swiper/css/pagination'
 import { supabase } from '@/services/supabase'
 import { formatDate } from '@/utils/date'
 
 const route = useRoute()
-const infoItem = ref(null)
+const router = useRouter()
+const infoItems = ref([])
+const loading = ref(true)
+const initialSlide = ref(0)
 
-const loadInfoDetail = async () => {
+const loadInfoItems = async () => {
+  loading.value = true
   try {
     const { data, error } = await supabase
       .from('municipal_info')
       .select('*')
-      .eq('id', route.params.id)
-      .single()
+      .order('created_at', { ascending: false })
 
     if (error) throw error
 
-    infoItem.value = data
+    infoItems.value = data || []
+
+    // Find the initial slide index based on the route parameter
+    if (route.params.id) {
+      const index = infoItems.value.findIndex(
+        (item) => item.id === route.params.id
+      )
+      if (index !== -1) {
+        initialSlide.value = index
+      }
+    }
   } catch (error) {
-    console.error('Error loading info detail:', error)
+    console.error('Error loading info items:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+const onSlideChange = (swiper) => {
+  const currentItem = infoItems.value[swiper.activeIndex]
+  if (currentItem) {
+    // Update the URL without reloading the page or triggering a navigation that would reset the swiper
+    // This allows the back button to behave correctly if needed, though often for swipers we just keep the active state
+    router.replace({ params: { id: currentItem.id } })
   }
 }
 
 onMounted(() => {
-  loadInfoDetail()
+  loadInfoItems()
 })
 </script>
 
 <style scoped>
+.info-swiper {
+  height: 100%;
+}
+
+.info-content {
+  height: 100%;
+  overflow-y: auto;
+}
+
 .meta-info {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 16px;
   color: var(--ion-color-medium);
+}
+
+.content-body {
+  line-height: 1.6;
 }
 
 .info-image {
@@ -72,4 +148,3 @@ onMounted(() => {
   margin-top: 16px;
 }
 </style>
-
