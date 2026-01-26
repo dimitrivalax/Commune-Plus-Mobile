@@ -1,9 +1,10 @@
 <template>
   <IonHeader>
-    <IonToolbar color="primary">
+    <IonToolbar>
       <IonRow>
-          <img :src="'/assets/logo.png'" alt="Logo" class="city-logo" />
-          <IonTitle>{{ title }}</IonTitle>
+        <img :src="'/assets/logo.png'" alt="Logo" class="city-logo" />
+        <IonTitle v-if="!logo">{{ title }}</IonTitle>
+        <CityHeader v-else></CityHeader>
       </IonRow>
       <IonButtons slot="end">
         <IonButton @click="$router.push('/settings')" color="light">
@@ -25,10 +26,15 @@ import {
   IonRow
 } from '@ionic/vue'
 import { settings } from 'ionicons/icons'
+import CityHeader from '@/components/CityHeader.vue'
 defineProps({
   title: {
     type: String,
     default: 'Commune Plus'
+  },
+  logo: {
+    type: Boolean,
+    default: false
   }
 })
 </script>
@@ -38,8 +44,9 @@ defineProps({
   width: 48px;
   height: 48px;
   object-fit: contain;
-  background: white;
   border-radius: 24px;
-  margin: 8px;
+  margin-top: auto;
+  margin-bottom: auto;
+  margin-left: 16px;
 }
 </style>

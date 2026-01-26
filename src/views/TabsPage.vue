@@ -28,7 +28,15 @@
 </template>
 
 <script setup>
-import { IonTabBar, IonTabButton, IonTabs, IonRouterOutlet, IonLabel, IonIcon, IonPage } from '@ionic/vue'
+import {
+  IonTabBar,
+  IonTabButton,
+  IonTabs,
+  IonRouterOutlet,
+  IonLabel,
+  IonIcon,
+  IonPage
+} from '@ionic/vue'
 import { home, warning, calendar, informationCircle } from 'ionicons/icons'
 </script>
 
@@ -52,4 +60,3 @@ ion-tab-button ion-icon {
   margin-bottom: 4px;
 }
 </style>
-

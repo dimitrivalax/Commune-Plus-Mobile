@@ -1,10 +1,10 @@
 <template>
   <div class="city-header">
     <ion-row
-      class="ion-justify-content-center ion-align-content-center ion-align-items-center gap-8"
+      class="ion-justify-content-center ion-align-content-center ion-align-items-center"
     >
-      <img v-if="showLogo" :src="logoUrl" alt="Logo" class="city-logo" />
       <h1 class="city-name">{{ cityName }}</h1>
+      <img v-if="showLogo" :src="logoUrl" alt="Logo" class="city-logo" />
     </ion-row>
   </div>
 </template>
@@ -33,15 +33,7 @@ const logoUrl = computed(() => cityInfo?.logo || cityConfig.logo)
 
 <style scoped>
 .city-header {
-  background: linear-gradient(
-    135deg,
-    var(--ion-color-primary) 0%,
-    var(--ion-color-primary-shade) 100%
-  );
-  padding: 20px 16px;
-  color: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
+  margin: auto;
 }
 
 .city-header-content {
@@ -55,6 +47,7 @@ const logoUrl = computed(() => cityInfo?.logo || cityConfig.logo)
   background: white;
   border-radius: 8px;
   padding: 4px;
+  margin-left: 2rem;
 }
 
 .city-info {

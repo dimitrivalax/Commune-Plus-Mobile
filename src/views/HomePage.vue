@@ -1,9 +1,7 @@
 <template>
   <IonPage>
-    <AppHeader title="Accueil"></AppHeader>
+    <AppHeader title="Accueil" :logo="true"></AppHeader>
     <IonContent :fullscreen="true">
-      <CityHeader />
-
       <div class="ion-padding">
         <div>
           <IonCard
@@ -64,6 +62,7 @@ import {
 import { warning, calendar, informationCircle } from 'ionicons/icons'
 import CityHeader from '@/components/CityHeader.vue'
 import AppHeader from '@/components/AppHeader.vue'
+import AppDisclaimer from '@/components/AppDisclaimer.vue'
 </script>
 
 <style scoped>

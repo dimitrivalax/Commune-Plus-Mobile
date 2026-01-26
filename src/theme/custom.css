@@ -41,10 +41,24 @@ ion-content {
 
 /* Headers épurés */
 ion-header ion-toolbar {
-  --background: white;
+  text-align: center;
   --color: var(--ion-color-light);
   --border-color: rgba(0, 0, 0, 0.08);
   box-shadow: var(--shadow-sm);
+  --background: linear-gradient(
+    135deg,
+    var(--ion-color-primary) 0%,
+    var(--ion-color-primary-shade) 100%
+  );
+}
+
+ion-tab-bar {
+    box-shadow: var(--shadow-sm);
+  --background: linear-gradient(
+    135deg,
+    var(--ion-color-primary) 0%,
+    var(--ion-color-primary-shade) 100%
+  );
 }
 
 ion-header ion-title {

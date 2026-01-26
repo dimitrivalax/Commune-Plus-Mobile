@@ -160,6 +160,8 @@
             </ion-card-content>
           </ion-card>
         </div>
+
+        <AppDisclaimer />
       </div>
 
       <!-- Modale de configuration de la commune -->
@@ -200,6 +202,7 @@ import {
   getCityInfoFromDatabase
 } from '@/utils/storage'
 import CitySetupModal from '@/components/CitySetupModal.vue'
+import AppDisclaimer from '@/components/AppDisclaimer.vue'
 
 const userForm = ref({
   firstName: '',
