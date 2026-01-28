@@ -28,27 +28,34 @@
           </ion-item>
 
           <div class="location-section">
-            <ion-button 
-              expand="block" 
-              @click="getCurrentLocation" 
+            <ion-button
+              expand="block"
+              @click="getCurrentLocation"
               :disabled="loading || gettingLocation"
               fill="outline"
               class="location-button"
             >
               <ion-icon :icon="locationIcon" slot="start" />
-              {{ location ? 'Position GPS enregistrée' : 'Obtenir ma position GPS' }}
+              {{
+                location
+                  ? 'Position GPS enregistrée'
+                  : 'Obtenir ma position GPS'
+              }}
             </ion-button>
             <p v-if="location" class="location-info">
               <ion-icon :icon="checkmarkCircleOutline" />
-              Position enregistrée : {{ location.latitude.toFixed(6) }}, {{ location.longitude.toFixed(6) }}
+              Position enregistrée : {{ location.latitude.toFixed(6) }},
+              {{ location.longitude.toFixed(6) }}
             </p>
             <p v-if="locationError" class="location-error">
               <ion-icon :icon="alertCircleOutline" />
               {{ locationError }}
             </p>
-            
+
             <div v-if="locationError || useAddress" class="address-fallback">
-              <p class="fallback-text">Ou renseignez l'adresse manuellement :</p>
+              <p class="fallback-text">
+                Ou renseignez l'adresse manuellement :
+              </p>
               <ion-item lines="none" class="form-item">
                 <ion-label position="stacked">Adresse</ion-label>
                 <ion-input
@@ -57,8 +64,8 @@
                 ></ion-input>
               </ion-item>
             </div>
-            
-            <ion-button 
+
+            <!-- <ion-button 
               v-if="!locationError && !useAddress"
               expand="block" 
               @click="handleUseAddress"
@@ -67,20 +74,29 @@
               class="use-address-button"
             >
               Utiliser une adresse à la place
-            </ion-button>
+            </ion-button> -->
           </div>
         </div>
 
         <div class="form-section">
           <h3 class="section-title">Photo</h3>
-          <ion-button expand="block" @click="takePhoto" :disabled="loading" class="photo-button">
+          <ion-button
+            expand="block"
+            @click="takePhoto"
+            :disabled="loading"
+            class="photo-button"
+          >
             <ion-icon :icon="camera" slot="start" />
             {{ photo ? 'Reprendre la photo' : 'Prendre une photo' }}
           </ion-button>
 
           <div v-if="photo" class="photo-preview">
             <img :src="photo" alt="Photo du signalement" />
-            <ion-button fill="clear" @click="removePhoto" class="remove-photo-btn">
+            <ion-button
+              fill="clear"
+              @click="removePhoto"
+              class="remove-photo-btn"
+            >
               <ion-icon :icon="close" />
             </ion-button>
           </div>
@@ -97,12 +113,14 @@
 
         <div class="form-section">
           <h3 class="section-title">Vos coordonnées</h3>
-          <p class="section-subtitle">Ces informations nous permettront de vous contacter si nécessaire</p>
+          <p class="section-subtitle">
+            Ces informations nous permettront de vous contacter si nécessaire
+          </p>
           <p v-if="hasSavedContact" class="saved-contact-info">
             <ion-icon :icon="checkmarkCircleOutline" />
             Coordonnées pré-remplies depuis votre dernière utilisation
           </p>
-          
+
           <ion-card class="contact-card">
             <ion-card-content>
               <ion-item lines="none" class="form-item">
@@ -147,7 +165,13 @@
         <ion-button
           expand="block"
           @click="submitSignalement"
-          :disabled="loading || !photo || !lastName || !firstName || (!location && !address)"
+          :disabled="
+            loading ||
+            !photo ||
+            !lastName ||
+            !firstName ||
+            (!location && !address)
+          "
           class="submit-button"
         >
           <ion-icon :icon="checkmark" slot="start" />
@@ -155,10 +179,10 @@
         </ion-button>
       </div>
     </ion-content>
-    
+
     <!-- Modale de configuration de la commune -->
-    <CitySetupModal 
-      :is-open="showCityModal" 
+    <CitySetupModal
+      :is-open="showCityModal"
       @saved="handleCityInfoSaved"
       @close="showCityModal = false"
     />
@@ -171,11 +195,45 @@ import { useRouter } from 'vue-router'
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
 import { Geolocation } from '@capacitor/geolocation'
 import { Capacitor } from '@capacitor/core'
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonBackButton, IonItem, IonLabel, IonTextarea, IonInput, IonButton, IonIcon, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, loadingController, toastController } from '@ionic/vue'
-import { camera, checkmark, close, location as locationIcon, checkmarkCircleOutline, alertCircleOutline, createOutline } from 'ionicons/icons'
+import {
+  IonPage,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonButtons,
+  IonBackButton,
+  IonItem,
+  IonLabel,
+  IonTextarea,
+  IonInput,
+  IonButton,
+  IonIcon,
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardSubtitle,
+  IonCardContent,
+  loadingController,
+  toastController
+} from '@ionic/vue'
+import {
+  camera,
+  checkmark,
+  close,
+  location as locationIcon,
+  checkmarkCircleOutline,
+  alertCircleOutline,
+  createOutline
+} from 'ionicons/icons'
 import { supabase } from '@/services/supabase'
 import { uploadImageToCloudinary } from '@/services/cloudinary'
-import { saveUserContact, getUserContact, getCityInfo, getCityIdFromDatabase } from '@/utils/storage'
+import {
+  saveUserContact,
+  getUserContact,
+  getCityInfo,
+  getCityIdFromDatabase
+} from '@/utils/storage'
 import { sendSignalementEmail } from '@/services/email'
 import CitySetupModal from '@/components/CitySetupModal.vue'
 import { trackEvent } from '@/services/posthog'
@@ -210,19 +268,19 @@ const takePhoto = async () => {
     })
 
     photo.value = image.dataUrl
-    
+
     // Track photo taken event
     trackEvent('signalement_photo_taken', {
       has_photo: true
     })
   } catch (error) {
     console.error('Error taking photo:', error)
-    
+
     // Track photo error
     trackEvent('signalement_photo_error', {
       error: error.message || 'Unknown error'
     })
-    
+
     const toast = await toastController.create({
       message: 'Erreur lors de la prise de photo',
       duration: 2000,
@@ -234,7 +292,7 @@ const takePhoto = async () => {
 
 const removePhoto = () => {
   photo.value = null
-  
+
   // Track photo removed event
   trackEvent('signalement_photo_removed')
 }
@@ -251,7 +309,8 @@ const getCurrentLocation = async () => {
     if (isWeb) {
       // Utiliser l'API géolocalisation native du navigateur
       if (!navigator.geolocation) {
-        locationError.value = 'La géolocalisation n\'est pas supportée par votre navigateur. Vous pouvez utiliser une adresse à la place.'
+        locationError.value =
+          "La géolocalisation n'est pas supportée par votre navigateur. Vous pouvez utiliser une adresse à la place."
         useAddress.value = true
         gettingLocation.value = false
         return
@@ -259,15 +318,11 @@ const getCurrentLocation = async () => {
 
       // Obtenir la position avec l'API du navigateur
       const position = await new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(
-          resolve,
-          reject,
-          {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0
-          }
-        )
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        })
       })
 
       location.value = {
@@ -297,11 +352,12 @@ const getCurrentLocation = async () => {
       // Utiliser Capacitor Geolocation pour mobile
       // Demander la permission
       const permissionStatus = await Geolocation.checkPermissions()
-      
+
       if (permissionStatus.location !== 'granted') {
         const requestResult = await Geolocation.requestPermissions()
         if (requestResult.location !== 'granted') {
-          locationError.value = 'Permission de géolocalisation refusée. Vous pouvez utiliser une adresse à la place.'
+          locationError.value =
+            'Permission de géolocalisation refusée. Vous pouvez utiliser une adresse à la place.'
           useAddress.value = true // Activer le mode adresse en fallback
           gettingLocation.value = false
           return
@@ -341,23 +397,27 @@ const getCurrentLocation = async () => {
     }
   } catch (error) {
     console.error('Error getting location:', error)
-    
+
     // Message d'erreur adapté selon le type d'erreur
     if (error.code === 1) {
       // PERMISSION_DENIED
-      locationError.value = 'Permission de géolocalisation refusée. Vous pouvez utiliser une adresse à la place.'
+      locationError.value =
+        'Permission de géolocalisation refusée. Vous pouvez utiliser une adresse à la place.'
     } else if (error.code === 2) {
       // POSITION_UNAVAILABLE
-      locationError.value = 'Position indisponible. Vous pouvez utiliser une adresse à la place.'
+      locationError.value =
+        'Position indisponible. Vous pouvez utiliser une adresse à la place.'
     } else if (error.code === 3) {
       // TIMEOUT
-      locationError.value = 'Timeout lors de la récupération de la position. Vous pouvez utiliser une adresse à la place.'
+      locationError.value =
+        'Timeout lors de la récupération de la position. Vous pouvez utiliser une adresse à la place.'
     } else {
-      locationError.value = 'Impossible d\'obtenir votre position. Vous pouvez utiliser une adresse à la place.'
+      locationError.value =
+        "Impossible d'obtenir votre position. Vous pouvez utiliser une adresse à la place."
     }
-    
+
     useAddress.value = true // Activer le mode adresse en fallback
-    
+
     // Track GPS error
     trackEvent('signalement_location_gps_error', {
       error: error.message || 'Unknown error',
@@ -365,7 +425,7 @@ const getCurrentLocation = async () => {
       fallback_to_address: true,
       platform: Capacitor.getPlatform()
     })
-    
+
     const toast = await toastController.create({
       message: 'Erreur lors de la récupération de la position GPS',
       duration: 3000,
@@ -379,7 +439,7 @@ const getCurrentLocation = async () => {
 
 const handleUseAddress = () => {
   useAddress.value = true
-  
+
   // Track manual address selection
   trackEvent('signalement_location_address_selected', {
     location_type: 'address',
@@ -391,7 +451,7 @@ const handleUseAddress = () => {
 onMounted(async () => {
   // Track signalement creation started
   trackEvent('signalement_creation_started')
-  
+
   // Charger les coordonnées depuis le localStorage
   const savedContact = getUserContact()
   if (savedContact) {
@@ -439,7 +499,10 @@ const handleCityInfoSaved = () => {
     const oldCityName = cityInfo.value?.name
     cityInfo.value = savedCityInfo
     // Mettre à jour l'adresse si elle était préremplie avec l'ancienne commune ou si elle est vide
-    if (!address.value || (oldCityName && address.value.includes(oldCityName))) {
+    if (
+      !address.value ||
+      (oldCityName && address.value.includes(oldCityName))
+    ) {
       address.value = `${savedCityInfo.name}, ${savedCityInfo.postalCode}`
     }
   }
@@ -496,11 +559,11 @@ const submitSignalement = async () => {
     // Convertir dataUrl en File pour Cloudinary
     const response = await fetch(photo.value)
     const blob = await response.blob()
-    
+
     // Déterminer l'extension et le type MIME à partir du blob
     let extension = 'jpg'
     let mimeType = 'image/jpeg'
-    
+
     if (blob.type) {
       mimeType = blob.type
       if (blob.type === 'image/png') {
@@ -512,8 +575,10 @@ const submitSignalement = async () => {
         mimeType = 'image/jpeg'
       }
     }
-    
-    const file = new File([blob], `signalement.${extension}`, { type: mimeType })
+
+    const file = new File([blob], `signalement.${extension}`, {
+      type: mimeType
+    })
 
     // Upload vers Cloudinary
     const photoUrl = await uploadImageToCloudinary(file)
@@ -564,17 +629,23 @@ const submitSignalement = async () => {
 
     // Si l'erreur est due à l'absence de la colonne user_id (migration non exécutée),
     // réessayer sans user_id
-    if (error && error.code === 'PGRST204' && error.message?.includes('user_id')) {
-      console.warn('Column user_id does not exist yet, retrying without it. Please run the migration SQL.')
+    if (
+      error &&
+      error.code === 'PGRST204' &&
+      error.message?.includes('user_id')
+    ) {
+      console.warn(
+        'Column user_id does not exist yet, retrying without it. Please run the migration SQL.'
+      )
       // Retirer user_id et réessayer
       const dataWithoutUserId = { ...dataToInsert }
       delete dataWithoutUserId.user_id
-      
+
       const retryResult = await supabase
         .from('signalements')
         .insert([dataWithoutUserId])
         .select()
-      
+
       if (retryResult.error) throw retryResult.error
       data = retryResult.data
     } else if (error) {
@@ -605,11 +676,13 @@ const submitSignalement = async () => {
         })
         console.log('Email envoyé avec succès à la mairie')
       } catch (emailError) {
-        console.error('Erreur lors de l\'envoi de l\'email:', emailError)
+        console.error("Erreur lors de l'envoi de l'email:", emailError)
         // Ne pas bloquer le processus si l'email échoue, le signalement est déjà sauvegardé
       }
     } else {
-      console.warn('Email de la mairie non configuré, l\'email n\'a pas été envoyé')
+      console.warn(
+        "Email de la mairie non configuré, l'email n'a pas été envoyé"
+      )
     }
 
     await loadingToast.dismiss()
@@ -643,8 +716,8 @@ const submitSignalement = async () => {
     })
 
     // Afficher un message d'erreur plus détaillé
-    const errorMessage = error.message || 'Erreur lors de l\'envoi'
-    
+    const errorMessage = error.message || "Erreur lors de l'envoi"
+
     const toast = await toastController.create({
       message: errorMessage,
       duration: 4000,
@@ -852,4 +925,3 @@ const submitSignalement = async () => {
   font-size: 16px;
 }
 </style>
-

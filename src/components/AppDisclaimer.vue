@@ -4,13 +4,14 @@
       <ion-icon :icon="informationCircleOutline" />
       <span>Note importante</span>
     </div>
-    <p class="disclaimer-text">
-      Cette application est un outil indépendant destiné à faciliter les
-      échanges entre les citoyens et les services municipaux. Elle
-      <strong
-        >n'est pas une application officielle gouvernementale ou
-        municipale</strong
-      >.
+    <p class="disclaimer-link">
+      Consulter les
+      <a
+        href="https://kdrive.infomaniak.com/app/share/2122574/dd659653-bda2-42b7-9679-08c97408efbe"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Conditions Générales d'Utilisation (CGU)</a
+      >
     </p>
   </div>
 </template>
@@ -55,5 +56,21 @@ import { informationCircleOutline } from 'ionicons/icons'
 
 .disclaimer-text strong {
   color: var(--ion-color-dark);
+}
+
+.disclaimer-link {
+  margin-top: 12px;
+  font-size: 13px;
+  text-align: center;
+}
+
+.disclaimer-link a {
+  color: var(--city-primary, var(--ion-color-primary));
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.disclaimer-link a:hover {
+  text-decoration: underline;
 }
 </style>
