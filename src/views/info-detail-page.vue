@@ -143,6 +143,107 @@ onMounted(() => {
 .content-body {
   line-height: 1.6;
   color: var(--ion-color-dark);
+
+  // Headings
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: 700;
+    margin-top: 16px;
+    margin-bottom: 8px;
+    color: var(--ion-color-dark);
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  h3 {
+    font-size: 18px;
+  }
+
+  // Paragraphs
+  p {
+    margin-bottom: 12px;
+  }
+
+  // Text formatting
+  strong {
+    font-weight: 700;
+  }
+
+  em {
+    font-style: italic;
+  }
+
+  u {
+    text-decoration: underline;
+  }
+
+  s {
+    text-decoration: line-through;
+  }
+
+  // Links
+  a {
+    color: var(--ion-color-primary);
+    text-decoration: underline;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+
+  // Lists
+  ul,
+  ol {
+    margin: 12px 0;
+    padding-left: 24px;
+  }
+
+  ul {
+    list-style-type: disc;
+  }
+
+  ol {
+    list-style-type: decimal;
+  }
+
+  li {
+    margin-bottom: 6px;
+  }
+
+  // Nested lists
+  ul ul,
+  ol ul {
+    list-style-type: circle;
+  }
+
+  ol ol,
+  ul ol {
+    list-style-type: lower-alpha;
+  }
+
+  // Colors (from Quill editor)
+  .ql-align-center {
+    text-align: center;
+  }
+
+  .ql-align-right {
+    text-align: right;
+  }
+
+  .ql-align-justify {
+    text-align: justify;
+  }
 }
 
 .info-image {
