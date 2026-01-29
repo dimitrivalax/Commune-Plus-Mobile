@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router'
-import TabsPage from '../views/TabsPage.vue'
+import TabsPage from '../views/tabs-page.vue'
 
 const routes = [
   {
@@ -17,7 +17,7 @@ const routes = [
       {
         path: 'home',
         name: 'home',
-        component: () => import('@/views/HomePage.vue')
+        component: () => import('@/views/home-page.vue')
       },
       {
         path: 'signalements',
@@ -27,18 +27,18 @@ const routes = [
       {
         path: 'reservations',
         name: 'reservations',
-        component: () => import('@/views/ReservationsPage.vue')
+        component: () => import('@/views/reservations-page.vue')
       },
       {
         path: 'info',
         name: 'info',
-        component: () => import('@/views/InfoPage.vue')
+        component: () => import('@/views/info-page.vue')
       }
     ]
   },
   {
     path: '/signalement/new',
-    component: () => import('@/views/NewSignalementPage.vue')
+    component: () => import('@/views/new-signalement-page.vue')
   },
   {
     path: '/signalement/:id',
@@ -47,22 +47,23 @@ const routes = [
   },
   {
     path: '/reservation/new',
-    component: () => import('@/views/NewReservationPage.vue')
+    component: () => import('@/views/new-reservation-page.vue')
   },
   {
     path: '/reservation/:id',
     name: 'reservation-detail',
-    component: () => import('@/views/ReservationDetailPage.vue')
+    component: () => import('@/views/reservation-detail-page.vue')
   },
   {
     path: '/info/:id',
-    component: () => import('@/views/InfoDetailPage.vue')
+    component: () => import('@/views/info-detail-page.vue')
   },
   {
     path: '/settings',
-    component: () => import('@/views/SettingsPage.vue')
+    component: () => import('@/views/settings-page.vue')
   }
 ]
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

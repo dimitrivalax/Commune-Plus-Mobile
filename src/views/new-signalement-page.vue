@@ -46,15 +46,7 @@
               <ion-icon :icon="checkmarkCircleOutline" />
               Position enregistrée : {{ location.latitude.toFixed(6) }},
               {{ location.longitude.toFixed(6) }}
-              <span
-                v-if="addressFromGps"
-                style="
-                  display: block;
-                  margin-top: 4px;
-                  font-size: 0.9em;
-                  opacity: 0.9;
-                "
-              >
+              <span v-if="addressFromGps" class="address-gps">
                 {{ addressFromGps }}
               </span>
             </p>
@@ -75,17 +67,6 @@
                 ></ion-input>
               </ion-item>
             </div>
-
-            <!-- <ion-button 
-              v-if="!locationError && !useAddress"
-              expand="block" 
-              @click="handleUseAddress"
-              fill="clear"
-              size="small"
-              class="use-address-button"
-            >
-              Utiliser une adresse à la place
-            </ion-button> -->
           </div>
         </div>
 
@@ -221,9 +202,6 @@ import {
   IonButton,
   IonIcon,
   IonCard,
-  IonCardHeader,
-  IonCardTitle,
-  IonCardSubtitle,
   IonCardContent,
   loadingController,
   toastController
@@ -234,8 +212,7 @@ import {
   close,
   location as locationIcon,
   checkmarkCircleOutline,
-  alertCircleOutline,
-  createOutline
+  alertCircleOutline
 } from 'ionicons/icons'
 import { supabase } from '@/services/supabase'
 import { uploadImageToCloudinary } from '@/services/cloudinary'
@@ -246,7 +223,7 @@ import {
   getCityIdFromDatabase
 } from '@/utils/storage'
 import { sendSignalementEmail } from '@/services/email'
-import CitySetupModal from '@/components/CitySetupModal.vue'
+import CitySetupModal from '@/components/city-setup-modal.vue'
 import { trackEvent } from '@/services/posthog'
 import { useGeocoding } from '@/composables/useGeocoding'
 import { getOrCreateUserId } from '@/services/push-notifications'
@@ -765,7 +742,7 @@ const submitSignalement = async () => {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .form-container {
   padding: 16px;
 }
@@ -798,104 +775,71 @@ const submitSignalement = async () => {
 .contact-card {
   margin: 0;
   background: var(--ion-color-light);
+  box-shadow: none;
+  border-radius: 12px;
+
+  ion-card-content {
+    padding: 16px;
+  }
 }
 
-.photo-button {
+.location-button,
+.photo-button,
+.submit-button {
+  margin-top: 16px;
   margin-bottom: 16px;
 }
 
-.photo-preview {
-  position: relative;
-  margin: 16px 0;
-  text-align: center;
-  background: var(--ion-color-light);
-  border-radius: 12px;
-  padding: 16px;
-}
-
-.photo-preview img {
-  max-width: 100%;
-  max-height: 400px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.remove-photo-btn {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  --color: var(--ion-color-danger);
-}
-
-.submit-button {
-  margin-top: 24px;
-  height: 48px;
-  font-weight: 600;
-}
-
-.location-section {
-  margin-top: 16px;
-}
-
-.location-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--ion-color-light);
-  margin: 0 0 12px 0;
-}
-
-.location-button {
-  margin-bottom: 12px;
-}
-
-.use-address-button {
-  margin-top: 8px;
-  --color: var(--ion-color-medium);
+.location-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--ion-color-success);
   font-size: 14px;
+  margin-top: 8px;
+  padding: 0 4px;
+
+  ion-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+}
+
+.address-gps {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.9em;
+  opacity: 0.9;
+}
+
+.location-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--ion-color-warning);
+  font-size: 14px;
+  margin-top: 8px;
+  padding: 0 4px;
+
+  ion-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
 }
 
 .address-fallback {
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-top: 1px dashed var(--ion-color-medium-shade);
 }
 
 .fallback-text {
   font-size: 14px;
   color: var(--ion-color-medium);
   margin-bottom: 12px;
-}
-
-.location-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--ion-color-success);
-  font-size: 14px;
-  margin: 8px 0 0 0;
-  padding: 8px 12px;
-  background: rgba(var(--ion-color-success-rgb), 0.1);
-  border-radius: 8px;
-}
-
-.location-info ion-icon {
-  font-size: 18px;
-}
-
-.location-error {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--ion-color-danger);
-  font-size: 14px;
-  margin: 8px 0 0 0;
-  padding: 8px 12px;
-  background: rgba(var(--ion-color-danger-rgb), 0.1);
-  border-radius: 8px;
-}
-
-.location-error ion-icon {
-  font-size: 18px;
+  font-style: italic;
 }
 
 .saved-contact-info {
@@ -903,54 +847,46 @@ const submitSignalement = async () => {
   align-items: center;
   gap: 8px;
   color: var(--ion-color-success);
-  font-size: 14px;
-  margin: 0 0 12px 0;
-  padding: 8px 12px;
-  background: rgba(var(--ion-color-success-rgb), 0.1);
-  border-radius: 8px;
-}
-
-.saved-contact-info ion-icon {
-  font-size: 18px;
-}
-
-.city-info-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-  flex-wrap: wrap;
-}
-
-.city-info-badge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--ion-color-primary);
-  font-size: 14px;
-  margin: 0;
-  padding: 8px 12px;
-  background: rgba(var(--ion-color-primary-rgb), 0.1);
-  border-radius: 8px;
-  font-weight: 500;
-  flex: 1;
-  min-width: 200px;
-}
-
-.city-info-badge ion-icon {
-  font-size: 18px;
-}
-
-.change-city-button {
-  --color: var(--ion-color-primary);
   font-size: 13px;
-  margin: 0;
-  height: auto;
-  text-transform: none;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background: var(--ion-color-success-contrast);
+  border-radius: 8px;
+  border: 1px solid var(--ion-color-success);
+
+  ion-icon {
+    font-size: 16px;
+  }
 }
 
-.change-city-button ion-icon {
-  font-size: 16px;
+.photo-preview {
+  position: relative;
+  margin-top: 16px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+  img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .remove-photo-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    --color: white;
+    --background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    margin: 0;
+
+    ion-icon {
+      font-size: 20px;
+    }
+  }
 }
 </style>

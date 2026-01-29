@@ -60,61 +60,59 @@ import {
   IonIcon
 } from '@ionic/vue'
 import { warning, calendar, informationCircle } from 'ionicons/icons'
-import CityHeader from '@/components/CityHeader.vue'
-import AppHeader from '@/components/AppHeader.vue'
-import AppDisclaimer from '@/components/AppDisclaimer.vue'
+import AppHeader from '@/components/app-header.vue'
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .service-card {
   margin-bottom: 16px;
   transition:
     transform 0.2s,
     box-shadow 0.2s;
-}
 
-.service-card:active {
-  transform: scale(0.98);
-}
+  &:active {
+    transform: scale(0.98);
+  }
 
-.service-card ion-card-content {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 24px;
-}
+  ion-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 24px;
+  }
 
-.service-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-  background: linear-gradient(
-    135deg,
-    var(--ion-color-primary),
-    var(--ion-color-primary-shade)
-  );
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
-}
+  .service-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    background: linear-gradient(
+      135deg,
+      var(--ion-color-primary),
+      var(--ion-color-primary-shade)
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
 
-.service-icon ion-icon {
-  font-size: 28px;
-  color: white;
-}
+    ion-icon {
+      font-size: 28px;
+      color: white;
+    }
+  }
 
-.service-card h3 {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--ion-color-dark);
-  margin: 0 0 8px 0;
-}
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ion-color-dark);
+    margin: 0 0 8px 0;
+  }
 
-.service-card p {
-  font-size: 14px;
-  color: var(--ion-color-medium);
-  margin: 0;
-  line-height: 1.5;
+  p {
+    font-size: 14px;
+    color: var(--ion-color-medium);
+    margin: 0;
+    line-height: 1.5;
+  }
 }
 </style>

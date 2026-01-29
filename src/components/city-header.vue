@@ -31,7 +31,7 @@ const cityName = computed(() => cityInfo?.name || cityConfig.name)
 const logoUrl = computed(() => cityInfo?.logo || cityConfig.logo)
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .city-header {
   margin: auto;
 }

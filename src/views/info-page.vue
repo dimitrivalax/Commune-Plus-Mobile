@@ -54,18 +54,15 @@ import {
   IonRefresherContent
 } from '@ionic/vue'
 import { newspaper, newspaperOutline, chevronForward } from 'ionicons/icons'
-import AppHeader from '@/components/AppHeader.vue'
-import { supabase } from '@/services/supabase'
+import AppHeader from '@/components/app-header.vue'
+import { InformationService } from '@/services/information-service'
 import { formatDate } from '@/utils/date'
 
 const infoItems = ref([])
 
 const loadInfo = async (event) => {
   try {
-    const { data, error } = await supabase
-      .from('municipal_info')
-      .select('*')
-      .order('created_at', { ascending: false })
+    const { data, error } = await InformationService.getAll()
 
     if (error) throw error
 
@@ -84,7 +81,7 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .info-list {
   background: transparent;
 }
@@ -94,17 +91,17 @@ onMounted(() => {
   margin-bottom: 12px;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}
 
-.info-icon {
-  font-size: 24px;
-  color: var(--ion-color-primary);
-  margin-right: 12px;
-}
+  .info-icon {
+    font-size: 24px;
+    color: var(--ion-color-primary);
+    margin-right: 12px;
+  }
 
-.chevron-icon {
-  font-size: 20px;
-  color: var(--ion-color-medium);
+  .chevron-icon {
+    font-size: 20px;
+    color: var(--ion-color-medium);
+  }
 }
 
 .item-meta {
@@ -127,22 +124,22 @@ onMounted(() => {
 .empty-state {
   text-align: center;
   padding: 48px 24px;
-}
 
-.empty-icon {
-  font-size: 64px;
-  color: var(--ion-color-light);
-  margin-bottom: 16px;
-}
+  .empty-icon {
+    font-size: 64px;
+    color: var(--ion-color-light);
+    margin-bottom: 16px;
+  }
 
-.empty-state h3 {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--ion-color-light);
-  margin: 0 0 8px 0;
-}
+  h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ion-color-light);
+    margin: 0 0 8px 0;
+  }
 
-.empty-state p {
-  color: var(--ion-color-medium);
+  p {
+    color: var(--ion-color-medium);
+  }
 }
 </style>

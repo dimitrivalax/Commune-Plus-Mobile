@@ -26,7 +26,7 @@ import {
   IonRow
 } from '@ionic/vue'
 import { settings } from 'ionicons/icons'
-import CityHeader from '@/components/CityHeader.vue'
+import CityHeader from '@/components/city-header.vue'
 defineProps({
   title: {
     type: String,
@@ -39,7 +39,7 @@ defineProps({
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .city-logo {
   width: 48px;
   height: 48px;

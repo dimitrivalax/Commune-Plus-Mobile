@@ -24,7 +24,13 @@
           >
             <IonIcon :icon="calendar" slot="start" class="reservation-icon" />
             <IonLabel>
-              <h2>{{ reservation.salle_nom || reservation.salle?.nom || 'Salle inconnue' }}</h2>
+              <h2>
+                {{
+                  reservation.salle_nom ||
+                  reservation.salle?.nom ||
+                  'Salle inconnue'
+                }}
+              </h2>
               <div class="item-meta">
                 <span class="date-text">{{
                   formatDate(reservation.date)
@@ -78,26 +84,20 @@ import {
   IonRefresherContent
 } from '@ionic/vue'
 import { add, calendar, calendarOutline } from 'ionicons/icons'
-import { supabase } from '@/services/supabase'
-import AppHeader from '@/components/AppHeader.vue'
+import { ReservationService } from '@/services/reservation-service'
+import AppHeader from '@/components/app-header.vue'
 import { formatDate, formatTime } from '@/utils/date'
 
 const reservations = ref([])
 
 const loadReservations = async (event) => {
   try {
-    const { data, error } = await supabase
-      .from('reservations_salles')
-      .select(`
-        *,
-        salle:salles(id, nom)
-      `)
-      .order('date', { ascending: false })
+    const { data, error } = await ReservationService.getAll()
 
     if (error) throw error
 
     // Extraire le nom de la salle pour chaque réservation
-    reservations.value = (data || []).map(reservation => ({
+    reservations.value = (data || []).map((reservation) => ({
       ...reservation,
       salle_nom: reservation.salle?.nom || 'Salle inconnue'
     }))
@@ -144,7 +144,7 @@ onActivated(() => {
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .reservations-list {
   background: transparent;
 }
@@ -154,12 +154,12 @@ onActivated(() => {
   margin-bottom: 12px;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}
 
-.reservation-icon {
-  font-size: 24px;
-  color: var(--ion-color-primary);
-  margin-right: 12px;
+  .reservation-icon {
+    font-size: 24px;
+    color: var(--ion-color-primary);
+    margin-right: 12px;
+  }
 }
 
 .item-meta {
@@ -188,28 +188,28 @@ onActivated(() => {
 .empty-state {
   text-align: center;
   padding: 48px 24px;
-}
 
-.empty-icon {
-  font-size: 64px;
-  color: var(--ion-color-light);
-  margin-bottom: 16px;
-}
+  .empty-icon {
+    font-size: 64px;
+    color: var(--ion-color-light);
+    margin-bottom: 16px;
+  }
 
-.empty-state h3 {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--ion-color-light);
-  margin: 0 0 8px 0;
-}
+  h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ion-color-light);
+    margin: 0 0 8px 0;
+  }
 
-.empty-state p {
-  color: var(--ion-color-medium);
-  margin-bottom: 24px;
-}
+  p {
+    color: var(--ion-color-medium);
+    margin-bottom: 24px;
+  }
 
-.empty-action {
-  max-width: 300px;
-  margin: 0 auto;
+  .empty-action {
+    max-width: 300px;
+    margin: 0 auto;
+  }
 }
 </style>

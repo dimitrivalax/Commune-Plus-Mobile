@@ -40,7 +40,7 @@ import {
 import { home, warning, calendar, informationCircle } from 'ionicons/icons'
 </script>
 
-<style>
+<style lang="scss">
 ion-tab-bar {
   --background: white;
   --border: 1px solid rgba(0, 0, 0, 0.08);
@@ -53,10 +53,10 @@ ion-tab-button {
   --color-selected: var(--ion-color-primary);
   font-size: 12px;
   font-weight: 500;
-}
 
-ion-tab-button ion-icon {
-  font-size: 24px;
-  margin-bottom: 4px;
+  ion-icon {
+    font-size: 24px;
+    margin-bottom: 4px;
+  }
 }
 </style>

@@ -201,8 +201,8 @@ import {
   getCityInfo,
   getCityInfoFromDatabase
 } from '@/utils/storage'
-import CitySetupModal from '@/components/CitySetupModal.vue'
-import AppDisclaimer from '@/components/AppDisclaimer.vue'
+import CitySetupModal from '@/components/city-setup-modal.vue'
+import AppDisclaimer from '@/components/app-disclaimer.vue'
 
 const userForm = ref({
   firstName: '',
@@ -299,7 +299,7 @@ onMounted(async () => {
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .settings-section {
   margin-bottom: 32px;
 }
@@ -312,11 +312,11 @@ onMounted(async () => {
   font-weight: 600;
   margin: 0 0 16px 0;
   padding: 0 4px;
-}
 
-.section-title ion-icon {
-  font-size: 24px;
-  color: var(--ion-color-primary);
+  ion-icon {
+    font-size: 24px;
+    color: var(--ion-color-primary);
+  }
 }
 
 ion-card {
@@ -327,10 +327,10 @@ ion-item {
   --padding-start: 0;
   --inner-padding-end: 0;
   margin-bottom: 16px;
-}
 
-ion-item:last-child {
-  margin-bottom: 0;
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
 .save-button,
@@ -342,15 +342,35 @@ ion-item:last-child {
 .no-city-info {
   text-align: center;
   padding: 24px 0;
-}
 
-.no-city-info p {
-  color: var(--ion-color-medium);
-  margin-bottom: 16px;
+  p {
+    color: var(--ion-color-medium);
+    margin-bottom: 16px;
+  }
 }
 
 .city-info-display {
   margin-bottom: 16px;
+
+  h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ion-color-light);
+    margin: 0 0 4px 0;
+  }
+
+  p {
+    font-size: 16px;
+    color: var(--ion-color-medium);
+    margin: 0;
+  }
+
+  ion-item {
+    --background: var(--ion-color-light);
+    --border-radius: 8px;
+    margin-bottom: 12px;
+    padding: 12px 0;
+  }
 }
 
 .city-logo-container {
@@ -358,36 +378,16 @@ ion-item:last-child {
   justify-content: center;
   margin-bottom: 20px;
   padding: 16px;
-}
 
-.city-logo {
-  width: 120px;
-  height: 120px;
-  object-fit: contain;
-  background: white;
-  border-radius: 12px;
-  padding: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.city-info-display ion-item {
-  --background: var(--ion-color-light);
-  --border-radius: 8px;
-  margin-bottom: 12px;
-  padding: 12px 0;
-}
-
-.city-info-display h3 {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--ion-color-light);
-  margin: 0 0 4px 0;
-}
-
-.city-info-display p {
-  font-size: 16px;
-  color: var(--ion-color-medium);
-  margin: 0;
+  .city-logo {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    background: white;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
 }
 
 .modification-info {
@@ -398,30 +398,30 @@ ion-item:last-child {
   background: var(--ion-color-light);
   border-radius: 8px;
   margin-top: 16px;
-}
 
-.modification-info .info-icon {
-  font-size: 24px;
-  color: var(--ion-color-primary);
-  flex-shrink: 0;
-  margin-top: 2px;
-}
+  .info-icon {
+    font-size: 24px;
+    color: var(--ion-color-primary);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
 
-.modification-info .info-text {
-  flex: 1;
-  margin: 0;
-  font-size: 14px;
-  color: var(--ion-color-dark);
-  line-height: 1.5;
-}
+  .info-text {
+    flex: 1;
+    margin: 0;
+    font-size: 14px;
+    color: var(--ion-color-dark);
+    line-height: 1.5;
+  }
 
-.modification-info .email-link {
-  color: var(--ion-color-primary);
-  text-decoration: none;
-  font-weight: 500;
-}
+  .email-link {
+    color: var(--ion-color-primary);
+    text-decoration: none;
+    font-weight: 500;
 
-.modification-info .email-link:hover {
-  text-decoration: underline;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 }
 </style>

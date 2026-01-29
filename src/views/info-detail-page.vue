@@ -68,7 +68,7 @@ import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Pagination } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/pagination'
-import { supabase } from '@/services/supabase'
+import { InformationService } from '@/services/information-service'
 import { formatDate } from '@/utils/date'
 
 const route = useRoute()
@@ -80,10 +80,7 @@ const initialSlide = ref(0)
 const loadInfoItems = async () => {
   loading.value = true
   try {
-    const { data, error } = await supabase
-      .from('municipal_info')
-      .select('*')
-      .order('created_at', { ascending: false })
+    const { data, error } = await InformationService.getAll()
 
     if (error) throw error
 
@@ -108,8 +105,7 @@ const loadInfoItems = async () => {
 const onSlideChange = (swiper) => {
   const currentItem = infoItems.value[swiper.activeIndex]
   if (currentItem) {
-    // Update the URL without reloading the page or triggering a navigation that would reset the swiper
-    // This allows the back button to behave correctly if needed, though often for swipers we just keep the active state
+    // Update the URL without reloading the page
     router.replace({ params: { id: currentItem.id } })
   }
 }
@@ -119,7 +115,7 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .info-swiper {
   height: 100%;
 }
@@ -127,6 +123,13 @@ onMounted(() => {
 .info-content {
   height: 100%;
   overflow-y: auto;
+
+  h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--ion-color-dark);
+  }
 }
 
 .meta-info {
@@ -139,6 +142,7 @@ onMounted(() => {
 
 .content-body {
   line-height: 1.6;
+  color: var(--ion-color-dark);
 }
 
 .info-image {

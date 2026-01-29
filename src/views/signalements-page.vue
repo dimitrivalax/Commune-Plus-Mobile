@@ -112,7 +112,7 @@ import {
   onIonViewWillEnter
 } from '@ionic/vue'
 import { add, documentText } from 'ionicons/icons'
-import AppHeader from '@/components/AppHeader.vue'
+import AppHeader from '@/components/app-header.vue'
 import { SignalementService } from '@/services/signalement-service'
 import { formatDateTime } from '@/utils/date'
 import { getOrCreateUserId } from '@/services/push-notifications'

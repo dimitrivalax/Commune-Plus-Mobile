@@ -27,7 +27,6 @@
             <p>Ou renseignez les informations manuellement</p>
           </div>
 
-
           <ion-item v-if="formData.logo" lines="none">
             <IonImg :src="formData.logo" alt="Logo" class="logo-image" />
           </ion-item>
@@ -112,7 +111,7 @@ import {
 } from '@ionic/vue'
 import { locationOutline } from 'ionicons/icons'
 import { saveCityInfoToDatabase } from '@/utils/storage'
-import CityTypeahead from './CityTypeahead.vue'
+import CityTypeahead from './city-typeahead.vue'
 
 const props = defineProps({
   isOpen: {
@@ -179,7 +178,8 @@ const handleSubmit = async () => {
 
     // Mettre à jour le token push avec la nouvelle commune
     if (result.id) {
-      const { updatePushTokenCommune } = await import('@/services/push-notifications')
+      const { updatePushTokenCommune } =
+        await import('@/services/push-notifications')
       await updatePushTokenCommune(result.id)
     }
 
@@ -243,7 +243,7 @@ watch(
 )
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .modal-content {
   max-width: 600px;
   margin: 0 auto;
@@ -252,25 +252,25 @@ watch(
 .modal-header {
   text-align: center;
   margin-bottom: 32px;
-}
 
-.header-icon {
-  font-size: 64px;
-  color: var(--ion-color-primary);
-  margin-bottom: 16px;
-}
+  .header-icon {
+    font-size: 64px;
+    color: var(--ion-color-primary);
+    margin-bottom: 16px;
+  }
 
-.modal-header h2 {
-  margin: 0 0 8px 0;
-  font-size: 24px;
-  font-weight: 600;
-  color: var(--ion-color-light);
-}
+  h2 {
+    margin: 0 0 8px 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--ion-color-light);
+  }
 
-.modal-header p {
-  margin: 0;
-  color: var(--ion-color-medium);
-  font-size: 14px;
+  p {
+    margin: 0;
+    color: var(--ion-color-medium);
+    font-size: 14px;
+  }
 }
 
 .logo-image {
@@ -278,6 +278,7 @@ watch(
   height: 50%;
   margin: 0 auto;
 }
+
 ion-item {
   --padding-start: 0;
   --inner-padding-end: 0;

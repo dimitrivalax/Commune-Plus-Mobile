@@ -7,7 +7,11 @@
         </ion-buttons>
         <ion-title>Détail de la réservation</ion-title>
         <ion-buttons slot="end">
-          <ion-button @click="toggleEditMode" v-if="!isDeleting && isOwner" color="light">
+          <ion-button
+            @click="toggleEditMode"
+            v-if="!isDeleting && isOwner"
+            color="light"
+          >
             <ion-icon :icon="isEditing ? close : create" />
           </ion-button>
         </ion-buttons>
@@ -33,7 +37,13 @@
               </div>
             </ion-card-header>
             <ion-card-content>
-              <p class="room-name">{{ reservation.salle?.nom || reservation.salle_nom || 'Salle inconnue' }}</p>
+              <p class="room-name">
+                {{
+                  reservation.salle?.nom ||
+                  reservation.salle_nom ||
+                  'Salle inconnue'
+                }}
+              </p>
               <p v-if="reservation.reason" class="reason-text">
                 <strong>Raison :</strong> {{ reservation.reason }}
               </p>
@@ -48,9 +58,18 @@
               </ion-card-title>
             </ion-card-header>
             <ion-card-content>
-              <p><strong>Date :</strong> {{ formatDisplayDate(reservation.date) }}</p>
-              <p><strong>Heure de début :</strong> {{ formatDisplayTime(reservation.start_time) }}</p>
-              <p><strong>Heure de fin :</strong> {{ formatDisplayTime(reservation.end_time) }}</p>
+              <p>
+                <strong>Date :</strong>
+                {{ formatDisplayDate(reservation.date) }}
+              </p>
+              <p>
+                <strong>Heure de début :</strong>
+                {{ formatDisplayTime(reservation.start_time) }}
+              </p>
+              <p>
+                <strong>Heure de fin :</strong>
+                {{ formatDisplayTime(reservation.end_time) }}
+              </p>
             </ion-card-content>
           </ion-card>
 
@@ -63,8 +82,12 @@
             </ion-card-header>
             <ion-card-content>
               <p><strong>Nom :</strong> {{ reservation.name }}</p>
-              <p v-if="reservation.email"><strong>Email :</strong> {{ reservation.email }}</p>
-              <p v-if="reservation.phone"><strong>Téléphone :</strong> {{ reservation.phone }}</p>
+              <p v-if="reservation.email">
+                <strong>Email :</strong> {{ reservation.email }}
+              </p>
+              <p v-if="reservation.phone">
+                <strong>Téléphone :</strong> {{ reservation.phone }}
+              </p>
             </ion-card-content>
           </ion-card>
 
@@ -76,9 +99,13 @@
               </ion-card-title>
             </ion-card-header>
             <ion-card-content>
-              <p><strong>Date de création :</strong> {{ formatDateTime(reservation.created_at) }}</p>
+              <p>
+                <strong>Date de création :</strong>
+                {{ formatDateTime(reservation.created_at) }}
+              </p>
               <p v-if="reservation.updated_at !== reservation.created_at">
-                <strong>Dernière modification :</strong> {{ formatDateTime(reservation.updated_at) }}
+                <strong>Dernière modification :</strong>
+                {{ formatDateTime(reservation.updated_at) }}
               </p>
             </ion-card-content>
           </ion-card>
@@ -96,7 +123,10 @@
             </ion-button>
           </div>
           <div v-else class="owner-notice">
-            <p>Vous ne pouvez modifier ou supprimer que les réservations que vous avez créées.</p>
+            <p>
+              Vous ne pouvez modifier ou supprimer que les réservations que vous
+              avez créées.
+            </p>
           </div>
         </div>
 
@@ -107,7 +137,10 @@
               <h3 class="section-title">Réservation</h3>
               <ion-item lines="none" class="form-item">
                 <ion-label position="stacked">Salle</ion-label>
-                <ion-select v-model="editForm.salleId" placeholder="Sélectionner une salle">
+                <ion-select
+                  v-model="editForm.salleId"
+                  placeholder="Sélectionner une salle"
+                >
                   <ion-select-option
                     v-for="salle in salles"
                     :key="salle.id"
@@ -120,8 +153,10 @@
 
               <!-- Date -->
               <ion-item lines="none" class="form-item">
-                <ion-label >Date</ion-label>
-                <ion-datetime-button datetime="edit-datetime"></ion-datetime-button>
+                <ion-label>Date</ion-label>
+                <ion-datetime-button
+                  datetime="edit-datetime"
+                ></ion-datetime-button>
                 <ion-modal :keep-contents-mounted="true">
                   <ion-datetime
                     id="edit-datetime"
@@ -129,22 +164,32 @@
                     presentation="date"
                     :min="minDate"
                     :value="editForm.date"
-                    @ionChange="(event) => { editForm.date = event.detail.value }"
+                    @ionChange="
+                      (event) => {
+                        editForm.date = event.detail.value
+                      }
+                    "
                   ></ion-datetime>
                 </ion-modal>
               </ion-item>
 
               <!-- Heure de début -->
               <ion-item lines="none" class="form-item">
-                <ion-label >Heure de début</ion-label>
-                <ion-datetime-button datetime="edit-start-time"></ion-datetime-button>
+                <ion-label>Heure de début</ion-label>
+                <ion-datetime-button
+                  datetime="edit-start-time"
+                ></ion-datetime-button>
                 <ion-modal :keep-contents-mounted="true">
                   <ion-datetime
                     id="edit-start-time"
                     :show-default-buttons="true"
                     presentation="time"
                     :value="editForm.startTime"
-                    @ionChange="(event) => { editForm.startTime = event.detail.value }"
+                    @ionChange="
+                      (event) => {
+                        editForm.startTime = event.detail.value
+                      }
+                    "
                   ></ion-datetime>
                 </ion-modal>
               </ion-item>
@@ -152,21 +197,28 @@
               <!-- Heure de fin -->
               <ion-item lines="none" class="form-item">
                 <ion-label>Heure de fin</ion-label>
-                <ion-datetime-button datetime="edit-end-time"></ion-datetime-button>
+                <ion-datetime-button
+                  datetime="edit-end-time"
+                ></ion-datetime-button>
                 <ion-modal :keep-contents-mounted="true">
                   <ion-datetime
                     id="edit-end-time"
                     :show-default-buttons="true"
                     presentation="time"
                     :value="editForm.endTime"
-                    @ionChange="(event) => { editForm.endTime = event.detail.value }"
+                    @ionChange="
+                      (event) => {
+                        editForm.endTime = event.detail.value
+                      }
+                    "
                   ></ion-datetime>
                 </ion-modal>
               </ion-item>
 
-
               <ion-item lines="none" class="form-item">
-                <ion-label position="stacked">Raison de la réservation</ion-label>
+                <ion-label position="stacked"
+                  >Raison de la réservation</ion-label
+                >
                 <ion-textarea
                   v-model="editForm.reason"
                   placeholder="Décrivez l'événement..."
@@ -247,14 +299,51 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonBackButton, IonButton, IonIcon, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonBadge, IonItem, IonLabel, IonTextarea, IonInput, IonSelect, IonSelectOption, IonModal, IonDatetime, IonDatetimeButton, IonSpinner, loadingController, toastController, alertController } from '@ionic/vue'
-import { create, close, trash, checkmark, calendar, person, time, alertCircle } from 'ionicons/icons'
-import { supabase } from '@/services/supabase'
+import {
+  IonPage,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonButtons,
+  IonBackButton,
+  IonButton,
+  IonIcon,
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardContent,
+  IonBadge,
+  IonItem,
+  IonLabel,
+  IonTextarea,
+  IonInput,
+  IonSelect,
+  IonSelectOption,
+  IonModal,
+  IonDatetime,
+  IonDatetimeButton,
+  IonSpinner,
+  loadingController,
+  toastController,
+  alertController
+} from '@ionic/vue'
+import {
+  create,
+  close,
+  trash,
+  checkmark,
+  calendar,
+  person,
+  time,
+  alertCircle
+} from 'ionicons/icons'
+import { ReservationService } from '@/services/reservation-service'
 import { formatDateTime, formatDateForDB, formatTime } from '@/utils/date'
 import { getUserContact, getCityInfo } from '@/utils/storage'
 
 const route = useRoute()
-const router = useRouter()
+const router = useRouter() // eslint-disable-line no-unused-vars
 
 const reservation = ref(null)
 const loading = ref(true)
@@ -289,7 +378,10 @@ const formatDisplayDate = (dateString) => {
     })
   }
   // Si c'est déjà au format YYYY-MM-DD
-  if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+  if (
+    typeof dateString === 'string' &&
+    dateString.match(/^\d{4}-\d{2}-\d{2}$/)
+  ) {
     const [year, month, day] = dateString.split('-')
     const date = new Date(year, month - 1, day)
     return date.toLocaleDateString('fr-FR', {
@@ -315,17 +407,14 @@ const formatDisplayTime = (timeString) => {
   return timeString
 }
 
-// Convertir une date YYYY-MM-DD vers le format ISO pour ion-datetime
 const convertDateForDatetime = (dateString) => {
   if (!dateString) return ''
   try {
-    // Si c'est déjà au format ISO, le retourner tel quel
     if (dateString.includes('T')) {
       const testDate = new Date(dateString)
       if (isNaN(testDate.getTime())) return ''
       return dateString
     }
-    // Si c'est au format YYYY-MM-DD, le convertir en ISO
     if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
       const date = new Date(dateString + 'T00:00:00')
       if (isNaN(date.getTime())) return ''
@@ -338,23 +427,19 @@ const convertDateForDatetime = (dateString) => {
   return dateString
 }
 
-// Convertir une heure HH:mm vers le format ISO pour ion-datetime
 const convertTimeForDatetime = (timeString) => {
   if (!timeString) return ''
   try {
-    // Si c'est déjà au format ISO, le retourner tel quel
     if (timeString.includes('T')) {
       const testDate = new Date(timeString)
       if (isNaN(testDate.getTime())) return ''
       return timeString
     }
-    // Si c'est au format HH:mm, le convertir en ISO avec la date d'aujourd'hui
     if (timeString.match(/^\d{2}:\d{2}/)) {
       const timeMatch = timeString.match(/^(\d{2}):(\d{2})/)
       if (timeMatch) {
         const hours = parseInt(timeMatch[1], 10)
         const minutes = parseInt(timeMatch[2], 10)
-        // Valider que les heures et minutes sont valides
         if (hours >= 0 && hours < 24 && minutes >= 0 && minutes < 60) {
           const today = new Date().toISOString().split('T')[0]
           const date = new Date(`${today}T${timeMatch[0]}:00`)
@@ -371,58 +456,48 @@ const convertTimeForDatetime = (timeString) => {
   return ''
 }
 
-
 const isFormValid = computed(() => {
-  return editForm.value.salleId && 
-         editForm.value.date && 
-         editForm.value.startTime && 
-         editForm.value.endTime && 
-         editForm.value.name && 
-         editForm.value.email
+  return (
+    editForm.value.salleId &&
+    editForm.value.date &&
+    editForm.value.startTime &&
+    editForm.value.endTime &&
+    editForm.value.name &&
+    editForm.value.email
+  )
 })
 
 const loadReservation = async () => {
   loading.value = true
   try {
-    const { data, error } = await supabase
-      .from('reservations_salles')
-      .select(`
-        *,
-        salle:salles(id, nom)
-      `)
-      .eq('id', route.params.id)
-      .single()
+    const { data, error } = await ReservationService.getById(route.params.id)
 
     if (error) throw error
 
     reservation.value = data
-    // Extraire le nom de la salle pour l'affichage
     if (data.salle) {
       reservation.value.salle_nom = data.salle.nom
     }
-    
-    // Vérifier si l'utilisateur actuel est le propriétaire de la réservation
+
     const userContact = getUserContact()
     if (userContact && userContact.email && data.email) {
-      isOwner.value = userContact.email.toLowerCase() === data.email.toLowerCase()
+      isOwner.value =
+        userContact.email.toLowerCase() === data.email.toLowerCase()
     } else {
-      // Si pas d'email dans le localStorage, vérifier avec le nom aussi
       if (userContact && userContact.name && data.name) {
-        isOwner.value = userContact.name.toLowerCase() === data.name.toLowerCase()
+        isOwner.value =
+          userContact.name.toLowerCase() === data.name.toLowerCase()
       }
     }
-    
-    // Initialiser le formulaire d'édition avec conversion des formats
-    // Utiliser des valeurs par défaut si les conversions échouent
+
     const convertedDate = convertDateForDatetime(data.date)
     const convertedStartTime = convertTimeForDatetime(data.start_time)
     const convertedEndTime = convertTimeForDatetime(data.end_time)
-    
-    // Valeurs par défaut si les conversions échouent
+
     const defaultDate = new Date()
     defaultDate.setHours(0, 0, 0, 0)
     const defaultTime = new Date()
-    
+
     editForm.value = {
       salleId: data.salle_id || '',
       date: convertedDate || defaultDate.toISOString(),
@@ -432,15 +507,6 @@ const loadReservation = async () => {
       name: data.name || '',
       email: data.email || '',
       phone: data.phone || ''
-    }
-    
-    // Log pour débogage si des valeurs sont invalides
-    if (!convertedDate || !convertedStartTime || !convertedEndTime) {
-      console.warn('Some date/time values could not be converted:', {
-        date: data.date,
-        start_time: data.start_time,
-        end_time: data.end_time
-      })
     }
   } catch (error) {
     console.error('Error loading reservation:', error)
@@ -458,20 +524,19 @@ const loadReservation = async () => {
 const toggleEditMode = async () => {
   isEditing.value = !isEditing.value
   if (isEditing.value && reservation.value) {
-    // S'assurer que les salles sont chargées avant d'entrer en mode édition
     if (salles.value.length === 0) {
       await loadSalles()
     }
-    // Réinitialiser le formulaire avec les valeurs actuelles (avec conversion des formats)
     const convertedDate = convertDateForDatetime(reservation.value.date)
-    const convertedStartTime = convertTimeForDatetime(reservation.value.start_time)
+    const convertedStartTime = convertTimeForDatetime(
+      reservation.value.start_time
+    )
     const convertedEndTime = convertTimeForDatetime(reservation.value.end_time)
-    
-    // Valeurs par défaut si les conversions échouent
+
     const defaultDate = new Date()
     defaultDate.setHours(0, 0, 0, 0)
     const defaultTime = new Date()
-    
+
     editForm.value = {
       salleId: reservation.value.salle_id || '',
       date: convertedDate || defaultDate.toISOString(),
@@ -490,7 +555,6 @@ const cancelEdit = () => {
 }
 
 const saveChanges = async () => {
-  // Vérifier à nouveau que l'utilisateur est le propriétaire
   if (!isOwner.value) {
     const toast = await toastController.create({
       message: 'Vous ne pouvez modifier que vos propres réservations',
@@ -514,7 +578,8 @@ const saveChanges = async () => {
   const userContact = getUserContact()
   if (!userContact || !userContact.email) {
     const toast = await toastController.create({
-      message: 'Impossible de vérifier votre identité. Veuillez créer une nouvelle réservation.',
+      message:
+        'Impossible de vérifier votre identité. Veuillez créer une nouvelle réservation.',
       duration: 3000,
       color: 'warning'
     })
@@ -529,23 +594,22 @@ const saveChanges = async () => {
   await loadingToast.present()
 
   try {
-    // Mettre à jour uniquement si l'email correspond
-    const { data, error } = await supabase
-      .from('reservations_salles')
-      .update({
-        salle_id: editForm.value.salleId,
-        date: formatDateForDB(editForm.value.date),
-        start_time: formatTime(editForm.value.startTime),
-        end_time: formatTime(editForm.value.endTime),
-        reason: editForm.value.reason,
-        name: editForm.value.name,
-        email: editForm.value.email,
-        phone: editForm.value.phone || null
-      })
-      .eq('id', route.params.id)
-      .eq('email', userContact.email.toLowerCase())
-      .select()
-      .single()
+    const updates = {
+      salle_id: editForm.value.salleId,
+      date: formatDateForDB(editForm.value.date),
+      start_time: formatTime(editForm.value.startTime),
+      end_time: formatTime(editForm.value.endTime),
+      reason: editForm.value.reason,
+      name: editForm.value.name,
+      email: editForm.value.email,
+      phone: editForm.value.phone || null
+    }
+
+    const { data, error } = await ReservationService.update(
+      route.params.id,
+      userContact.email,
+      updates
+    )
 
     if (error) throw error
 
@@ -560,15 +624,14 @@ const saveChanges = async () => {
       color: 'success'
     })
     await toast.present()
-    
-    // Recharger les données pour afficher les modifications
+
     await loadReservation()
   } catch (error) {
     console.error('Error updating reservation:', error)
     await loadingToast.dismiss()
 
     const toast = await toastController.create({
-      message: 'Erreur lors de l\'enregistrement',
+      message: "Erreur lors de l'enregistrement",
       duration: 2000,
       color: 'danger'
     })
@@ -581,7 +644,8 @@ const saveChanges = async () => {
 const confirmDelete = async () => {
   const alert = await alertController.create({
     header: 'Confirmer la suppression',
-    message: 'Êtes-vous sûr de vouloir supprimer cette réservation ? Cette action est irréversible.',
+    message:
+      'Êtes-vous sûr de vouloir supprimer cette réservation ? Cette action est irréversible.',
     buttons: [
       {
         text: 'Annuler',
@@ -601,7 +665,6 @@ const confirmDelete = async () => {
 }
 
 const deleteReservation = async () => {
-  // Vérifier à nouveau que l'utilisateur est le propriétaire
   if (!isOwner.value) {
     const toast = await toastController.create({
       message: 'Vous ne pouvez supprimer que vos propres réservations',
@@ -615,7 +678,8 @@ const deleteReservation = async () => {
   const userContact = getUserContact()
   if (!userContact || !userContact.email) {
     const toast = await toastController.create({
-      message: 'Impossible de vérifier votre identité. Veuillez créer une nouvelle réservation.',
+      message:
+        'Impossible de vérifier votre identité. Veuillez créer une nouvelle réservation.',
       duration: 3000,
       color: 'warning'
     })
@@ -630,12 +694,10 @@ const deleteReservation = async () => {
   await loadingToast.present()
 
   try {
-    // Supprimer uniquement si l'email correspond
-    const { error } = await supabase
-      .from('reservations_salles')
-      .delete()
-      .eq('id', route.params.id)
-      .eq('email', userContact.email.toLowerCase())
+    const { error } = await ReservationService.delete(
+      route.params.id,
+      userContact.email
+    )
 
     if (error) throw error
 
@@ -648,7 +710,6 @@ const deleteReservation = async () => {
     })
     await toast.present()
 
-    // Utiliser replace pour forcer le rechargement de la liste
     router.replace('/tabs/reservations')
   } catch (error) {
     console.error('Error deleting reservation:', error)
@@ -689,39 +750,14 @@ const getStatusLabel = (status) => {
   }
 }
 
-// Charger les salles depuis Supabase pour la commune sélectionnée
 const loadSalles = async () => {
   try {
-    // Récupérer l'ID de la commune depuis le localStorage
     const cityInfo = getCityInfo()
     const communeId = cityInfo?.id
 
-    if (!communeId) {
-      console.warn(
-        'Aucune commune sélectionnée, chargement de toutes les salles'
-      )
-      // Si aucune commune n'est sélectionnée, charger toutes les salles
-      const { data, error } = await supabase
-        .from('salles')
-        .select('id, nom')
-        .order('nom', { ascending: true })
-
-      if (error) throw error
-      if (data) {
-        salles.value = data
-      }
-      return
-    }
-
-    // Filtrer les salles par commune_id
-    const { data, error } = await supabase
-      .from('salles')
-      .select('id, nom')
-      .eq('commune_id', communeId)
-      .order('nom', { ascending: true })
+    const { data, error } = await ReservationService.getSalles(communeId)
 
     if (error) throw error
-
     if (data) {
       salles.value = data
     }
@@ -742,7 +778,7 @@ onMounted(async () => {
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -805,65 +841,26 @@ onMounted(async () => {
   padding: 0;
 }
 
-.form-section {
-  margin-bottom: 24px;
-}
-
-.section-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--ion-color-light);
-  margin: 0 0 16px 0;
-  padding: 0 4px;
-}
-
-.form-item {
-  --background: var(--ion-color-light);
-  --border-radius: 12px;
-  margin-bottom: 16px;
-  padding: 4px 0;
-}
-
-.contact-card {
-  margin: 0;
-  background: var(--ion-color-light);
-}
-
 .error-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  padding: 24px;
+  min-height: 300px;
   text-align: center;
-}
+  gap: 16px;
 
-.error-icon {
-  font-size: 64px;
-  color: var(--ion-color-medium);
-  margin-bottom: 16px;
-}
-
-.error-container h3 {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--ion-color-light);
-  margin: 0 0 24px 0;
+  .error-icon {
+    font-size: 48px;
+    color: var(--ion-color-danger);
+  }
 }
 
 .owner-notice {
-  margin-top: 24px;
-  padding: 16px;
-  background: rgba(var(--ion-color-warning-rgb), 0.1);
-  border-radius: 12px;
   text-align: center;
-}
-
-.owner-notice p {
-  margin: 0;
-  color: var(--ion-color-warning);
+  color: var(--ion-color-medium);
   font-size: 14px;
+  font-style: italic;
+  margin-top: 16px;
 }
 </style>
-

@@ -21,7 +21,7 @@ import { IonIcon } from '@ionic/vue'
 import { informationCircleOutline } from 'ionicons/icons'
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .disclaimer-container {
   margin: 24px 16px;
   padding: 16px;
@@ -40,10 +40,10 @@ import { informationCircleOutline } from 'ionicons/icons'
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-}
 
-.disclaimer-title ion-icon {
-  font-size: 20px;
+  ion-icon {
+    font-size: 20px;
+  }
 }
 
 .disclaimer-text {
@@ -52,25 +52,25 @@ import { informationCircleOutline } from 'ionicons/icons'
   line-height: 1.5;
   color: var(--ion-color-medium);
   text-align: justify;
-}
 
-.disclaimer-text strong {
-  color: var(--ion-color-dark);
+  strong {
+    color: var(--ion-color-dark);
+  }
 }
 
 .disclaimer-link {
   margin-top: 12px;
   font-size: 13px;
   text-align: center;
-}
 
-.disclaimer-link a {
-  color: var(--city-primary, var(--ion-color-primary));
-  text-decoration: none;
-  font-weight: 500;
-}
+  a {
+    color: var(--city-primary, var(--ion-color-primary));
+    text-decoration: none;
+    font-weight: 500;
 
-.disclaimer-link a:hover {
-  text-decoration: underline;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 }
 </style>

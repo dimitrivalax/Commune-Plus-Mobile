@@ -1,6 +1,10 @@
 <template>
   <div v-if="show" class="splash-screen">
-    <img src="/assets/commune-plus.png" alt="Commune Plus" class="splash-image" />
+    <img
+      src="/assets/commune-plus.png"
+      alt="Commune Plus"
+      class="splash-image"
+    />
   </div>
 </template>
 
@@ -12,8 +16,8 @@ const show = ref(true)
 
 onMounted(async () => {
   // Attendre un peu pour afficher le splash screen
-  await new Promise(resolve => setTimeout(resolve, 2000))
-  
+  await new Promise((resolve) => setTimeout(resolve, 2000))
+
   // Masquer le splash screen natif (mobile)
   try {
     await CapacitorSplashScreen.hide({
@@ -23,13 +27,13 @@ onMounted(async () => {
     // Ignorer l'erreur si on est sur le web
     console.log('Splash screen native not available (web mode)')
   }
-  
+
   // Masquer le splash screen web
   show.value = false
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .splash-screen {
   position: fixed;
   top: 0;
@@ -73,4 +77,3 @@ onMounted(async () => {
   }
 }
 </style>
-

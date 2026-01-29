@@ -81,7 +81,7 @@ import {
 import { searchOutline, hourglassOutline } from 'ionicons/icons'
 import { searchCitiesInDatabase } from '@/utils/storage'
 
-const props = defineProps({
+defineProps({
   disabled: {
     type: Boolean,
     default: false
@@ -149,7 +149,7 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .city-typeahead {
   position: relative;
   margin-bottom: 16px;
@@ -178,6 +178,24 @@ ion-item {
   overflow-y: auto;
   margin-top: 4px;
   border: 1px solid var(--ion-color-light);
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--ion-color-light);
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--ion-color-medium);
+    border-radius: 3px;
+
+    &:hover {
+      background: var(--ion-color-medium-shade);
+    }
+  }
 }
 
 .dropdown-item {
@@ -185,30 +203,29 @@ ion-item {
   cursor: pointer;
   border-bottom: 1px solid var(--ion-color-light);
   transition: background-color 0.2s;
-}
 
-.dropdown-item:last-child {
-  border-bottom: none;
-}
+  &:last-child {
+    border-bottom: none;
+  }
 
-.dropdown-item:hover {
-  background-color: var(--ion-color-light);
-}
+  &:hover {
+    background-color: var(--ion-color-light);
+  }
 
-.dropdown-item.loading,
-.dropdown-item.no-results {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  color: var(--ion-color-medium);
-  font-style: italic;
-  cursor: default;
-}
+  &.loading,
+  &.no-results {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--ion-color-medium);
+    font-style: italic;
+    cursor: default;
 
-.dropdown-item.loading:hover,
-.dropdown-item.no-results:hover {
-  background-color: transparent;
+    &:hover {
+      background-color: transparent;
+    }
+  }
 }
 
 .city-name {
@@ -237,24 +254,6 @@ ion-item {
   font-size: 12px;
 }
 
-/* Scrollbar personnalisée */
-.dropdown::-webkit-scrollbar {
-  width: 6px;
-}
-
-.dropdown::-webkit-scrollbar-track {
-  background: var(--ion-color-light);
-  border-radius: 3px;
-}
-
-.dropdown::-webkit-scrollbar-thumb {
-  background: var(--ion-color-medium);
-  border-radius: 3px;
-}
-
-.dropdown::-webkit-scrollbar-thumb:hover {
-  background: var(--ion-color-medium-shade);
-}
 .city-logo {
   width: 48px;
   height: 48px;
