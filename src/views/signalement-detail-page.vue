@@ -24,8 +24,14 @@
         <div v-if="!isEditing" class="view-mode">
           <!-- Photo -->
           <div v-if="signalement.photo_url" class="photo-section">
-            <img :src="signalement.photo_url" alt="Photo du signalement" class="detail-photo" />
-            <p v-if="signalement.comment" class="photo-comment">{{ signalement.comment }}</p>
+            <img
+              :src="signalement.photo_url"
+              alt="Photo du signalement"
+              class="detail-photo"
+            />
+            <p v-if="signalement.comment" class="photo-comment">
+              {{ signalement.comment }}
+            </p>
           </div>
 
           <!-- Informations principales -->
@@ -39,7 +45,9 @@
               </div>
             </ion-card-header>
             <ion-card-content>
-              <p class="description-text">{{ signalement.description || 'Aucune description' }}</p>
+              <p class="description-text">
+                {{ signalement.description || 'Aucune description' }}
+              </p>
             </ion-card-content>
           </ion-card>
 
@@ -65,14 +73,17 @@
             <ion-card-content>
               <div v-if="signalement.latitude && signalement.longitude">
                 <p><strong>Coordonnées GPS :</strong></p>
-                <p>{{ signalement.latitude.toFixed(6) }}, {{ signalement.longitude.toFixed(6) }}</p>
+                <p>
+                  {{ signalement.latitude.toFixed(6) }},
+                  {{ signalement.longitude.toFixed(6) }}
+                </p>
                 <p v-if="signalement.location_accuracy" class="accuracy-text">
                   Précision : {{ Math.round(signalement.location_accuracy) }}m
                 </p>
               </div>
-              <div v-if="signalement.address">
+              <div v-if="signalement.address || addressFromGps">
                 <p><strong>Adresse :</strong></p>
-                <p>{{ signalement.address }}</p>
+                <p>{{ signalement.address || addressFromGps }}</p>
               </div>
             </ion-card-content>
           </ion-card>
@@ -85,9 +96,16 @@
               </ion-card-title>
             </ion-card-header>
             <ion-card-content>
-              <p><strong>Nom :</strong> {{ signalement.first_name }} {{ signalement.last_name }}</p>
-              <p v-if="signalement.email"><strong>Email :</strong> {{ signalement.email }}</p>
-              <p v-if="signalement.phone"><strong>Téléphone :</strong> {{ signalement.phone }}</p>
+              <p>
+                <strong>Nom :</strong> {{ signalement.first_name }}
+                {{ signalement.last_name }}
+              </p>
+              <p v-if="signalement.email">
+                <strong>Email :</strong> {{ signalement.email }}
+              </p>
+              <p v-if="signalement.phone">
+                <strong>Téléphone :</strong> {{ signalement.phone }}
+              </p>
             </ion-card-content>
           </ion-card>
 
@@ -99,16 +117,25 @@
               </ion-card-title>
             </ion-card-header>
             <ion-card-content>
-              <p><strong>Date de création :</strong> {{ formatDateTime(signalement.created_at) }}</p>
+              <p>
+                <strong>Date de création :</strong>
+                {{ formatDateTime(signalement.created_at) }}
+              </p>
               <p v-if="signalement.updated_at !== signalement.created_at">
-                <strong>Dernière modification :</strong> {{ formatDateTime(signalement.updated_at) }}
+                <strong>Dernière modification :</strong>
+                {{ formatDateTime(signalement.updated_at) }}
               </p>
             </ion-card-content>
           </ion-card>
 
           <!-- Boutons d'action -->
           <div class="action-buttons" v-if="signalement.status !== 'archive'">
-            <ion-button expand="block" color="medium" @click="confirmArchive" :disabled="isArchiving">
+            <ion-button
+              expand="block"
+              color="medium"
+              @click="confirmArchive"
+              :disabled="isArchiving"
+            >
               <ion-icon :icon="archive" slot="start" />
               Archiver le signalement
             </ion-button>
@@ -119,7 +146,9 @@
         <div v-else class="edit-mode">
           <div class="edit-header">
             <h2 class="edit-title">Modifier le signalement</h2>
-            <p class="edit-subtitle">Modifiez les informations de votre signalement</p>
+            <p class="edit-subtitle">
+              Modifiez les informations de votre signalement
+            </p>
           </div>
           <div class="form-container">
             <div class="form-section">
@@ -129,21 +158,34 @@
                   <ion-icon :icon="createOutline" class="edit-icon" />
                   Description du signalement
                 </ion-label>
-                <ion-textarea v-model="editForm.description" placeholder="Décrivez le signalement..."
-                  rows="4"></ion-textarea>
+                <ion-textarea
+                  v-model="editForm.description"
+                  placeholder="Décrivez le signalement..."
+                  rows="4"
+                ></ion-textarea>
               </ion-item>
             </div>
 
             <div class="form-section">
               <h3 class="section-title">Photo</h3>
-              <ion-button expand="block" @click="takePhoto" :disabled="saving" class="photo-button">
+              <ion-button
+                expand="block"
+                @click="takePhoto"
+                :disabled="saving"
+                class="photo-button"
+              >
                 <ion-icon :icon="camera" slot="start" />
                 {{ editPhoto ? 'Reprendre la photo' : 'Prendre une photo' }}
               </ion-button>
 
               <div v-if="editPhoto" class="photo-preview">
                 <img :src="editPhoto" alt="Photo du signalement" />
-                <ion-button fill="clear" @click="removePhoto" class="remove-photo-btn" :disabled="saving">
+                <ion-button
+                  fill="clear"
+                  @click="removePhoto"
+                  class="remove-photo-btn"
+                  :disabled="saving"
+                >
                   <ion-icon :icon="close" />
                 </ion-button>
               </div>
@@ -152,20 +194,30 @@
                   <ion-icon :icon="createOutline" class="edit-icon" />
                   Commentaire
                 </ion-label>
-                <ion-textarea v-model="editForm.comment" placeholder="Commentaire sur la photo (optionnel)..."
-                  rows="3"></ion-textarea>
+                <ion-textarea
+                  v-model="editForm.comment"
+                  placeholder="Commentaire sur la photo (optionnel)..."
+                  rows="3"
+                ></ion-textarea>
               </ion-item>
             </div>
 
-
-
             <div class="action-buttons">
-              <ion-button expand="block" @click="saveChanges"
-                :disabled="saving" class="save-button">
+              <ion-button
+                expand="block"
+                @click="saveChanges"
+                :disabled="saving"
+                class="save-button"
+              >
                 <ion-icon :icon="checkmark" slot="start" />
                 Enregistrer les modifications
               </ion-button>
-              <ion-button expand="block" fill="outline" @click="cancelEdit" :disabled="saving">
+              <ion-button
+                expand="block"
+                fill="outline"
+                @click="cancelEdit"
+                :disabled="saving"
+              >
                 Annuler
               </ion-button>
             </div>
@@ -188,15 +240,54 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonBackButton, IonButton, IonIcon, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonBadge, IonItem, IonLabel, IonTextarea, IonInput, IonSelect, IonSelectOption, IonSpinner, loadingController, toastController, alertController } from '@ionic/vue'
-import { create, close, trash, checkmark, checkmarkCircle, archive, location as locationIcon, person, time, alertCircle, camera, createOutline } from 'ionicons/icons'
-import { supabase } from '@/services/supabase'
+import {
+  IonPage,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonButtons,
+  IonBackButton,
+  IonButton,
+  IonIcon,
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardContent,
+  IonBadge,
+  IonItem,
+  IonLabel,
+  IonTextarea,
+  // IonInput, // Unused
+  // IonSelect, // Unused
+  // IonSelectOption, // Unused
+  IonSpinner,
+  loadingController,
+  toastController,
+  alertController
+} from '@ionic/vue'
+import {
+  create,
+  close,
+  // trash, // Unused
+  checkmark,
+  checkmarkCircle,
+  archive,
+  location as locationIcon,
+  person,
+  time,
+  alertCircle,
+  camera,
+  createOutline
+} from 'ionicons/icons'
+import { SignalementService } from '@/services/signalement-service'
 import { formatDateTime } from '@/utils/date'
 import { trackEvent } from '@/services/posthog'
 import { uploadImageToCloudinary } from '@/services/cloudinary'
+import { useGeocoding } from '@/composables/useGeocoding'
 
 const route = useRoute()
-const router = useRouter()
+const router = useRouter() // eslint-disable-line no-unused-vars
 
 const signalement = ref(null)
 const loading = ref(true)
@@ -213,18 +304,27 @@ const editForm = ref({
 const editPhoto = ref(null)
 const photoChanged = ref(false)
 
+const addressFromGps = ref('')
+
+const { getAddressFromCoordinates } = useGeocoding()
+
 const loadSignalement = async () => {
   loading.value = true
   try {
-    const { data, error } = await supabase
-      .from('signalements')
-      .select('*')
-      .eq('id', route.params.id)
-      .single()
+    const { data, error } = await SignalementService.getById(route.params.id)
 
     if (error) throw error
 
     signalement.value = data
+
+    // Si pas d'adresse mais coordonnées GPS, on essaie de récupérer l'adresse
+    if (!data.address && data.latitude && data.longitude) {
+      addressFromGps.value = await getAddressFromCoordinates(
+        data.latitude,
+        data.longitude
+      )
+    }
+
     // Initialiser le formulaire d'édition
     editForm.value = {
       description: data.description || '',
@@ -282,13 +382,13 @@ const takePhoto = async () => {
 
     editPhoto.value = image.dataUrl
     photoChanged.value = true
-    
+
     trackEvent('signalement_photo_changed', {
       signalement_id: signalement.value?.id
     })
   } catch (error) {
     console.error('Error taking photo:', error)
-    
+
     const toast = await toastController.create({
       message: 'Erreur lors de la prise de photo',
       duration: 2000,
@@ -301,7 +401,7 @@ const takePhoto = async () => {
 const removePhoto = () => {
   editPhoto.value = null
   photoChanged.value = true
-  
+
   trackEvent('signalement_photo_removed', {
     signalement_id: signalement.value?.id
   })
@@ -334,11 +434,11 @@ const saveChanges = async () => {
         // Convertir dataUrl en File pour Cloudinary
         const response = await fetch(editPhoto.value)
         const blob = await response.blob()
-        
+
         // Déterminer l'extension et le type MIME
         let extension = 'jpg'
         let mimeType = 'image/jpeg'
-        
+
         if (blob.type) {
           mimeType = blob.type
           if (blob.type === 'image/png') {
@@ -350,8 +450,12 @@ const saveChanges = async () => {
             mimeType = 'image/jpeg'
           }
         }
-        
-        const file = new File([blob], `signalement-${route.params.id}.${extension}`, { type: mimeType })
+
+        const file = new File(
+          [blob],
+          `signalement-${route.params.id}.${extension}`,
+          { type: mimeType }
+        )
         photoUrl = await uploadImageToCloudinary(file)
       } else {
         // Photo supprimée
@@ -370,17 +474,15 @@ const saveChanges = async () => {
       updateData.photo_url = photoUrl
     }
 
-    const { data, error } = await supabase
-      .from('signalements')
-      .update(updateData)
-      .eq('id', route.params.id)
-      .select()
-      .single()
+    const { data, error } = await SignalementService.update(
+      route.params.id,
+      updateData
+    )
 
     if (error) throw error
 
     const wasPhotoChanged = photoChanged.value
-    
+
     signalement.value = data
     isEditing.value = false
     photoChanged.value = false
@@ -391,7 +493,8 @@ const saveChanges = async () => {
       old_status: signalement.value?.status,
       new_status: editForm.value.status,
       fields_modified: {
-        description: editForm.value.description !== (signalement.value?.description || ''),
+        description:
+          editForm.value.description !== (signalement.value?.description || ''),
         comment: editForm.value.comment !== (signalement.value?.comment || ''),
         photo: wasPhotoChanged,
         status: editForm.value.status !== (signalement.value?.status || '')
@@ -418,7 +521,7 @@ const saveChanges = async () => {
     })
 
     const toast = await toastController.create({
-      message: 'Erreur lors de l\'enregistrement',
+      message: "Erreur lors de l'enregistrement",
       duration: 2000,
       color: 'danger'
     })
@@ -430,8 +533,9 @@ const saveChanges = async () => {
 
 const confirmArchive = async () => {
   const alert = await alertController.create({
-    header: 'Confirmer l\'archivage',
-    message: 'Êtes-vous sûr de vouloir archiver ce signalement ? Il sera déplacé dans les archives.',
+    header: "Confirmer l'archivage",
+    message:
+      'Êtes-vous sûr de vouloir archiver ce signalement ? Il sera déplacé dans les archives.',
     buttons: [
       {
         text: 'Annuler',
@@ -460,13 +564,14 @@ const archiveSignalement = async () => {
     // Sauvegarder le statut précédent pour le tracking
     const previousStatus = signalement.value?.status || 'unknown'
 
-    console.log('Archiving signalement:', route.params.id, 'Previous status:', previousStatus)
+    console.log(
+      'Archiving signalement:',
+      route.params.id,
+      'Previous status:',
+      previousStatus
+    )
 
-    const { data, error } = await supabase
-      .from('signalements')
-      .update({ status: 'archive', updated_at: new Date().toISOString() })
-      .eq('id', route.params.id)
-      .select()
+    const { data, error } = await SignalementService.archive(route.params.id)
 
     console.log('Update result:', { data, error })
 
@@ -477,7 +582,9 @@ const archiveSignalement = async () => {
 
     if (!data || data.length === 0) {
       console.error('No data returned from update')
-      throw new Error('Signalement non trouvé ou non autorisé à être mis à jour')
+      throw new Error(
+        'Signalement non trouvé ou non autorisé à être mis à jour'
+      )
     }
 
     // Mettre à jour le signalement local
@@ -512,7 +619,7 @@ const archiveSignalement = async () => {
     })
 
     const toast = await toastController.create({
-      message: 'Erreur lors de l\'archivage',
+      message: "Erreur lors de l'archivage",
       duration: 2000,
       color: 'danger'
     })
@@ -560,7 +667,7 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -681,85 +788,6 @@ onMounted(() => {
 }
 
 .form-section {
-  margin-bottom: 24px;
-}
-
-.section-title {
-  font-size: 18px;
-  font-weight: 600;
-  margin: 0 0 16px 0;
-  padding: 0 4px;
-}
-
-.form-item {
-  --background: var(--ion-color-light);
-  --border-radius: 12px;
-  margin-bottom: 16px;
-  padding: 4px 0;
-}
-
-.label-with-icon {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.edit-icon {
-  font-size: 16px;
-  color: var(--ion-color-primary);
-  opacity: 0.7;
-}
-
-.photo-button {
-  margin-bottom: 16px;
-}
-
-.photo-preview {
-  position: relative;
-  width: 100%;
-  border-radius: 12px;
-  overflow: hidden;
-  margin-top: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.photo-preview img {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.remove-photo-btn {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  --color: white;
-  --background: rgba(0, 0, 0, 0.5);
-  --border-radius: 50%;
-  width: 40px;
-  height: 40px;
-}
-
-.error-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  padding: 24px;
-  text-align: center;
-}
-
-.error-icon {
-  font-size: 64px;
-  color: var(--ion-color-medium);
-  margin-bottom: 16px;
-}
-
-.error-container h3 {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--ion-color-light);
-  margin: 0 0 24px 0;
+  // Styles for form sections can be added here if needed
 }
 </style>

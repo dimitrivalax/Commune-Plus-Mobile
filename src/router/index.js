@@ -22,7 +22,7 @@ const routes = [
       {
         path: 'signalements',
         name: 'signalements',
-        component: () => import('@/views/SignalementsPage.vue')
+        component: () => import('@/views/signalements-page.vue')
       },
       {
         path: 'reservations',
@@ -43,7 +43,7 @@ const routes = [
   {
     path: '/signalement/:id',
     name: 'signalement-detail',
-    component: () => import('@/views/SignalementDetailPage.vue')
+    component: () => import('@/views/signalement-detail-page.vue')
   },
   {
     path: '/reservation/new',

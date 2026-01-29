@@ -1,5 +1,5 @@
 <template>
-  <IonPage @ionViewWillEnter="loadSignalements">
+  <IonPage>
     <AppHeader title="Signalements"></AppHeader>
     <IonContent :fullscreen="true">
       <IonFab vertical="bottom" horizontal="end" slot="fixed">
@@ -108,12 +108,14 @@ import {
   IonRefresher,
   IonRefresherContent,
   IonSelect,
-  IonSelectOption
+  IonSelectOption,
+  onIonViewWillEnter
 } from '@ionic/vue'
 import { add, documentText } from 'ionicons/icons'
 import AppHeader from '@/components/AppHeader.vue'
-import { supabase } from '@/services/supabase'
+import { SignalementService } from '@/services/signalement-service'
 import { formatDateTime } from '@/utils/date'
+import { getOrCreateUserId } from '@/services/push-notifications'
 
 const signalements = ref([])
 const selectedStatus = ref('all')
@@ -127,10 +129,8 @@ const filteredSignalements = computed(() => {
 
 const loadSignalements = async (event) => {
   try {
-    const { data, error } = await supabase
-      .from('signalements')
-      .select('*')
-      .order('created_at', { ascending: false })
+    const userId = getOrCreateUserId()
+    const { data, error } = await SignalementService.getAll(userId)
 
     if (error) throw error
 
@@ -143,6 +143,10 @@ const loadSignalements = async (event) => {
     }
   }
 }
+
+onIonViewWillEnter(() => {
+  loadSignalements()
+})
 
 const getStatusColor = (status) => {
   switch (status) {
@@ -177,7 +181,7 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .filter-item {
   margin-bottom: 16px;
   --background: var(--ion-color-light);
@@ -196,11 +200,11 @@ onMounted(() => {
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   color: var(--ion-color-dark);
-}
 
-ion-thumbnail {
-  --size: 80px;
-  --border-radius: 8px;
+  ion-thumbnail {
+    --size: 80px;
+    --border-radius: 8px;
+  }
 }
 
 .comment-text {
@@ -230,24 +234,24 @@ ion-thumbnail {
 .empty-state {
   text-align: center;
   padding: 48px 24px;
+
+  h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ion-color-light);
+    margin: 0 0 8px 0;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    margin-bottom: 24px;
+  }
 }
 
 .empty-icon {
   font-size: 64px;
   color: var(--ion-color-light);
   margin-bottom: 16px;
-}
-
-.empty-state h3 {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--ion-color-light);
-  margin: 0 0 8px 0;
-}
-
-.empty-state p {
-  color: var(--ion-color-medium);
-  margin-bottom: 24px;
 }
 
 .empty-action {

@@ -46,6 +46,17 @@
               <ion-icon :icon="checkmarkCircleOutline" />
               Position enregistrée : {{ location.latitude.toFixed(6) }},
               {{ location.longitude.toFixed(6) }}
+              <span
+                v-if="addressFromGps"
+                style="
+                  display: block;
+                  margin-top: 4px;
+                  font-size: 0.9em;
+                  opacity: 0.9;
+                "
+              >
+                {{ addressFromGps }}
+              </span>
             </p>
             <p v-if="locationError" class="location-error">
               <ion-icon :icon="alertCircleOutline" />
@@ -237,6 +248,7 @@ import {
 import { sendSignalementEmail } from '@/services/email'
 import CitySetupModal from '@/components/CitySetupModal.vue'
 import { trackEvent } from '@/services/posthog'
+import { useGeocoding } from '@/composables/useGeocoding'
 import { getOrCreateUserId } from '@/services/push-notifications'
 
 const router = useRouter()
@@ -257,6 +269,8 @@ const hasSavedContact = ref(false)
 const hasCityInfo = ref(false)
 const cityInfo = ref(null)
 const showCityModal = ref(false)
+
+const { getAddressFromCoordinates } = useGeocoding()
 
 const takePhoto = async () => {
   try {
@@ -297,10 +311,13 @@ const removePhoto = () => {
   trackEvent('signalement_photo_removed')
 }
 
+const addressFromGps = ref('')
+
 const getCurrentLocation = async () => {
   gettingLocation.value = true
   locationError.value = ''
   useAddress.value = false // Réinitialiser le mode adresse si on essaie le GPS
+  addressFromGps.value = ''
 
   try {
     // Vérifier si on est sur le web
@@ -331,9 +348,15 @@ const getCurrentLocation = async () => {
         accuracy: position.coords.accuracy
       }
 
-      // Réinitialiser l'adresse si le GPS fonctionne
+      // Réinitialiser l'adresse manuelle si le GPS fonctionne
       address.value = ''
       useAddress.value = false
+
+      // Obtenir l'adresse depuis les coordonnées
+      addressFromGps.value = await getAddressFromCoordinates(
+        position.coords.latitude,
+        position.coords.longitude
+      )
 
       // Track GPS location obtained
       trackEvent('signalement_location_gps_obtained', {
@@ -377,9 +400,15 @@ const getCurrentLocation = async () => {
         accuracy: position.coords.accuracy
       }
 
-      // Réinitialiser l'adresse si le GPS fonctionne
+      // Réinitialiser l'adresse manuelle si le GPS fonctionne
       address.value = ''
       useAddress.value = false
+
+      // Obtenir l'adresse depuis les coordonnées
+      addressFromGps.value = await getAddressFromCoordinates(
+        position.coords.latitude,
+        position.coords.longitude
+      )
 
       // Track GPS location obtained
       trackEvent('signalement_location_gps_obtained', {
