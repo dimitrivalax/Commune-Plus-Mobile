@@ -1,39 +1,81 @@
 <template>
   <IonPage>
     <AppHeader title="Informations"></AppHeader>
-    <IonContent :fullscreen="true">
+    <IonContent ref="ionContentRef" :fullscreen="true">
       <div class="ion-padding">
-        <IonRefresher slot="fixed" @ionRefresh="loadInfo($event)">
+        <IonRefresher slot="fixed" @ionRefresh="onRefresh($event)">
           <IonRefresherContent></IonRefresherContent>
         </IonRefresher>
 
-        <IonList v-if="infoItems.length > 0" class="info-list">
-          <IonItem
-            lines="none"
-            v-for="item in infoItems"
-            :key="item.id"
-            button
-            @click="$router.push(`/info/${item.id}`)"
-            class="info-item"
-          >
-            <IonIcon :icon="newspaper" slot="start" class="info-icon" />
-            <IonLabel>
-              <h2>{{ item.title }}</h2>
-              <div class="item-meta">
-                <span class="date-text">{{ formatDate(item.created_at) }}</span>
-                <IonBadge v-if="item.category" class="category-badge">
-                  {{ item.category }}
-                </IonBadge>
-              </div>
-            </IonLabel>
-            <IonIcon :icon="chevronForward" slot="end" class="chevron-icon" />
-          </IonItem>
-        </IonList>
+        <!-- Infinite scroll vers le haut (charger les plus anciennes) -->
+        <IonInfiniteScroll
+          v-if="hasMoreOlder && infoItems.length > 0"
+          position="top"
+          :disabled="loadingOlder"
+          @ionInfinite="loadOlder($event)"
+        >
+          <IonInfiniteScrollContent
+            loading-spinner="crescent"
+            loading-text="Chargement..."
+          ></IonInfiniteScrollContent>
+        </IonInfiniteScroll>
 
-        <div v-else class="empty-state">
+        <template v-if="groupedByDate.length > 0">
+          <div
+            v-for="group in groupedByDate"
+            :key="group.dateKey"
+            class="date-group"
+          >
+            <div class="date-group-header">
+              <IonIcon :icon="calendarOutline" class="date-group-icon" />
+              <span class="date-group-label">{{ group.label }}</span>
+            </div>
+            <IonList class="info-list">
+              <IonItem
+                v-for="item in group.items"
+                :key="item.id"
+                lines="none"
+                button
+                class="info-item"
+                @click="$router.push(`/info/${item.id}`)"
+              >
+                <IonIcon :icon="newspaper" slot="start" class="info-icon" />
+                <IonLabel>
+                  <p>{{ item.title }}</p>
+                  <div class="item-meta">
+
+                    <IonBadge v-if="item.category" class="category-badge">
+                      {{ item.category }}
+                    </IonBadge>
+                  </div>
+                </IonLabel>
+                <IonIcon :icon="chevronForward" slot="end" class="chevron-icon" />
+              </IonItem>
+            </IonList>
+          </div>
+
+          <!-- Infinite scroll vers le bas (charger les plus récentes) -->
+          <IonInfiniteScroll
+            v-if="hasMoreNewer"
+            :disabled="loadingNewer"
+            @ionInfinite="loadNewer($event)"
+          >
+            <IonInfiniteScrollContent
+              loading-spinner="crescent"
+              loading-text="Chargement..."
+            ></IonInfiniteScrollContent>
+          </IonInfiniteScroll>
+        </template>
+
+        <div v-else-if="!initialLoading" class="empty-state">
           <IonIcon :icon="newspaperOutline" class="empty-icon" />
           <h3>Aucune information</h3>
           <p>Aucune information disponible pour le moment.</p>
+        </div>
+
+        <div v-else class="loading-state">
+          <IonSpinner name="crescent" class="loading-spinner" />
+          <p>Chargement des informations...</p>
         </div>
       </div>
     </IonContent>
@@ -41,7 +83,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import {
   IonPage,
   IonContent,
@@ -51,44 +93,200 @@ import {
   IonBadge,
   IonIcon,
   IonRefresher,
-  IonRefresherContent
+  IonRefresherContent,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
+  IonSpinner
 } from '@ionic/vue'
-import { newspaper, newspaperOutline, chevronForward } from 'ionicons/icons'
+import { newspaper, newspaperOutline, chevronForward, calendarOutline } from 'ionicons/icons'
 import AppHeader from '@/components/app-header.vue'
 import { InformationService } from '@/services/information-service'
-import { formatDate } from '@/utils/date'
+import { formatDateGroupLabel, formatTimeFromDateTime } from '@/utils/date'
+import { getCityInfo, getCityIdFromDatabase } from '@/utils/storage'
 
+const ionContentRef = ref(null)
 const infoItems = ref([])
+const hasMoreOlder = ref(true)
+const hasMoreNewer = ref(true)
+const loadingOlder = ref(false)
+const loadingNewer = ref(false)
+const initialLoading = ref(true)
 
-const loadInfo = async (event) => {
-  try {
-    const { data, error } = await InformationService.getAll()
+const getCommuneId = async () => {
+  const cityInfo = getCityInfo()
+  if (cityInfo?.id) return cityInfo.id
+  return await getCityIdFromDatabase()
+}
 
-    if (error) throw error
+const getMinEventDate = () => {
+  const dates = infoItems.value.map((i) => i.event_date).filter(Boolean)
+  return dates.length ? dates.sort()[0] : null
+}
 
-    infoItems.value = data || []
-  } catch (error) {
-    console.error('Error loading info:', error)
-  } finally {
-    if (event) {
-      event.target.complete()
+const getMaxEventDate = () => {
+  const dates = infoItems.value.map((i) => i.event_date).filter(Boolean)
+  return dates.length ? dates.sort().pop() : null
+}
+
+const getDateKey = (dateString) => {
+  if (!dateString) return ''
+  const d = new Date(dateString)
+  return d.toISOString().split('T')[0]
+}
+
+const groupedByDate = computed(() => {
+  const groups = new Map()
+  for (const item of infoItems.value) {
+    const dateStr = item.event_date || item.created_at
+    const dateKey = getDateKey(dateStr)
+    if (!groups.has(dateKey)) {
+      groups.set(dateKey, {
+        dateKey,
+        label: formatDateGroupLabel(dateStr),
+        items: []
+      })
     }
+    groups.get(dateKey).items.push(item)
+  }
+  return Array.from(groups.values())
+})
+
+const loadInitial = async () => {
+  const communeId = await getCommuneId()
+  const today = new Date().toISOString().split('T')[0]
+  const { data, error, hasMoreOlder: moreOlder, hasMoreNewer: moreNewer } = await InformationService.getInitial(communeId, today)
+  if (error) throw error
+  infoItems.value = data || []
+  hasMoreOlder.value = moreOlder
+  hasMoreNewer.value = moreNewer
+}
+
+const loadOlder = async (event) => {
+  if (loadingOlder.value || !hasMoreOlder.value) {
+    event?.target?.complete()
+    return
+  }
+  const minDate = getMinEventDate()
+  if (!minDate) {
+    hasMoreOlder.value = false
+    event?.target?.complete()
+    return
+  }
+  loadingOlder.value = true
+  try {
+    const communeId = await getCommuneId()
+    const { data, error, hasMore } = await InformationService.getOlderThan(communeId, minDate)
+    if (error) throw error
+    if (data?.length) {
+      infoItems.value = [...(data || []), ...infoItems.value]
+    }
+    hasMoreOlder.value = hasMore
+  } catch (err) {
+    console.error('Error loading older info:', err)
+    hasMoreOlder.value = false
+  } finally {
+    loadingOlder.value = false
+    event?.target?.complete()
   }
 }
 
-onMounted(() => {
-  loadInfo()
+const loadNewer = async (event) => {
+  if (loadingNewer.value || !hasMoreNewer.value) {
+    event?.target?.complete()
+    return
+  }
+  const maxDate = getMaxEventDate()
+  if (!maxDate) {
+    hasMoreNewer.value = false
+    event?.target?.complete()
+    return
+  }
+  loadingNewer.value = true
+  try {
+    const communeId = await getCommuneId()
+    const { data, error, hasMore } = await InformationService.getNewerThan(communeId, maxDate)
+    if (error) throw error
+    if (data?.length) {
+      infoItems.value = [...infoItems.value, ...(data || [])]
+    }
+    hasMoreNewer.value = hasMore
+  } catch (err) {
+    console.error('Error loading newer info:', err)
+    hasMoreNewer.value = false
+  } finally {
+    loadingNewer.value = false
+    event?.target?.complete()
+  }
+}
+
+const onRefresh = async (event) => {
+  hasMoreOlder.value = true
+  hasMoreNewer.value = true
+  initialLoading.value = false
+  try {
+    await loadInitial()
+  } catch (err) {
+    console.error('Error refreshing info:', err)
+  } finally {
+    event.target.complete()
+    await nextTick()
+    setTimeout(() => {
+      ionContentRef.value?.$el?.scrollToTop(0)
+    }, 50)
+  }
+}
+
+onMounted(async () => {
+  try {
+    await loadInitial()
+  } catch (err) {
+    console.error('Error loading info:', err)
+  } finally {
+    initialLoading.value = false
+    await nextTick()
+    setTimeout(() => {
+      ionContentRef.value?.$el?.scrollToTop(0)
+    }, 50)
+  }
 })
 </script>
 
 <style lang="scss" scoped>
+.date-group {
+  margin-bottom: 24px;
+
+  &:last-child {
+    margin-bottom: 16px;
+  }
+}
+
+.date-group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 6px 0;
+
+  .date-group-icon {
+    font-size: 18px;
+    color: var(--ion-color-primary);
+  }
+
+  .date-group-label {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ion-color-primary);
+    text-transform: capitalize;
+  }
+}
+
 .info-list {
   background: transparent;
 }
 
 .info-item {
   --background: white;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 
@@ -112,7 +310,7 @@ onMounted(() => {
   gap: 8px;
 }
 
-.date-text {
+.time-text {
   font-size: 13px;
   color: var(--ion-color-medium);
 }
@@ -121,13 +319,18 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
-.empty-state {
+.empty-state,
+.loading-state {
   text-align: center;
   padding: 48px 24px;
 
   .empty-icon {
     font-size: 64px;
     color: var(--ion-color-light);
+    margin-bottom: 16px;
+  }
+
+  .loading-spinner {
     margin-bottom: 16px;
   }
 

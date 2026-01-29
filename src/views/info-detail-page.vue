@@ -70,6 +70,8 @@ import 'swiper/css'
 import 'swiper/css/pagination'
 import { InformationService } from '@/services/information-service'
 import { formatDate } from '@/utils/date'
+import { getCityInfo } from '@/utils/storage'
+import { getCityIdFromDatabase } from '@/utils/storage'
 
 const route = useRoute()
 const router = useRouter()
@@ -77,10 +79,17 @@ const infoItems = ref([])
 const loading = ref(true)
 const initialSlide = ref(0)
 
+const getCommuneId = async () => {
+  const cityInfo = getCityInfo()
+  if (cityInfo?.id) return cityInfo.id
+  return await getCityIdFromDatabase()
+}
+
 const loadInfoItems = async () => {
   loading.value = true
   try {
-    const { data, error } = await InformationService.getAll()
+    const communeId = await getCommuneId()
+    const { data, error } = await InformationService.getAll(communeId)
 
     if (error) throw error
 
