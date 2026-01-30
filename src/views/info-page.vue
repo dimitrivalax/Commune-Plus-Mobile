@@ -8,7 +8,7 @@
         </IonRefresher>
 
         <!-- Infinite scroll vers le haut (charger les plus anciennes) -->
-        <IonInfiniteScroll
+        <!-- <IonInfiniteScroll
           v-if="hasMoreOlder && infoItems.length > 0"
           position="top"
           :disabled="loadingOlder"
@@ -18,7 +18,7 @@
             loading-spinner="crescent"
             loading-text="Chargement..."
           ></IonInfiniteScrollContent>
-        </IonInfiniteScroll>
+        </IonInfiniteScroll> -->
 
         <template v-if="groupedByDate.length > 0">
           <div
@@ -162,6 +162,7 @@ const loadInitial = async () => {
 }
 
 const loadOlder = async (event) => {
+  console.log('loadOlder', loadingOlder.value, hasMoreOlder.value)
   if (loadingOlder.value || !hasMoreOlder.value) {
     event?.target?.complete()
     return
