@@ -266,6 +266,11 @@ async function savePushToken(token) {
     const cityInfo = getCityInfo()
     console.log('City info:', cityInfo)
     
+    // Récupérer les informations de contact utilisateur (email)
+    const userContact = getUserContact()
+    const userEmail = userContact?.email?.toLowerCase() || null
+    console.log('User contact email:', userEmail)
+    
     // Générer ou récupérer un identifiant utilisateur unique
     const userId = getOrCreateUserId()
     console.log('User ID:', userId)
@@ -306,6 +311,7 @@ async function savePushToken(token) {
         .from('push_tokens')
         .update({
           user_id: userId,
+          email: userEmail,
           commune_id: communeId,
           platform,
           device_id: deviceId,
@@ -326,6 +332,7 @@ async function savePushToken(token) {
       const tokenData = {
         token,
         user_id: userId,
+        email: userEmail,
         commune_id: communeId,
         platform,
         device_id: deviceId,
