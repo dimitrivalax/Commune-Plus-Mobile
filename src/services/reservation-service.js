@@ -89,5 +89,19 @@ export const ReservationService = {
     }
     
     return await query.order('nom', { ascending: true })
+  },
+
+  /**
+   * Fetch all reservations for a specific room
+   * @param {string} salleId - The ID of the room
+   * @returns {Promise<{data: any[], error: any}>}
+   */
+  async getReservationsBySalle(salleId) {
+    return await supabase
+      .from('reservations_salles')
+      .select('*')
+      .eq('salle_id', salleId)
+      .in('status', ['en_attente', 'confirmée'])
+      .order('date', { ascending: true })
   }
 }

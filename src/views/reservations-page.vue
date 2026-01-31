@@ -40,6 +40,9 @@
                   {{ formatTime(reservation.end_time) }}</span
                 >
               </div>
+              <p v-if="reservation.reason" class="reason-text">
+                {{ reservation.reason }}
+              </p>
               <IonBadge
                 :color="getStatusColor(reservation.status)"
                 class="status-badge"
@@ -178,6 +181,16 @@ onActivated(() => {
 .time-text {
   font-size: 13px;
   color: var(--ion-color-medium);
+}
+
+.reason-text {
+  font-size: 14px;
+  color: var(--ion-color-step-600);
+  margin: 8px 0 0 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-style: italic;
 }
 
 .status-badge {

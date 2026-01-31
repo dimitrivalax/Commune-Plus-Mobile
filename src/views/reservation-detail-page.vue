@@ -217,7 +217,7 @@
 
               <ion-item lines="none" class="form-item">
                 <ion-label position="stacked"
-                  >Raison de la réservation</ion-label
+                  >Raison de la réservation (obligatoire)</ion-label
                 >
                 <ion-textarea
                   v-model="editForm.reason"
@@ -463,7 +463,9 @@ const isFormValid = computed(() => {
     editForm.value.startTime &&
     editForm.value.endTime &&
     editForm.value.name &&
-    editForm.value.email
+    editForm.value.email &&
+    editForm.value.reason &&
+    editForm.value.reason.trim() !== ''
   )
 })
 
