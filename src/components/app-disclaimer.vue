@@ -1,9 +1,10 @@
 <template>
   <div class="disclaimer-container">
-    <div class="disclaimer-title">
-      <ion-icon :icon="informationCircleOutline" />
-      <span>Note importante</span>
-    </div>
+    <div class="disclaimer-title"></div>
+    <p class="disclaimer-link">
+      Pour toutes questions contactez-nous par email :
+      <a href="mailto:contact@commune-plus.fr">contact@commune-plus.fr</a>
+    </p>
     <p class="disclaimer-link">
       Consulter les
       <a
