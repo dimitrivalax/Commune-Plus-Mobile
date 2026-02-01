@@ -39,7 +39,7 @@
             <ion-input
               v-model="formData.name"
               type="text"
-              placeholder="Ex: Paris"
+              placeholder="Ex: Venerque"
               required
               :disabled="isSubmitting"
             ></ion-input>
@@ -52,7 +52,7 @@
             <ion-input
               v-model="formData.postalCode"
               type="text"
-              placeholder="Ex: 75001"
+              placeholder="Ex: 31810"
               pattern="[0-9]{5}"
               maxlength="5"
               required
@@ -62,7 +62,7 @@
 
           <ion-item lines="none">
             <ion-label position="stacked"
-              >Email de la commune
+              >Email de la commune (pour les test je bloque ce champ)
               <ion-text color="danger">*</ion-text></ion-label
             >
             <ion-input
@@ -70,7 +70,7 @@
               type="email"
               placeholder="Ex: contact@mairie.fr"
               required
-              :disabled="isSubmitting"
+              :disabled="true"
             ></ion-input>
           </ion-item>
 
@@ -129,7 +129,7 @@ const emit = defineEmits(['close', 'saved'])
 const formData = ref({
   name: '',
   postalCode: '',
-  email: ''
+  email: 'contact@commune-plus.fr'
 })
 
 const isSubmitting = ref(false)

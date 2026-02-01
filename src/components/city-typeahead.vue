@@ -3,9 +3,6 @@
     <ion-item>
       <ion-label position="stacked">
         Rechercher une commune existante
-        <ion-text color="medium" style="font-size: 12px; font-weight: normal">
-          (optionnel)
-        </ion-text>
       </ion-label>
       <ion-input
         v-model="searchTerm"

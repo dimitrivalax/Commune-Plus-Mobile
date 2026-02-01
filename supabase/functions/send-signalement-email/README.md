@@ -45,19 +45,19 @@ Elle attend les données suivantes dans le body de la requête :
   "firstName": "Jean",
   "lastName": "Dupont",
   "email": "jean.dupont@example.com",
-  "commune": "Paris",
+  "commune": "Venerque",
   "description": "Description du signalement",
   "photoUrl": "https://res.cloudinary.com/...",
-  "mairieEmail": "mairie@paris.fr"
+  "mairieEmail": "mairie@Venerque.fr"
 }
 ```
 
 ## Format de l'email
 
 L'email envoyé contient :
+
 - **Objet** : "Signalement automatique via Commune Plus"
 - **Corps HTML** : Message formaté avec les informations du signalement
 - **Corps texte** : Version texte de l'email
 - **Photo** : URL de la photo du signalement (si disponible) incluse dans le corps de l'email
 - **Reply-To** : Email de l'utilisateur (si fourni) pour permettre à la mairie de répondre directement
-
