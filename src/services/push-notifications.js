@@ -55,16 +55,28 @@ export async function initializePushNotifications() {
       
       try {
         const router = (await import('@/router')).default
-        
-        // Attendre que le router soit prêt
         await router.isReady()
-        
         console.log('Navigating to signalement page:', `/signalement/${signalementId}`)
-        
-        // Naviguer vers la page de détail du signalement
         router.push(`/signalement/${signalementId}`)
       } catch (error) {
         console.error('Error navigating to signalement:', error)
+      }
+    }
+
+    // Fonction helper pour naviguer vers une doléance
+    const navigateToProposition = async (propositionId) => {
+      if (!propositionId) {
+        console.warn('No proposition ID provided for navigation')
+        return
+      }
+      
+      try {
+        const router = (await import('@/router')).default
+        await router.isReady()
+        console.log('Navigating to proposition page:', `/proposition/${propositionId}`)
+        router.push(`/proposition/${propositionId}`)
+      } catch (error) {
+        console.error('Error navigating to proposition:', error)
       }
     }
 
@@ -106,6 +118,12 @@ export async function initializePushNotifications() {
         const infoId = data.info_id || data.infoId
         if (infoId) {
           await navigateToInfo(infoId)
+        }
+      } else if (notificationType === 'proposition' || data?.proposition_id || data?.propositionId) {
+        // Notification pour une doléance
+        const propositionId = data.proposition_id || data.propositionId
+        if (propositionId) {
+          await navigateToProposition(propositionId)
         }
       }
     })
@@ -161,6 +179,17 @@ export async function initializePushNotifications() {
           }, 500)
         } else {
           console.warn('No info_id found in notification data. Available keys:', Object.keys(data))
+        }
+      } else if (notificationType === 'proposition' || data?.proposition_id || data?.propositionId) {
+        // Notification pour une doléance
+        const propositionId = data.proposition_id || data.propositionId
+        if (propositionId) {
+          console.log('Found proposition_id in notification, navigating to:', propositionId)
+          setTimeout(async () => {
+            await navigateToProposition(propositionId)
+          }, 500)
+        } else {
+          console.warn('No proposition_id found in notification data. Available keys:', Object.keys(data))
         }
       } else {
         console.warn('Unknown notification type or missing ID. Available keys:', Object.keys(data))

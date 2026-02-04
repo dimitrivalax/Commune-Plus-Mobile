@@ -33,8 +33,22 @@ const routes = [
         path: 'info',
         name: 'info',
         component: () => import('@/views/info-page.vue')
+      },
+      {
+        path: 'propositions',
+        name: 'propositions',
+        component: () => import('@/views/propositions-page.vue')
       }
     ]
+  },
+  {
+    path: '/proposition/new',
+    component: () => import('@/views/new-proposition-page.vue')
+  },
+  {
+    path: '/proposition/:id',
+    name: 'proposition-detail',
+    component: () => import('@/views/proposition-detail-page.vue')
   },
   {
     path: '/signalement/new',

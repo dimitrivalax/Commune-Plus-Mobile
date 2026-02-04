@@ -90,12 +90,21 @@ import { add, calendar, calendarOutline } from 'ionicons/icons'
 import { ReservationService } from '@/services/reservation-service'
 import AppHeader from '@/components/app-header.vue'
 import { formatDate, formatTime } from '@/utils/date'
+import { getCityIdFromDatabase } from '@/utils/storage'
+import { getUserContact } from '@/utils/storage'
 
 const reservations = ref([])
 
 const loadReservations = async (event) => {
   try {
-    const { data, error } = await ReservationService.getAll()
+    const communeId = await getCityIdFromDatabase()
+    const contact = getUserContact()
+    const userEmail = contact?.email?.trim()
+
+    const { data, error } = await ReservationService.getMyReservationsInCommune(
+      communeId,
+      userEmail
+    )
 
     if (error) throw error
 

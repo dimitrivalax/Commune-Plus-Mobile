@@ -45,6 +45,20 @@
               <p>Consultez les dernières informations de la mairie.</p>
             </IonCardContent>
           </IonCard>
+
+          <IonCard
+            button
+            @click="$router.push('/tabs/propositions')"
+            class="service-card"
+          >
+            <IonCardContent>
+              <div class="service-icon">
+                <IonIcon :icon="book" />
+              </div>
+              <h3>Cahier de Doléances</h3>
+              <p>Partagez vos idées et propositions pour la commune.</p>
+            </IonCardContent>
+          </IonCard>
         </div>
       </div>
     </IonContent>
@@ -59,7 +73,7 @@ import {
   IonCardContent,
   IonIcon
 } from '@ionic/vue'
-import { warning, calendar, informationCircle } from 'ionicons/icons'
+import { warning, calendar, informationCircle, book } from 'ionicons/icons'
 import AppHeader from '@/components/app-header.vue'
 </script>
 

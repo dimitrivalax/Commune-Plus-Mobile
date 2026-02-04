@@ -22,6 +22,11 @@
           <ion-icon :icon="informationCircle" />
           <ion-label>Infos</ion-label>
         </ion-tab-button>
+
+        <ion-tab-button tab="propositions" href="/tabs/propositions">
+          <ion-icon :icon="book" />
+          <ion-label>Doléances</ion-label>
+        </ion-tab-button>
       </ion-tab-bar>
     </ion-tabs>
   </ion-page>
@@ -37,7 +42,13 @@ import {
   IonIcon,
   IonPage
 } from '@ionic/vue'
-import { home, warning, calendar, informationCircle } from 'ionicons/icons'
+import {
+  home,
+  warning,
+  calendar,
+  informationCircle,
+  book
+} from 'ionicons/icons'
 </script>
 
 <style lang="scss">

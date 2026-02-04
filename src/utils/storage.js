@@ -280,7 +280,6 @@ export const saveCityInfoToDatabase = async (cityData) => {
       id: result.id
     })
 
-    console.log('City info saved successfully to database:', result)
     return result
   } catch (error) {
     console.error('Error saving city info to database:', error)

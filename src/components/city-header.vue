@@ -1,8 +1,6 @@
 <template>
   <div class="city-header">
-    <ion-row
-      class="ion-justify-content-center ion-align-content-center ion-align-items-center"
-    >
+    <ion-row class="ion-justify-content-center ion-align-content-center ion-align-items-center">
       <h1 class="city-name">{{ cityName }}</h1>
       <img v-if="showLogo" :src="logoUrl" alt="Logo" class="city-logo" />
     </ion-row>
@@ -13,6 +11,9 @@
 import { computed } from 'vue'
 import { cityConfig } from '@/config/city'
 import { getCityInfo } from '@/utils/storage'
+import {
+  IonRow
+} from '@ionic/vue'
 
 const cityInfo = getCityInfo()
 

@@ -2,7 +2,42 @@ import { supabase } from '@/services/supabase'
 
 export const ReservationService = {
   /**
-   * Fetch all reservations with hall details
+   * Fetch reservations for the current user in the given commune only.
+   * Uses user email (from storage) and commune id (from storage) to filter.
+   * @param {string} communeId - Current commune ID (from getCityIdFromDatabase)
+   * @param {string} userEmail - Current user email (from getUserContact)
+   * @returns {Promise<{data: any[], error: any}>}
+   */
+  async getMyReservationsInCommune(communeId, userEmail) {
+    if (!communeId || !userEmail) {
+      return { data: [], error: null }
+    }
+
+    const { data: salles, error: sallesError } = await supabase
+      .from('salles')
+      .select('id')
+      .eq('commune_id', communeId)
+
+    if (sallesError) return { data: null, error: sallesError }
+    const salleIds = (salles || []).map((s) => s.id)
+    if (salleIds.length === 0) {
+      return { data: [], error: null }
+    }
+
+    const normalizedEmail = userEmail.trim().toLowerCase()
+    return await supabase
+      .from('reservations_salles')
+      .select(`
+        *,
+        salle:salles(id, nom)
+      `)
+      .eq('email', normalizedEmail)
+      .in('salle_id', salleIds)
+      .order('date', { ascending: false })
+  },
+
+  /**
+   * Fetch all reservations with hall details (no filter - use getMyReservationsInCommune for mobile list)
    * @returns {Promise<{data: any[], error: any}>}
    */
   async getAll() {

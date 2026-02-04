@@ -18,15 +18,6 @@ export const uploadImageToCloudinary = async (file) => {
     throw new Error('Invalid file provided for upload')
   }
 
-  // Log pour débogage (sans exposer les valeurs sensibles)
-  console.log('Uploading to Cloudinary:', {
-    cloudName: cloudinaryCloudName,
-    uploadPreset: cloudinaryUploadPreset,
-    fileName: file.name,
-    fileSize: file.size,
-    fileType: file.type
-  })
-
   const formData = new FormData()
   formData.append('file', file)
   formData.append('upload_preset', cloudinaryUploadPreset)

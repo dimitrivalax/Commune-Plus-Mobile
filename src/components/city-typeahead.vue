@@ -72,7 +72,6 @@ import {
   IonLabel,
   IonInput,
   IonIcon,
-  IonText,
   IonSpinner
 } from '@ionic/vue'
 import { searchOutline, hourglassOutline } from 'ionicons/icons'
