@@ -214,7 +214,7 @@ import {
   checkmarkCircleOutline,
   alertCircleOutline
 } from 'ionicons/icons'
-import { supabase } from '@/services/supabase'
+import { SignalementService } from '@/services/signalement-service'
 import { uploadImageToCloudinary } from '@/services/cloudinary'
 import {
   saveUserContact,
@@ -627,36 +627,9 @@ const submitSignalement = async () => {
       dataToInsert.address = address.value
     }
 
-    // Sauvegarder dans Supabase
-    let { data, error } = await supabase
-      .from('signalements')
-      .insert([dataToInsert])
-      .select()
-
-    // Si l'erreur est due à l'absence de la colonne user_id (migration non exécutée),
-    // réessayer sans user_id
-    if (
-      error &&
-      error.code === 'PGRST204' &&
-      error.message?.includes('user_id')
-    ) {
-      console.warn(
-        'Column user_id does not exist yet, retrying without it. Please run the migration SQL.'
-      )
-      // Retirer user_id et réessayer
-      const dataWithoutUserId = { ...dataToInsert }
-      delete dataWithoutUserId.user_id
-
-      const retryResult = await supabase
-        .from('signalements')
-        .insert([dataWithoutUserId])
-        .select()
-
-      if (retryResult.error) throw retryResult.error
-      data = retryResult.data
-    } else if (error) {
-      throw error
-    }
+    // Sauvegarder via le service
+    const { data, error } = await SignalementService.create(dataToInsert)
+    if (error) throw error
 
     // Sauvegarder les coordonnées dans le localStorage pour les prochaines fois
     saveUserContact({

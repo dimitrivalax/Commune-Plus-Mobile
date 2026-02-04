@@ -137,7 +137,6 @@ import {
 } from '@ionic/vue'
 import { camera, closeCircle } from 'ionicons/icons'
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
-import { supabase } from '@/services/supabase'
 import { PropositionService } from '@/services/proposition-service'
 import { uploadImageToCloudinary } from '@/services/cloudinary'
 import {
@@ -254,14 +253,10 @@ const submitProposition = async () => {
       is_archived: false
     }
 
-    const { data: insertData, error: insertError } = await supabase
-      .from('propositions')
-      .insert([propositionData])
-      .select()
-      .single()
+    const { data: insertData, error: insertError } = await PropositionService.create(propositionData)
 
     if (insertError) {
-      console.error('Supabase insert error:', insertError)
+      console.error('Proposition create error:', insertError)
       throw insertError
     }
 

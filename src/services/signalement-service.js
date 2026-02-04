@@ -2,6 +2,36 @@ import { supabase } from '@/services/supabase'
 
 export const SignalementService = {
   /**
+   * Create a new signalement.
+   * If the table does not have user_id column yet (PGRST204), retries without user_id.
+   * @param {object} data - The signalement data
+   * @returns {Promise<{data: any[]|null, error: any}>}
+   */
+  async create(data) {
+    let { data: resultData, error } = await supabase
+      .from('signalements')
+      .insert([data])
+      .select()
+
+    if (error && error.code === 'PGRST204' && error.message?.includes('user_id')) {
+      console.warn(
+        'Column user_id does not exist yet, retrying without it. Please run the migration SQL.'
+      )
+      const dataWithoutUserId = { ...data }
+      delete dataWithoutUserId.user_id
+      const retry = await supabase
+        .from('signalements')
+        .insert([dataWithoutUserId])
+        .select()
+      if (retry.error) return { data: null, error: retry.error }
+      return { data: retry.data, error: null }
+    }
+
+    if (error) return { data: null, error }
+    return { data: resultData, error: null }
+  },
+
+  /**
    * Fetch all signalements for a specific user
    * @param {string} userId - The ID of the user
    * @returns {Promise<{data: any[], error: any}>}
