@@ -1,7 +1,7 @@
 import { PushNotifications } from '@capacitor/push-notifications'
 import { Capacitor } from '@capacitor/core'
 import { supabase } from './supabase'
-import { getCityInfo } from '@/utils/storage'
+import { getCityInfo, getUserContact } from '@/utils/storage'
 
 /**
  * Service de gestion des push notifications
@@ -459,6 +459,43 @@ export async function updatePushTokenCommune(communeId) {
     }
   } catch (error) {
     console.error('Error updating push token commune:', error)
+  }
+}
+
+/**
+ * Met à jour l'email des tokens push pour l'utilisateur courant.
+ * À appeler quand l'utilisateur renseigne son email (paramètres, signalement, réservation).
+ * @param {string} email - Email de l'utilisateur (sera stocké en minuscules)
+ */
+export async function updatePushTokenEmail(email) {
+  if (!email || typeof email !== 'string') {
+    return
+  }
+  const emailNormalized = email.trim().toLowerCase()
+  if (!emailNormalized) {
+    return
+  }
+  try {
+    const userId = getOrCreateUserId()
+    if (!userId) {
+      return
+    }
+    const { error } = await supabase
+      .from('push_tokens')
+      .update({
+        email: emailNormalized,
+        updated_at: new Date().toISOString()
+      })
+      .eq('user_id', userId)
+      .eq('is_active', true)
+
+    if (error) {
+      console.error('Error updating push token email:', error)
+    } else {
+      console.log('Push token(s) updated with email')
+    }
+  } catch (error) {
+    console.error('Error updating push token email:', error)
   }
 }
 

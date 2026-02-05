@@ -134,11 +134,12 @@
               </ion-item>
 
               <ion-item lines="none" class="form-item">
-                <ion-label position="stacked">Email</ion-label>
+                <ion-label position="stacked">Email *</ion-label>
                 <ion-input
                   v-model="email"
                   type="email"
                   placeholder="votre.email@exemple.com"
+                  required
                 ></ion-input>
               </ion-item>
 
@@ -162,6 +163,7 @@
             !photo ||
             !lastName ||
             !firstName ||
+            !email ||
             (!location && !address)
           "
           class="submit-button"
@@ -226,7 +228,10 @@ import { sendSignalementEmail } from '@/services/email'
 import CitySetupModal from '@/components/city-setup-modal.vue'
 import { trackEvent } from '@/services/posthog'
 import { useGeocoding } from '@/composables/useGeocoding'
-import { getOrCreateUserId } from '@/services/push-notifications'
+import {
+  getOrCreateUserId,
+  updatePushTokenEmail
+} from '@/services/push-notifications'
 
 const router = useRouter()
 const description = ref('')
@@ -535,9 +540,9 @@ const submitSignalement = async () => {
     return
   }
 
-  if (!email.value && !phone.value) {
+  if (!email.value?.trim()) {
     const toast = await toastController.create({
-      message: 'Veuillez renseigner au moins un email ou un téléphone',
+      message: 'Veuillez renseigner votre email',
       duration: 2000,
       color: 'warning'
     })
@@ -639,6 +644,10 @@ const submitSignalement = async () => {
       phone: phone.value,
       address: address.value
     })
+
+    if (email.value?.trim()) {
+      await updatePushTokenEmail(email.value.trim())
+    }
 
     // Envoyer l'email à la mairie si l'email de la mairie est configuré
     const cityInfoData = getCityInfo()

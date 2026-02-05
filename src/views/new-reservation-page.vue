@@ -125,19 +125,21 @@
           </p>
 
           <ion-item lines="none">
-            <ion-label position="stacked">Nom</ion-label>
+            <ion-label position="stacked">Nom *</ion-label>
             <ion-input
               v-model="newForm.name"
               placeholder="Votre nom"
+              required
             ></ion-input>
           </ion-item>
 
           <ion-item lines="none">
-            <ion-label position="stacked">Email</ion-label>
+            <ion-label position="stacked">Email *</ion-label>
             <ion-input
               v-model="newForm.email"
               type="email"
               placeholder="Votre email"
+              required
             ></ion-input>
           </ion-item>
 
@@ -209,6 +211,7 @@ import {
 import { ReservationService } from '@/services/reservation-service'
 import { formatDate, formatDateForDB, formatTime } from '@/utils/date'
 import { saveUserContact, getUserContact, getCityInfo } from '@/utils/storage'
+import { updatePushTokenEmail } from '@/services/push-notifications'
 
 const router = useRouter()
 
@@ -377,6 +380,10 @@ const submitReservation = async () => {
       email: newForm.value.email,
       phone: newForm.value.phone || ''
     })
+
+    if (newForm.value.email?.trim()) {
+      await updatePushTokenEmail(newForm.value.email.trim())
+    }
 
     await loadingToast.dismiss()
 

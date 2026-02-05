@@ -1,5 +1,23 @@
 import { supabase } from '@/services/supabase'
 
+/**
+ * Derive a deterministic UUID from an email (for fallback when proposition_votes has no email column).
+ * Same email always returns the same UUID so one person = one vote.
+ * @param {string} email - Normalized email
+ * @returns {Promise<string>} UUID string
+ */
+async function userIdFromEmail(email) {
+  const buf = await crypto.subtle.digest(
+    'SHA-256',
+    new TextEncoder().encode(email.toLowerCase().trim())
+  )
+  const hex = Array.from(new Uint8Array(buf))
+    .slice(0, 16)
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-a${hex.slice(17, 20)}-${hex.slice(20, 32)}`
+}
+
 export const PropositionService = {
   /**
    * Fetch all propositions for a commune
@@ -17,12 +35,13 @@ export const PropositionService = {
   },
 
   /**
-   * Fetch a single proposition by ID with its comments and user's vote status
+   * Fetch a single proposition by ID with its comments and user's vote status.
+   * Vote status is determined by user email (from getUserContact).
    * @param {string} id - The proposition ID
-   * @param {string} userId - The current user's ID
+   * @param {string} [userEmail] - The current user's email (optional; if missing, has_voted will be false)
    * @returns {Promise<{data: any, error: any}>}
    */
-  async getById(id, userId) {
+  async getById(id, userEmail) {
     // Get proposition
     const { data: proposition, error: propError } = await supabase
       .from('propositions')
@@ -39,19 +58,37 @@ export const PropositionService = {
       .eq('proposition_id', id)
       .order('created_at', { ascending: true })
 
-    // Check if current user has voted
-    const { data: userVote, error: voteError } = await supabase
-      .from('proposition_votes')
-      .select('id')
-      .eq('proposition_id', id)
-      .eq('user_id', userId)
-      .maybeSingle()
+    // Check if current user has voted (by email, or by user_id if schema has no email column)
+    let hasVoted = false
+    const emailNormalized =
+      userEmail && typeof userEmail === 'string'
+        ? userEmail.trim().toLowerCase()
+        : null
+    if (emailNormalized) {
+      let { data: userVote, error: voteErr } = await supabase
+        .from('proposition_votes')
+        .select('id')
+        .eq('proposition_id', id)
+        .eq('email', emailNormalized)
+        .maybeSingle()
+      if (voteErr && voteErr.code === 'PGRST204' && voteErr.message?.includes('email')) {
+        const uid = await userIdFromEmail(emailNormalized)
+        const retry = await supabase
+          .from('proposition_votes')
+          .select('id')
+          .eq('proposition_id', id)
+          .eq('user_id', uid)
+          .maybeSingle()
+        userVote = retry.data
+      }
+      hasVoted = !!userVote
+    }
 
     return {
       data: {
         ...proposition,
         comments: comments || [],
-        has_voted: !!userVote
+        has_voted: hasVoted
       },
       error: null
     }
@@ -98,27 +135,52 @@ export const PropositionService = {
   },
 
   /**
-   * Vote for a proposition
+   * Vote for a proposition (identified by email).
    * @param {string} propositionId - The proposition ID
-   * @param {string} userId - The user ID
+   * @param {string} userEmail - The user's email
    * @returns {Promise<{data: any, error: any}>}
    */
-  async vote(propositionId, userId) {
-    // 1. Check if already voted (redundant with UNIQUE constraint but cleaner error handling)
-    const { data: existingVote } = await supabase
+  async vote(propositionId, userEmail) {
+    const emailNormalized =
+      userEmail && typeof userEmail === 'string'
+        ? userEmail.trim().toLowerCase()
+        : null
+    if (!emailNormalized) {
+      return { data: null, error: { message: 'Email requis pour voter' } }
+    }
+
+    // 1. Check if already voted (by email, or by user_id if schema has no email)
+    let { data: existingVote, error: checkErr } = await supabase
       .from('proposition_votes')
       .select('id')
       .eq('proposition_id', propositionId)
-      .eq('user_id', userId)
+      .eq('email', emailNormalized)
       .maybeSingle()
 
+    if (checkErr && checkErr.code === 'PGRST204' && checkErr.message?.includes('email')) {
+      const uid = await userIdFromEmail(emailNormalized)
+      const retry = await supabase
+        .from('proposition_votes')
+        .select('id')
+        .eq('proposition_id', propositionId)
+        .eq('user_id', uid)
+        .maybeSingle()
+      existingVote = retry.data
+    }
     if (existingVote) return { data: null, error: { message: 'Already voted' } }
 
-    // 2. Insert vote
-    const { error: voteError } = await supabase
+    // 2. Insert vote (email, or user_id if schema has no email column)
+    let votePayload = { proposition_id: propositionId, email: emailNormalized }
+    let { error: voteError } = await supabase
       .from('proposition_votes')
-      .insert([{ proposition_id: propositionId, user_id: userId }])
+      .insert([votePayload])
 
+    if (voteError && voteError.code === 'PGRST204' && voteError.message?.includes('email')) {
+      const uid = await userIdFromEmail(emailNormalized)
+      votePayload = { proposition_id: propositionId, user_id: uid }
+      const retry = await supabase.from('proposition_votes').insert([votePayload])
+      voteError = retry.error
+    }
     if (voteError) return { data: null, error: voteError }
 
     // 3. Increment vote count on proposition
@@ -144,27 +206,59 @@ export const PropositionService = {
   },
 
   /**
-   * Remove vote for a proposition (unvote)
+   * Remove vote for a proposition (unvote), identified by email.
    * @param {string} propositionId - The proposition ID
-   * @param {string} userId - The user ID
+   * @param {string} userEmail - The user's email
    * @returns {Promise<{data: any, error: any}>}
    */
-  async unvote(propositionId, userId) {
-    const { data: existingVote, error: findError } = await supabase
+  async unvote(propositionId, userEmail) {
+    const emailNormalized =
+      userEmail && typeof userEmail === 'string'
+        ? userEmail.trim().toLowerCase()
+        : null
+    if (!emailNormalized) {
+      return { data: null, error: { message: 'Email requis' } }
+    }
+
+    let { data: existingVote, error: findError } = await supabase
       .from('proposition_votes')
       .select('id')
       .eq('proposition_id', propositionId)
-      .eq('user_id', userId)
+      .eq('email', emailNormalized)
       .maybeSingle()
 
+    let deleteFilter = { proposition_id: propositionId, email: emailNormalized }
+    if (findError && findError.code === 'PGRST204' && findError.message?.includes('email')) {
+      const uid = await userIdFromEmail(emailNormalized)
+      const retry = await supabase
+        .from('proposition_votes')
+        .select('id')
+        .eq('proposition_id', propositionId)
+        .eq('user_id', uid)
+        .maybeSingle()
+      findError = retry.error
+      existingVote = retry.data
+      deleteFilter = { proposition_id: propositionId, user_id: uid }
+    }
     if (findError) return { data: null, error: findError }
     if (!existingVote) return { data: null, error: { message: 'No vote to remove' } }
 
-    const { error: deleteError } = await supabase
-      .from('proposition_votes')
-      .delete()
-      .eq('proposition_id', propositionId)
-      .eq('user_id', userId)
+    let deleteError
+    if (deleteFilter.email !== undefined) {
+      const res = await supabase
+        .from('proposition_votes')
+        .delete()
+        .eq('proposition_id', propositionId)
+        .eq('email', emailNormalized)
+      deleteError = res.error
+    } else {
+      const res = await supabase
+        .from('proposition_votes')
+        .delete()
+        .eq('proposition_id', propositionId)
+        .eq('user_id', deleteFilter.user_id)
+      deleteError = res.error
+    }
 
     if (deleteError) return { data: null, error: deleteError }
 
@@ -219,16 +313,19 @@ export const PropositionService = {
         return
       }
 
+      const body = {
+        proposition_id: propositionId,
+        type
+      }
+      if (commentContent != null && commentContent !== '') {
+        body.comment_content = commentContent
+      }
       await fetch(`${apiUrl}/api/propositions/notify`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          proposition_id: propositionId,
-          type,
-          comment_content: commentContent
-        })
+        body: JSON.stringify(body)
       })
     } catch (error) {
       console.error('Failed to send notification via BackOffice API:', error)

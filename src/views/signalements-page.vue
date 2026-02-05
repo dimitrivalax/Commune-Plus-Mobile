@@ -115,7 +115,7 @@ import { add, documentText } from 'ionicons/icons'
 import AppHeader from '@/components/app-header.vue'
 import { SignalementService } from '@/services/signalement-service'
 import { formatDateTime } from '@/utils/date'
-import { getOrCreateUserId } from '@/services/push-notifications'
+import { getCityIdFromDatabase, getUserContact } from '@/utils/storage'
 
 const signalements = ref([])
 const selectedStatus = ref('all')
@@ -129,8 +129,14 @@ const filteredSignalements = computed(() => {
 
 const loadSignalements = async (event) => {
   try {
-    const userId = getOrCreateUserId()
-    const { data, error } = await SignalementService.getAll(userId)
+    const communeId = await getCityIdFromDatabase()
+    const contact = getUserContact()
+    const userEmail = contact?.email?.trim()
+
+    const { data, error } = await SignalementService.getMySignalementsInCommune(
+      communeId,
+      userEmail
+    )
 
     if (error) throw error
 

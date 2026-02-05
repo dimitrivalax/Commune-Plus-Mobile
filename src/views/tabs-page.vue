@@ -60,8 +60,15 @@ ion-tab-bar {
   padding-bottom: calc(8px + var(--ion-safe-area-bottom, 0px));
 }
 
+button-native {
+  --color-selected: var(--ion-color-secondary);
+  --color-focused: var(--ion-color-secondary);
+}
+
 ion-tab-button {
+  --color: var(--ion-color-medium);
   --color-selected: var(--ion-color-primary);
+  --color-focused: var(--ion-color-secondary);
   font-size: 12px;
   font-weight: 500;
 

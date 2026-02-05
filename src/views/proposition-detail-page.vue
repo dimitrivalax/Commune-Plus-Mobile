@@ -165,7 +165,6 @@ import {
 } from 'ionicons/icons'
 import { PropositionService } from '@/services/proposition-service'
 import { getUserContact, saveUserContact } from '@/utils/storage'
-import { getOrCreateUserId } from '@/services/push-notifications'
 import { formatDate, formatDateTime } from '@/utils/date'
 
 const route = useRoute()
@@ -176,18 +175,25 @@ const voting = ref(false)
 const commenting = ref(false)
 const newComment = ref('')
 
-const currentUserId = getOrCreateUserId()
+/** Email de l'utilisateur courant (stocké en minuscules pour comparaison). */
+const currentUserEmail = computed(() => {
+  const email = getUserContact()?.email?.trim()
+  return email ? email.toLowerCase() : null
+})
 
 const isCreator = computed(() => {
-  return proposition.value && proposition.value.user_id === currentUserId
+  if (!proposition.value || !currentUserEmail.value) return false
+  const creatorEmail = (proposition.value.user_email || '').trim().toLowerCase()
+  return creatorEmail === currentUserEmail.value
 })
 
 const loadProposition = async () => {
   try {
     loading.value = true
+    const userEmail = getUserContact()?.email?.trim() || null
     const { data, error } = await PropositionService.getById(
       route.params.id,
-      currentUserId
+      userEmail
     )
     if (error) throw error
     proposition.value = data
@@ -198,21 +204,62 @@ const loadProposition = async () => {
   }
 }
 
+/** Récupère l'email (depuis le contact ou en le demandant à l'utilisateur). Retourne null si annulé. */
+const getEmailForVote = async () => {
+  const contact = getUserContact()
+  let email = contact?.email?.trim()
+  if (email) return email
+
+  return new Promise((resolve) => {
+    alertController
+      .create({
+        header: 'Email requis',
+        message:
+          "Pour soutenir cette doléance, merci de renseigner votre adresse email. Elle permet d'identifier votre vote.",
+        inputs: [
+          {
+            name: 'email',
+            placeholder: 'votre.email@exemple.com',
+            type: 'email',
+            value: email || ''
+          }
+        ],
+        buttons: [
+          { text: 'Annuler', role: 'cancel', handler: () => resolve(null) },
+          {
+            text: 'Valider',
+            handler: (data) => {
+              const e = data?.email?.trim()
+              if (!e) return false
+              saveUserContact({
+                firstName: contact?.firstName ?? '',
+                lastName: contact?.lastName ?? '',
+                email: e,
+                phone: contact?.phone ?? '',
+                address: contact?.address ?? ''
+              })
+              resolve(e)
+            }
+          }
+        ]
+      })
+      .then((alert) => alert.present())
+  })
+}
+
 const handleVote = async () => {
   if (voting.value) return
+  const userEmail = await getEmailForVote()
+  if (!userEmail) return
   voting.value = true
   try {
     const { error } = await PropositionService.vote(
       proposition.value.id,
-      currentUserId
+      userEmail
     )
     if (error) throw error
 
-    // Refresh data
     await loadProposition()
-
-    // Trigger notification (to be implemented on backend)
-    // We could call a webhook or an API here if needed
 
     const toast = await toastController.create({
       message: 'Vote enregistré !',
@@ -222,6 +269,15 @@ const handleVote = async () => {
     await toast.present()
   } catch (error) {
     console.error('Error voting:', error)
+    const toast = await toastController.create({
+      message:
+        error?.message === 'Already voted'
+          ? 'Vous soutenez déjà cette doléance.'
+          : "Impossible d'enregistrer le vote.",
+      duration: 2000,
+      color: 'danger'
+    })
+    await toast.present()
   } finally {
     voting.value = false
   }
@@ -229,11 +285,13 @@ const handleVote = async () => {
 
 const handleUnvote = async () => {
   if (voting.value) return
+  const userEmail = currentUserEmail.value || (await getEmailForVote())
+  if (!userEmail) return
   voting.value = true
   try {
     const { error } = await PropositionService.unvote(
       proposition.value.id,
-      currentUserId
+      userEmail
     )
     if (error) throw error
 

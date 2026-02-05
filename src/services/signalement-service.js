@@ -32,15 +32,23 @@ export const SignalementService = {
   },
 
   /**
-   * Fetch all signalements for a specific user
-   * @param {string} userId - The ID of the user
+   * Fetch signalements for the current user in the given commune only.
+   * Same pattern as reservations: filter by email and commune (city_id).
+   * @param {string} communeId - Current commune ID (from getCityIdFromDatabase)
+   * @param {string} userEmail - Current user email (from getUserContact)
    * @returns {Promise<{data: any[], error: any}>}
    */
-  async getAll(userId) {
+  async getMySignalementsInCommune(communeId, userEmail) {
+    if (!communeId || !userEmail) {
+      return { data: [], error: null }
+    }
+
+    const normalizedEmail = userEmail.trim().toLowerCase()
     return await supabase
       .from('signalements')
       .select('*')
-      .eq('user_id', userId)
+      .eq('city_id', communeId)
+      .eq('email', normalizedEmail)
       .order('created_at', { ascending: false })
   },
 

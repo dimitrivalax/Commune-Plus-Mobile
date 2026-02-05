@@ -201,6 +201,7 @@ import {
   getCityInfo,
   getCityInfoFromDatabase
 } from '@/utils/storage'
+import { updatePushTokenEmail } from '@/services/push-notifications'
 import CitySetupModal from '@/components/city-setup-modal.vue'
 import AppDisclaimer from '@/components/app-disclaimer.vue'
 
@@ -262,6 +263,11 @@ const saveUserContactForm = async () => {
       phone: userForm.value.phone.trim(),
       address: userForm.value.address.trim()
     })
+
+    const emailTrimmed = userForm.value.email.trim()
+    if (emailTrimmed) {
+      await updatePushTokenEmail(emailTrimmed)
+    }
 
     const toast = await toastController.create({
       message: 'Coordonnées enregistrées avec succès',
