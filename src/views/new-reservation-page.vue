@@ -85,12 +85,7 @@
                 :show-default-buttons="true"
                 presentation="time"
                 :value="newForm.startTime"
-                @ionChange="
-                  (event) => {
-                    newForm.startTime = event.detail.value
-                    validateTimeRange()
-                  }
-                "
+                @ionChange="handleStartTimeChange"
               ></ion-datetime>
             </ion-modal>
           </ion-item>
@@ -297,6 +292,22 @@ const handleSalleChange = (event) => {
 
 const handleDateChange = (event) => {
   newForm.value.date = event.detail.value
+  validateTimeRange()
+}
+
+/** Retourne l'heure de fin = heure de début + 1h (même format que la valeur reçue) */
+const getEndTimeOneHourAfter = (startTimeValue) => {
+  const dateStr = formatDateForDB(newForm.value.date)
+  const timeStr = formatTime(startTimeValue)
+  const d = new Date(dateStr + 'T' + timeStr + ':00')
+  d.setHours(d.getHours() + 2)
+  return d.toISOString()
+}
+
+const handleStartTimeChange = (event) => {
+  const value = event.detail.value
+  newForm.value.startTime = value
+  newForm.value.endTime = getEndTimeOneHourAfter(value)
   validateTimeRange()
 }
 
