@@ -43,55 +43,53 @@ serve(async (req) => {
       )
     }
 
-    // Construire le contenu de l'email
-    const emailSubject = 'Signalement automatique via Commune Plus'
+    // Construire le contenu de l'email (ton personnel : la mairie reçoit comme si c'était l'habitant qui écrit)
+    const emailSubject = `Signalement — ${signalementData.firstName} ${signalementData.lastName}`
     
-    // Version texte de l'email
+    // Version texte de l'email (rédigé à la première personne, au nom de l'habitant)
     let emailText = `Madame, Monsieur,
 
-Je me permets de vous transmettre un signalement automatique généré via l'application Commune Plus, qui facilite la communication entre les habitants et la mairie.
+Je vous écris pour vous signaler le point suivant concernant notre commune :
 
-Nom : ${signalementData.lastName} ${signalementData.firstName}
 Commune : ${signalementData.commune}
-Description du signalement : ${signalementData.description}`
+
+Description : ${signalementData.description}`
 
     // Ajouter l'URL de la photo si disponible
     if (signalementData.photoUrl) {
-      emailText += `\n\nPhoto du signalement : ${signalementData.photoUrl}`
+      emailText += `\n\nPhoto : ${signalementData.photoUrl}`
     }
 
-    emailText += `\n\nJe vous remercie pour votre attention et votre suivi.
+    emailText += `
+
+Je vous remercie pour votre attention et votre suivi.
 
 Cordialement,
-${signalementData.lastName} ${signalementData.firstName}
+${signalementData.firstName} ${signalementData.lastName}
 
-Envoyé via Commune Plus — L'application qui simplifie la communication entre habitants et mairie.`
+---
+Ce mail a été créé avec la solution Commune Plus, l'application qui simplifie la communication entre habitants et mairie.
+Si vous souhaitez en savoir plus : https://commune-plus.fr`
 
-    // Version HTML de l'email
+    // Version HTML de l'email (corps personnel, pied de page Commune Plus)
     let emailHtml = `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Signalement automatique</title>
+  <title>Signalement</title>
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-    <h1 style="color: #10b981; margin-top: 0;">Signalement automatique via Commune Plus</h1>
+  <div style="margin-bottom: 24px;">
     <p>Madame, Monsieur,</p>
-    <p>Je me permets de vous transmettre un signalement automatique généré via l'application Commune Plus, qui facilite la communication entre les habitants et la mairie.</p>
+    <p>Je vous écris pour vous signaler le point suivant concernant notre commune :</p>
   </div>
 
-  <div style="background-color: #ffffff; border: 1px solid #e5e7eb; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-    <h2 style="color: #374151; margin-top: 0; border-bottom: 2px solid #10b981; padding-bottom: 10px;">Détails du signalement</h2>
+  <div style="background-color: #ffffff; border: 1px solid #e5e7eb; padding: 20px; border-radius: 8px; margin-bottom: 24px;">
     <table style="width: 100%; border-collapse: collapse;">
       <tr>
-        <td style="padding: 8px 0; font-weight: bold; width: 40%;">Nom :</td>
-        <td style="padding: 8px 0;">${signalementData.lastName} ${signalementData.firstName}</td>
-      </tr>
-      <tr>
-        <td style="padding: 8px 0; font-weight: bold;">Commune :</td>
+        <td style="padding: 8px 0; font-weight: bold; width: 30%;">Commune :</td>
         <td style="padding: 8px 0;">${signalementData.commune}</td>
       </tr>
       <tr>
@@ -107,9 +105,12 @@ Envoyé via Commune Plus — L'application qui simplifie la communication entre 
     </table>
   </div>
 
-  <div style="text-align: center; color: #6b7280; font-size: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-    <p>Cordialement,<br>${signalementData.lastName} ${signalementData.firstName}</p>
-    <p>Envoyé via Commune Plus — L'application qui simplifie la communication entre habitants et mairie.</p>
+  <p>Je vous remercie pour votre attention et votre suivi.</p>
+  <p><strong>Cordialement,</strong><br>${signalementData.firstName} ${signalementData.lastName}</p>
+
+  <div style="margin-top: 32px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 12px;">
+    <p>Ce mail a été créé avec la solution <strong>Commune Plus</strong>, l'application qui simplifie la communication entre habitants et mairie.</p>
+    <p>Si vous souhaitez en savoir plus : <a href="https://commune-plus.fr" style="color: #10b981; text-decoration: none;">commune-plus.fr</a></p>
   </div>
 </body>
 </html>
@@ -117,7 +118,7 @@ Envoyé via Commune Plus — L'application qui simplifie la communication entre 
 
     // Préparer les options d'envoi Resend
     const resendPayload: any = {
-      from: `${signalementData.lastName} ${signalementData.firstName} <${resendFromEmail}>`,
+      from: `${signalementData.firstName} ${signalementData.lastName} <${resendFromEmail}>`,
       to: [signalementData.mairieEmail],
       subject: emailSubject,
       html: emailHtml,

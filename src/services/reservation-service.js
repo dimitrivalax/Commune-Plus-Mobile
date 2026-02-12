@@ -117,7 +117,7 @@ export const ReservationService = {
   async getSalles(communeId = null) {
     let query = supabase
       .from('salles')
-      .select('id, nom')
+      .select('id, nom, description')
       
     if (communeId) {
       query = query.eq('commune_id', communeId)

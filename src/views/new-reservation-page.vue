@@ -31,6 +31,9 @@
               {{ salle.nom }}
             </ion-select-option>
           </ion-select>
+          <p v-if="newForm.salleId" class="salle-description">
+            {{ salles.find((salle) => salle.id === newForm.salleId).description }}
+          </p>
         </ion-item>
 
         <div v-if="newForm.salleId" class="calendar-container">
@@ -286,6 +289,9 @@ const fetchReservations = async (salleId) => {
 
 const handleSalleChange = (event) => {
   const salleId = event.detail.value
+  newForm.value.salleDescription = salles.value.find(
+    (salle) => salle.id === salleId
+  ).description
   fetchReservations(salleId)
 }
 
