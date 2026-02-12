@@ -30,7 +30,7 @@
             <h1>{{ item.title }}</h1>
             <p class="meta-info">
               <ion-badge v-if="item.category">{{ item.category }}</ion-badge>
-              <span>{{ formatDate(item.created_at) }}</span>
+              <span>{{ formatDate(item.event_date) }}</span>
             </p>
             <div class="content-body" v-html="item.content"></div>
             <img

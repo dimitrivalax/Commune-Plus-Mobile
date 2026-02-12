@@ -7,19 +7,6 @@
           <IonRefresherContent></IonRefresherContent>
         </IonRefresher>
 
-        <!-- Infinite scroll vers le haut (charger les plus anciennes) -->
-        <!-- <IonInfiniteScroll
-          v-if="hasMoreOlder && infoItems.length > 0"
-          position="top"
-          :disabled="loadingOlder"
-          @ionInfinite="loadOlder($event)"
-        >
-          <IonInfiniteScrollContent
-            loading-spinner="crescent"
-            loading-text="Chargement..."
-          ></IonInfiniteScrollContent>
-        </IonInfiniteScroll> -->
-
         <template v-if="groupedByDate.length > 0">
           <div
             v-for="group in groupedByDate"
@@ -92,6 +79,7 @@ import {
   IonLabel,
   IonBadge,
   IonIcon,
+  IonImg,
   IonRefresher,
   IonRefresherContent,
   IonInfiniteScroll,
@@ -101,7 +89,7 @@ import {
 import { newspaper, newspaperOutline, chevronForward, calendarOutline } from 'ionicons/icons'
 import AppHeader from '@/components/app-header.vue'
 import { InformationService } from '@/services/information-service'
-import { formatDateGroupLabel, formatTimeFromDateTime } from '@/utils/date'
+import { formatDateGroupLabel } from '@/utils/date'
 import { getCityInfo, getCityIdFromDatabase } from '@/utils/storage'
 
 const ionContentRef = ref(null)
