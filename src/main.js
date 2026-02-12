@@ -2,7 +2,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import { IonicVue } from '@ionic/vue'
-import { initPostHog, trackPageView } from './services/posthog'
+import { initPostHog, trackPageView, updateUserAndCommuneContext } from './services/posthog'
 import { initializePushNotifications } from './services/push-notifications'
 
 /* Core CSS required for Ionic components to work properly */
@@ -43,6 +43,7 @@ if (posthogApiKey) {
     // Persist user across sessions
     persistence: 'localStorage+cookie'
   })
+  updateUserAndCommuneContext()
 }
 
 // Track page views

@@ -149,6 +149,7 @@
               v-model="newForm.phone"
               type="tel"
               placeholder="Votre téléphone"
+              required
             ></ion-input>
           </ion-item>
         </div>
@@ -261,6 +262,7 @@ const isFormValid = computed(() => {
     newForm.value.endTime &&
     newForm.value.name &&
     newForm.value.email &&
+    newForm.value.phone &&
     newForm.value.reason.trim() !== ''
   )
 })

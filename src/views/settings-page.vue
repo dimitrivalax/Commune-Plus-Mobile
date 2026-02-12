@@ -202,6 +202,7 @@ import {
   getCityInfoFromDatabase
 } from '@/utils/storage'
 import { updatePushTokenEmail } from '@/services/push-notifications'
+import { updateUserAndCommuneContext } from '@/services/posthog'
 import CitySetupModal from '@/components/city-setup-modal.vue'
 import AppDisclaimer from '@/components/app-disclaimer.vue'
 
@@ -269,6 +270,7 @@ const saveUserContactForm = async () => {
       await updatePushTokenEmail(emailTrimmed)
     }
 
+    updateUserAndCommuneContext()
     const toast = await toastController.create({
       message: 'Coordonnées enregistrées avec succès',
       duration: 2000,
@@ -298,6 +300,7 @@ const handleCityInfoSaved = async () => {
   showCityModal.value = false
   // Recharger les informations de la commune
   await loadData()
+  updateUserAndCommuneContext()
 }
 
 onMounted(async () => {

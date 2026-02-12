@@ -1,6 +1,61 @@
 import posthog from 'posthog-js'
+import { getUserContact } from '@/utils/storage'
+import { getCityInfo } from '@/utils/storage'
 
 let posthogInstance = null
+
+/**
+ * Build context (person + commune) to attach to every event
+ * @returns {object} - { person: {...}, commune: {...} } for event properties
+ */
+function getEventContext() {
+  const contact = getUserContact()
+  const city = getCityInfo()
+  return {
+    // Person (sans données sensibles en clair dans les props d'event si besoin de restreindre)
+    person: contact
+      ? {
+          has_contact: true,
+          first_name: contact.firstName || undefined,
+          last_name: contact.lastName || undefined,
+          email: contact.email || undefined
+        }
+      : { has_contact: false },
+    // Commune
+    commune:
+      city && (city.name || city.id)
+        ? {
+            commune_id: city.id || undefined,
+            commune_name: city.name || undefined,
+            commune_postal_code: city.postalCode || undefined
+          }
+        : {
+            commune_id: undefined,
+            commune_name: undefined,
+            commune_postal_code: undefined
+          }
+  }
+}
+
+/**
+ * Flatten context for PostHog event properties (no nested object to simplify filters in PostHog)
+ */
+function getFlattenedEventContext() {
+  const { person, commune } = getEventContext()
+  return {
+    ...(person.has_contact
+      ? {
+          person_has_contact: true,
+          person_first_name: person.first_name,
+          person_last_name: person.last_name,
+          person_email: person.email
+        }
+      : { person_has_contact: false }),
+    commune_id: commune.commune_id,
+    commune_name: commune.commune_name,
+    commune_postal_code: commune.commune_postal_code
+  }
+}
 
 /**
  * Initialize PostHog analytics
@@ -15,7 +70,9 @@ export function initPostHog(apiKey, host, options = {}) {
   }
 
   if (!apiKey || !host) {
-    console.warn('PostHog API key or host is missing. Analytics will not be initialized.')
+    console.warn(
+      'PostHog API key or host is missing. Analytics will not be initialized.'
+    )
     return null
   }
 
@@ -25,7 +82,7 @@ export function initPostHog(apiKey, host, options = {}) {
       autocapture: true,
       capture_pageview: false, // We'll handle pageviews manually via router
       capture_pageleave: true,
-      loaded: (posthog) => {
+      loaded: () => {
         if (process.env.NODE_ENV === 'development') {
           console.log('PostHog loaded successfully')
         }
@@ -70,18 +127,21 @@ export function resetUser() {
 }
 
 /**
- * Track a custom event
+ * Track a custom event (person + commune context added automatically)
  * @param {string} eventName - Name of the event
  * @param {object} properties - Event properties
  */
 export function trackEvent(eventName, properties = {}) {
   if (posthogInstance) {
-    posthogInstance.capture(eventName, properties)
+    posthogInstance.capture(eventName, {
+      ...getFlattenedEventContext(),
+      ...properties
+    })
   }
 }
 
 /**
- * Track a page view
+ * Track a page view (person + commune context added automatically)
  * @param {string} pageName - Name of the page
  * @param {object} properties - Additional properties
  */
@@ -89,6 +149,7 @@ export function trackPageView(pageName, properties = {}) {
   if (posthogInstance) {
     posthogInstance.capture('$pageview', {
       page_name: pageName,
+      ...getFlattenedEventContext(),
       ...properties
     })
   }
@@ -104,3 +165,32 @@ export function setUserProperties(properties) {
   }
 }
 
+/**
+ * Sync current person and commune from storage to PostHog (identify + person properties).
+ * Call at app startup and after saving contact/commune in settings.
+ */
+export function updateUserAndCommuneContext() {
+  if (!posthogInstance) return
+  const contact = getUserContact()
+  const city = getCityInfo()
+  const distinctId = contact?.email?.trim() || posthogInstance.get_distinct_id()
+  const personProps = {
+    ...(contact
+      ? {
+          email: contact.email || undefined,
+          first_name: contact.firstName || undefined,
+          last_name: contact.lastName || undefined,
+          has_contact: true
+        }
+      : { has_contact: false }),
+    ...(city && (city.name || city.id)
+      ? {
+          commune_id: city.id || undefined,
+          commune_name: city.name || undefined,
+          commune_postal_code: city.postalCode || undefined
+        }
+      : {})
+  }
+  posthogInstance.identify(distinctId, personProps)
+  posthogInstance.setPersonProperties(personProps)
+}
