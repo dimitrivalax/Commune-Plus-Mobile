@@ -49,11 +49,9 @@ serve(async (req) => {
     // Version texte de l'email (rédigé à la première personne, au nom de l'habitant)
     let emailText = `Madame, Monsieur,
 
-Je vous écris pour vous signaler le point suivant concernant notre commune :
+Je vous écris pour vous signaler le point suivant concernant notre commune.
 
-Commune : ${signalementData.commune}
-
-Description : ${signalementData.description}`
+${signalementData.address ? `Lieu : ${signalementData.address}\n\n` : ''}${signalementData.description}`
 
     // Ajouter l'URL de la photo si disponible
     if (signalementData.photoUrl) {
@@ -83,30 +81,19 @@ Si vous souhaitez en savoir plus : https://commune-plus.fr`
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
   <div style="margin-bottom: 24px;">
     <p>Madame, Monsieur,</p>
-    <p>Je vous écris pour vous signaler le point suivant concernant notre commune :</p>
-  </div>
-
-  <div style="background-color: #ffffff; border: 1px solid #e5e7eb; padding: 20px; border-radius: 8px; margin-bottom: 24px;">
-    <table style="width: 100%; border-collapse: collapse;">
-      <tr>
-        <td style="padding: 8px 0; font-weight: bold; width: 30%;">Commune :</td>
-        <td style="padding: 8px 0;">${signalementData.commune}</td>
-      </tr>
-      <tr>
-        <td style="padding: 8px 0; font-weight: bold; vertical-align: top;">Description :</td>
-        <td style="padding: 8px 0;">${signalementData.description}</td>
-      </tr>
-      ${signalementData.photoUrl ? `
-      <tr>
-        <td style="padding: 8px 0; font-weight: bold;">Photo :</td>
-        <td style="padding: 8px 0;"><a href="${signalementData.photoUrl}" style="color: #10b981; text-decoration: none;">Voir la photo</a></td>
-      </tr>
+    <p>Je vous écris pour vous signaler le point suivant concernant notre commune.</p>
+    ${signalementData.address ? `<p> ${signalementData.address}</p>` : ''}
+    <p>${signalementData.description}</p>
+    
+    ${signalementData.photoUrl ? `
+        <img src="${signalementData.photoUrl}" alt="Photo du signalement" style="max-width: 100%; height: auto; margin-top: 20px;">
+        <a href="${signalementData.photoUrl}"  target="_blank">Voir la photo</a>
       ` : ''}
-    </table>
+  </div>
   </div>
 
   <p>Je vous remercie pour votre attention et votre suivi.</p>
-  <p><strong>Cordialement,</strong><br>${signalementData.firstName} ${signalementData.lastName}</p>
+  <p>Cordialement,<br>${signalementData.firstName} ${signalementData.lastName}</p>
 
   <div style="margin-top: 32px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 12px;">
     <p>Ce mail a été créé avec la solution <strong>Commune Plus</strong>, l'application qui simplifie la communication entre habitants et mairie.</p>
@@ -122,7 +109,8 @@ Si vous souhaitez en savoir plus : https://commune-plus.fr`
       to: [signalementData.mairieEmail],
       subject: emailSubject,
       html: emailHtml,
-      text: emailText
+      text: emailText,
+      reply_to: [signalementData.email, resendFromEmail]
     }
 
     // Ajouter Reply-To avec l'email de l'utilisateur si disponible

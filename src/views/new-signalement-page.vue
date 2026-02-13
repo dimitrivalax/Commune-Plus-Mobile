@@ -660,6 +660,9 @@ const submitSignalement = async () => {
           commune: cityInfoData.name || '',
           description: description.value,
           photoUrl: photoUrl,
+          address: address.value || addressFromGps.value || null,
+          latitude: location.value?.latitude,
+          longitude: location.value?.longitude,
           mairieEmail: cityInfoData.email
         })
         console.log('Email envoyé avec succès à la mairie')

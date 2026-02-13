@@ -37,8 +37,37 @@
               v-if="item.image_url"
               :src="item.image_url"
               :alt="item.title"
-              class="info-image"
+              class="info-image info-image-clickable"
+              @click="openFullscreenImage(item.image_url)"
             />
+
+            <ion-modal
+              :is-open="!!fullscreenImageUrl"
+              :initial-breakpoint="1"
+              :breakpoints="[1]"
+              class="fullscreen-image-modal"
+              backdrop-dismiss
+              @didDismiss="fullscreenImageUrl = null"
+            >
+              <ion-header>
+                <ion-toolbar>
+                  <ion-buttons slot="end">
+                    <ion-button @click="fullscreenImageUrl = null">
+                      <ion-icon :icon="closeOutline" />
+                    </ion-button>
+                  </ion-buttons>
+                </ion-toolbar>
+              </ion-header>
+              <ion-content class="ion-padding fullscreen-image-content">
+                <img
+                  v-if="fullscreenImageUrl"
+                  :src="fullscreenImageUrl"
+                  alt="Image plein écran"
+                  class="fullscreen-image"
+                  @click="fullscreenImageUrl = null"
+                />
+              </ion-content>
+            </ion-modal>
           </div>
         </swiper-slide>
       </swiper>
@@ -53,6 +82,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { closeOutline } from 'ionicons/icons'
 import {
   IonPage,
   IonHeader,
@@ -62,7 +92,10 @@ import {
   IonButtons,
   IonBackButton,
   IonBadge,
-  IonSpinner
+  IonSpinner,
+  IonModal,
+  IonButton,
+  IonIcon
 } from '@ionic/vue'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Pagination } from 'swiper/modules'
@@ -78,6 +111,11 @@ const router = useRouter()
 const infoItems = ref([])
 const loading = ref(true)
 const initialSlide = ref(0)
+const fullscreenImageUrl = ref(null)
+
+const openFullscreenImage = (url) => {
+  fullscreenImageUrl.value = url
+}
 
 const getCommuneId = async () => {
   const cityInfo = getCityInfo()
@@ -260,5 +298,35 @@ onMounted(() => {
   max-width: 100%;
   border-radius: 8px;
   margin-top: 16px;
+}
+
+.info-image-clickable {
+  cursor: pointer;
+}
+
+.fullscreen-image-modal {
+  --width: 100%;
+  --height: 100%;
+  --max-width: 100%;
+  --max-height: 100%;
+  --border-radius: 0;
+
+  &::part(content) {
+    --background: #000;
+  }
+}
+
+.fullscreen-image-content {
+  --background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+}
+
+.fullscreen-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
 </style>
