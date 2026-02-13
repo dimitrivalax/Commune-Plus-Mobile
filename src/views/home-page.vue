@@ -41,7 +41,7 @@
               <div class="service-icon">
                 <IonIcon :icon="informationCircle" />
               </div>
-              <h3>Informations municipales</h3>
+              <h3>Actualités municipales</h3>
               <p>Consultez les dernières informations de la mairie.</p>
             </IonCardContent>
           </IonCard>

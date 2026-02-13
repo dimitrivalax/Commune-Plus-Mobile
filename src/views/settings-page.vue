@@ -91,7 +91,7 @@
         <div class="settings-section">
           <h2 class="section-title">
             <ion-icon :icon="location" />
-            Informations de la commune
+            Actualitéss de la commune
           </h2>
           <ion-card>
             <ion-card-content>

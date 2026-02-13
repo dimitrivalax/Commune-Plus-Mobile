@@ -20,7 +20,7 @@
 
         <ion-tab-button tab="info" href="/tabs/info">
           <ion-icon :icon="informationCircle" />
-          <ion-label>Infos</ion-label>
+          <ion-label>Actualités</ion-label>
         </ion-tab-button>
 
         <ion-tab-button tab="propositions" href="/tabs/propositions">

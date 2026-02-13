@@ -113,7 +113,7 @@
           <ion-card class="info-card">
             <ion-card-header>
               <ion-card-title>
-                <ion-icon :icon="time" /> Informations
+                <ion-icon :icon="time" /> Actualités
               </ion-card-title>
             </ion-card-header>
             <ion-card-content>

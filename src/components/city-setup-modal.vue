@@ -16,7 +16,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <ion-icon :icon="locationOutline" class="header-icon"></ion-icon>
-          <h2>Informations de votre commune</h2>
+          <h2>Actualités de votre commune</h2>
           <p>Veuillez rechercher la commune dans la liste ci-dessous</p>
         </div>
 
@@ -185,7 +185,7 @@ const handleSubmit = async () => {
 
     isSaved.value = true
     await showToast(
-      'Informations de la commune enregistrées avec succès',
+      'Actualités de la commune enregistrées avec succès',
       'success'
     )
     emit('saved')

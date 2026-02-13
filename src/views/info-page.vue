@@ -1,6 +1,6 @@
 <template>
   <IonPage>
-    <AppHeader title="Informations"></AppHeader>
+    <AppHeader title="Actualités"></AppHeader>
     <IonContent ref="ionContentRef" :fullscreen="true">
       <div class="ion-padding">
         <IonRefresher slot="fixed" @ionRefresh="onRefresh($event)">
@@ -26,7 +26,18 @@
                 class="info-item"
                 @click="$router.push(`/info/${item.id}`)"
               >
-                <IonIcon :icon="newspaper" slot="start" class="info-icon" />
+                <IonThumbnail
+                  v-if="item.image_url"
+                  slot="start"
+                  class="info-thumb-wrap"
+                >
+                  <img
+                    :src="item.image_url"
+                    :alt="item.title"
+                    class="info-thumb"
+                  />
+                </IonThumbnail>
+                <IonIcon v-else :icon="newspaper" slot="start" class="info-icon" />
                 <IonLabel>
                   <p>{{ item.title }}</p>
                   <div class="item-meta">
@@ -62,7 +73,7 @@
 
         <div v-else class="loading-state">
           <IonSpinner name="crescent" class="loading-spinner" />
-          <p>Chargement des informations...</p>
+          <p>Chargement des actualités...</p>
         </div>
       </div>
     </IonContent>
@@ -78,8 +89,8 @@ import {
   IonItem,
   IonLabel,
   IonBadge,
+  IonThumbnail,
   IonIcon,
-  IonImg,
   IonRefresher,
   IonRefresherContent,
   IonInfiniteScroll,
@@ -278,6 +289,18 @@ onMounted(async () => {
   margin-bottom: 8px;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+
+  .info-thumb-wrap {
+    --size: 48px;
+    margin-right: 12px;
+  }
+
+  .info-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+  }
 
   .info-icon {
     font-size: 24px;
