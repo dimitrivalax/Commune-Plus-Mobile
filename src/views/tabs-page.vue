@@ -13,19 +13,9 @@
           <ion-label>Signalements</ion-label>
         </ion-tab-button>
 
-        <ion-tab-button tab="reservations" href="/tabs/reservations">
-          <ion-icon :icon="calendar" />
-          <ion-label>Réservations</ion-label>
-        </ion-tab-button>
-
         <ion-tab-button tab="info" href="/tabs/info">
-          <ion-icon :icon="informationCircle" />
+          <ion-icon :icon="newspaper" />
           <ion-label>Actualités</ion-label>
-        </ion-tab-button>
-
-        <ion-tab-button tab="propositions" href="/tabs/propositions">
-          <ion-icon :icon="book" />
-          <ion-label>Doléances</ion-label>
         </ion-tab-button>
       </ion-tab-bar>
     </ion-tabs>
@@ -45,9 +35,7 @@ import {
 import {
   home,
   warning,
-  calendar,
-  informationCircle,
-  book
+  newspaper
 } from 'ionicons/icons'
 </script>
 
@@ -60,15 +48,10 @@ ion-tab-bar {
   padding-bottom: calc(8px + var(--ion-safe-area-bottom, 0px));
 }
 
-button-native {
-  --color-selected: var(--ion-color-secondary);
-  --color-focused: var(--ion-color-secondary);
-}
-
 ion-tab-button {
   --color: var(--ion-color-medium);
   --color-selected: var(--ion-color-primary);
-  --color-focused: var(--ion-color-secondary);
+  // --color-focused: var(--ion-color-secondary);
   font-size: 12px;
   font-weight: 500;
 
@@ -76,5 +59,18 @@ ion-tab-button {
     font-size: 24px;
     margin-bottom: 4px;
   }
+}
+
+/* L’élément <a class="button-native"> ne doit pas cacher icône/label au hover */
+ion-tab-button::part(native) {
+  background: transparent;
+}
+
+ion-tab-button::part(native):hover,
+ion-tab-button::part(native):active {
+  background: var(--ion-color-light);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  transform: scale(1.05);
 }
 </style>

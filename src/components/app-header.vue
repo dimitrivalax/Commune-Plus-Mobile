@@ -1,8 +1,10 @@
 <template>
   <IonHeader>
     <IonToolbar>
+      <IonButtons slot="start">
+        <IonMenuButton />
+      </IonButtons>
       <IonRow>
-        <img :src="'/assets/logo.png'" alt="Logo" class="city-logo" />
         <IonTitle v-if="!logo">{{ title }}</IonTitle>
         <CityHeader v-else></CityHeader>
       </IonRow>
@@ -23,7 +25,8 @@ import {
   IonButtons,
   IonButton,
   IonIcon,
-  IonRow
+  IonRow,
+  IonMenuButton
 } from '@ionic/vue'
 import { settings } from 'ionicons/icons'
 import CityHeader from '@/components/city-header.vue'
@@ -40,13 +43,4 @@ defineProps({
 </script>
 
 <style lang="scss" scoped>
-.city-logo {
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
-  border-radius: 24px;
-  margin-top: auto;
-  margin-bottom: auto;
-  margin-left: 16px;
-}
 </style>

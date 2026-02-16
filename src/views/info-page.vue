@@ -39,7 +39,7 @@
                 </IonThumbnail>
                 <IonIcon v-else :icon="newspaper" slot="start" class="info-icon" />
                 <IonLabel>
-                  <p>{{ item.title }}</p>
+                  <p class="info-item-title">{{ item.title }}</p>
                   <div class="item-meta">
 
                     <IonBadge v-if="item.category" class="category-badge">
@@ -290,6 +290,11 @@ onMounted(async () => {
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 
+  .info-item-title {
+    font-weight: bold;
+    font-size: large;
+  }
+
   .info-thumb-wrap {
     --size: 48px;
     margin-right: 12px;
@@ -329,6 +334,12 @@ onMounted(async () => {
 
 .category-badge {
   flex-shrink: 0;
+  --padding-top: 2px;
+  --padding-bottom: 2px;
+  --padding-start: 6px;
+  --padding-end: 6px;
+  font-size: 11px;
+  line-height: 1.2;
 }
 
 .empty-state,
