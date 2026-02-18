@@ -63,6 +63,9 @@
 	--ion-color-dark-shade: #292929;
 	--ion-color-dark-tint: #444444;
 
+
+	--ion-item-background: var(--ion-color-light);
+
 }
 
 

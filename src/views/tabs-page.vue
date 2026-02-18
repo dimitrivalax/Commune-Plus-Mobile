@@ -17,6 +17,11 @@
           <ion-icon :icon="newspaper" />
           <ion-label>Actualités</ion-label>
         </ion-tab-button>
+
+        <ion-tab-button tab="menu" @click.prevent="openMenu">
+          <ion-icon :icon="menuOutline" />
+          <ion-label>Menu</ion-label>
+        </ion-tab-button>
       </ion-tab-bar>
     </ion-tabs>
   </ion-page>
@@ -30,13 +35,14 @@ import {
   IonRouterOutlet,
   IonLabel,
   IonIcon,
-  IonPage
+  IonPage,
+  menuController
 } from '@ionic/vue'
-import {
-  home,
-  warning,
-  newspaper
-} from 'ionicons/icons'
+import { home, warning, newspaper, menuOutline } from 'ionicons/icons'
+
+const openMenu = () => {
+  menuController.open()
+}
 </script>
 
 <style lang="scss">
