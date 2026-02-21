@@ -74,7 +74,7 @@ ion-tab-button::part(native) {
 
 ion-tab-button::part(native):hover,
 ion-tab-button::part(native):active {
-  background: var(--ion-color-light);
+  background: var(--ion-color-primary-tint);
   border-radius: 10px;
   transition: all 0.3s ease;
   transform: scale(1.05);

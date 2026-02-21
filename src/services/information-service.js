@@ -16,7 +16,7 @@ export const InformationService = {
     return await supabase
       .from('municipal_info')
       .select('*')
-      .eq('commune_id', communeId)
+      .or(`commune_id.eq.${communeId},commune_id.is.null`)
       .order('event_date', { ascending: false })
   },
 
@@ -36,7 +36,7 @@ export const InformationService = {
     const { data, error } = await supabase
       .from('municipal_info')
       .select('*')
-      .eq('commune_id', communeId)
+      .or(`commune_id.eq.${communeId},commune_id.is.null`)
       .gte('event_date', today)
       .order('event_date', { ascending: true })
       .limit(INITIAL_FUTURE)
@@ -64,7 +64,7 @@ export const InformationService = {
     const { data, error } = await supabase
       .from('municipal_info')
       .select('*')
-      .eq('commune_id', communeId)
+      .or(`commune_id.eq.${communeId},commune_id.is.null`)
       .lt('event_date', beforeDateIso)
       .order('event_date', { ascending: false })
       .limit(limit)
@@ -87,7 +87,7 @@ export const InformationService = {
     const { data, error } = await supabase
       .from('municipal_info')
       .select('*')
-      .eq('commune_id', communeId)
+      .or(`commune_id.eq.${communeId},commune_id.is.null`)
       .gt('event_date', afterDateIso)
       .order('event_date', { ascending: true })
       .limit(limit)
@@ -104,11 +104,12 @@ export const InformationService = {
     if (!communeId) {
       return { data: null, error: { message: 'Commune non sélectionnée' } }
     }
-    return await supabase
+    const { data, error } = await supabase
       .from('municipal_info')
       .select('*')
       .eq('id', id)
-      .eq('commune_id', communeId)
+      .or(`commune_id.eq.${communeId},commune_id.is.null`)
       .single()
+    return { data, error }
   }
 }
