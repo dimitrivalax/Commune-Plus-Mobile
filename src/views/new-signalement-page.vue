@@ -47,9 +47,16 @@
               Position enregistrée : {{ location.latitude.toFixed(6) }},
               {{ location.longitude.toFixed(6) }}
               <span v-if="addressFromGps" class="address-gps">
-                {{ addressFromGps }}
+                {{ addressFromGpsLoading ? 'Mise à jour de l\'adresse…' : addressFromGps }}
               </span>
             </p>
+            <div v-if="location" class="signalement-map-wrapper">
+              <div ref="mapContainer" class="signalement-map"></div>
+              <div class="signalement-map-pin" aria-hidden="true">
+                <ion-icon :icon="locationIcon" />
+              </div>
+            </div>
+            <p v-if="location" class="map-hint">Déplacez la carte pour ajuster la position ; le point reste au centre.</p>
             <p v-if="locationError" class="location-error">
               <ion-icon :icon="alertCircleOutline" />
               {{ locationError }}
@@ -72,15 +79,27 @@
 
         <div class="form-section">
           <h3 class="section-title">Photo</h3>
-          <ion-button
-            expand="block"
-            @click="takePhoto"
-            :disabled="loading"
-            class="photo-button"
-          >
-            <ion-icon :icon="camera" slot="start" />
-            {{ photo ? 'Reprendre la photo' : 'Prendre une photo' }}
-          </ion-button>
+          <div class="photo-actions">
+            <ion-button
+              expand="block"
+              @click="takePhoto"
+              :disabled="loading"
+              class="photo-button"
+            >
+              <ion-icon :icon="camera" slot="start" />
+              {{ photo ? 'Reprendre la photo' : 'Prendre une photo' }}
+            </ion-button>
+            <ion-button
+              expand="block"
+              fill="outline"
+              @click="pickFromGallery"
+              :disabled="loading"
+              class="photo-button photo-button-gallery"
+            >
+              <ion-icon :icon="images" slot="start" />
+              Choisir depuis la galerie
+            </ion-button>
+          </div>
 
           <div v-if="photo" class="photo-preview">
             <img :src="photo" alt="Photo du signalement" />
@@ -184,7 +203,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch, nextTick, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
 import { Geolocation } from '@capacitor/geolocation'
@@ -210,6 +229,7 @@ import {
 } from '@ionic/vue'
 import {
   camera,
+  images,
   checkmark,
   close,
   location as locationIcon,
@@ -228,6 +248,8 @@ import { sendSignalementEmail } from '@/services/email'
 import CitySetupModal from '@/components/city-setup-modal.vue'
 import { trackEvent } from '@/services/posthog'
 import { useGeocoding } from '@/composables/useGeocoding'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 import {
   getOrCreateUserId,
   updatePushTokenEmail
@@ -286,6 +308,37 @@ const takePhoto = async () => {
   }
 }
 
+const pickFromGallery = async () => {
+  try {
+    const image = await Camera.getPhoto({
+      quality: 90,
+      allowEditing: false,
+      resultType: CameraResultType.DataUrl,
+      source: CameraSource.Photos
+    })
+
+    photo.value = image.dataUrl
+
+    trackEvent('signalement_photo_from_gallery', {
+      has_photo: true
+    })
+  } catch (error) {
+    console.error('Error picking from gallery:', error)
+
+    trackEvent('signalement_photo_error', {
+      error: error.message || 'Unknown error',
+      source: 'gallery'
+    })
+
+    const toast = await toastController.create({
+      message: 'Erreur lors du chargement de la photo depuis la galerie',
+      duration: 2000,
+      color: 'danger'
+    })
+    await toast.present()
+  }
+}
+
 const removePhoto = () => {
   photo.value = null
 
@@ -294,6 +347,68 @@ const removePhoto = () => {
 }
 
 const addressFromGps = ref('')
+const addressFromGpsLoading = ref(false)
+const mapContainer = ref(null)
+let mapInstance = null
+
+async function updateLocationFromMapCenter() {
+  if (!mapInstance) return
+  const center = mapInstance.getCenter()
+  location.value = {
+    latitude: center.lat,
+    longitude: center.lng,
+    accuracy: location.value?.accuracy ?? null
+  }
+  addressFromGpsLoading.value = true
+  try {
+    addressFromGps.value = await getAddressFromCoordinates(center.lat, center.lng)
+  } catch (e) {
+    addressFromGps.value = ''
+  }
+  addressFromGpsLoading.value = false
+}
+
+function initMap() {
+  if (!mapContainer.value || !location.value) return
+  const { latitude, longitude } = location.value
+  mapInstance = L.map(mapContainer.value).setView([latitude, longitude], 16)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+  }).addTo(mapInstance)
+  mapInstance.on('moveend', updateLocationFromMapCenter)
+  nextTick(() => mapInstance?.invalidateSize())
+}
+
+function updateMapPosition(loc) {
+  if (!mapInstance || !loc) return
+  mapInstance.off('moveend', updateLocationFromMapCenter)
+  mapInstance.setView([loc.latitude, loc.longitude], mapInstance.getZoom())
+  mapInstance.on('moveend', updateLocationFromMapCenter)
+}
+
+function destroyMap() {
+  if (mapInstance) {
+    mapInstance.off('moveend', updateLocationFromMapCenter)
+    mapInstance.remove()
+    mapInstance = null
+  }
+}
+
+watch(
+  location,
+  async (newVal) => {
+    await nextTick()
+    if (newVal) {
+      if (!mapInstance) initMap()
+      else updateMapPosition(newVal)
+    } else {
+      destroyMap()
+    }
+  },
+  { immediate: false }
+)
+
+onBeforeUnmount(destroyMap)
 
 const getCurrentLocation = async () => {
   gettingLocation.value = true
@@ -768,6 +883,25 @@ const submitSignalement = async () => {
   }
 }
 
+.photo-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.photo-actions .photo-button {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.photo-actions .photo-button:first-child {
+  margin-top: 16px;
+}
+
+.photo-actions .photo-button:last-child {
+  margin-bottom: 16px;
+}
+
 .location-button,
 .photo-button,
 .submit-button {
@@ -796,6 +930,44 @@ const submitSignalement = async () => {
   margin-top: 4px;
   font-size: 0.9em;
   opacity: 0.9;
+}
+
+.signalement-map-wrapper {
+  position: relative;
+  margin-top: 16px;
+}
+
+.signalement-map {
+  height: 220px;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--ion-color-medium-tint);
+  z-index: 0;
+}
+
+.signalement-map-pin {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -100%);
+  pointer-events: none;
+  z-index: 1000;
+  color: var(--ion-color-primary);
+  font-size: 36px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+
+  ion-icon {
+    display: block;
+  }
+}
+
+.map-hint {
+  font-size: 12px;
+  color: var(--ion-color-medium);
+  margin-top: 6px;
+  padding: 0 4px;
+  font-style: italic;
 }
 
 .location-error {
