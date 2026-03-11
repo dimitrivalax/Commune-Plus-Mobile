@@ -1,4 +1,16 @@
-# Configuration du Splash Screen
+# Configuration du Splash Screen et de l'icône d'application
+
+## Icône iOS (App Icon)
+
+L'icône affichée sur l'écran d'accueil iOS est définie dans :
+- `ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png` (1024×1024 px).
+
+**Pour mettre à jour l'icône** : remplacez ce fichier par votre logo Commune Plus (1024×1024 px). La source recommandée est `public/assets/logo.png`. Après modification de `public/assets/logo.png`, copiez-le vers le dossier AppIcon :
+```bash
+cp public/assets/logo.png ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png
+```
+
+---
 
 Le splash screen est configuré pour afficher l'image `commune-plus.png` au démarrage de l'application.
 
