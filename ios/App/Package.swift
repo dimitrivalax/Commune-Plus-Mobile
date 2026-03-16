@@ -12,7 +12,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", exact: "8.1.0"),
-        .package(name: "CapacitorFirebaseMessaging", path: "../../../node_modules/.pnpm/@capacitor-firebase+messaging@8.1.0_@capacitor+core@8.1.0_firebase@12.10.0/node_modules/@capacitor-firebase/messaging"),
+        .package(name: "CapacitorFirebaseMessaging", path: "../../../node_modules/.pnpm/@capacitor-firebase+messaging@8.1.0_@capacitor+core@8.1.0/node_modules/@capacitor-firebase/messaging"),
         .package(name: "CapacitorApp", path: "../../../node_modules/.pnpm/@capacitor+app@8.0.0_@capacitor+core@8.1.0/node_modules/@capacitor/app"),
         .package(name: "CapacitorCamera", path: "../../../node_modules/.pnpm/@capacitor+camera@8.0.0_@capacitor+core@8.1.0/node_modules/@capacitor/camera"),
         .package(name: "CapacitorGeolocation", path: "../../../node_modules/.pnpm/@capacitor+geolocation@8.0.0_@capacitor+core@8.1.0/node_modules/@capacitor/geolocation"),

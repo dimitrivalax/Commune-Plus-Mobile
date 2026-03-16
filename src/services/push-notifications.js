@@ -1,4 +1,5 @@
 import { PushNotifications } from '@capacitor/push-notifications'
+import { FirebaseMessaging } from '@capacitor-firebase/messaging'
 import { Capacitor } from '@capacitor/core'
 import { supabase } from './supabase'
 import { getCityInfo, getUserContact } from '@/utils/storage'
@@ -85,8 +86,26 @@ export async function initializePushNotifications() {
     
     // Écouter l'événement d'enregistrement
     PushNotifications.addListener('registration', async (token) => {
-      console.log('Push registration success, token: ' + token.value)
-      await savePushToken(token.value)
+      console.log('Push registration success, CP token: ' + token.value)
+      
+      let finalToken = token.value
+      
+      // Sur iOS, le token reçu est le token APNs (hex). 
+      // On doit utiliser le plugin Firebase Messaging pour obtenir le token d'enregistrement FCM.
+      if (Capacitor.getPlatform() === 'ios') {
+        try {
+          const { token: fcmToken } = await FirebaseMessaging.getToken()
+          if (fcmToken) {
+            console.log('Firebase Messaging token for iOS retrieved: ' + fcmToken)
+            finalToken = fcmToken
+          }
+        } catch (error) {
+          console.error('Error getting FCM token on iOS:', error)
+          // On garde le token APNs par défaut, mais ça échouera probablement côté serveur
+        }
+      }
+      
+      await savePushToken(finalToken)
     })
 
     // Écouter les erreurs d'enregistrement

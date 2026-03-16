@@ -2,12 +2,24 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>CAPACITOR_DEBUG</key>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Cette application nécessite l'accès à votre bibliothèque de photos pour vous permettre de joindre des photos à vos signalements et propositions.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Cette application nécessite l'autorisation d'ajouter des photos à votre bibliothèque pour enregistrer les photos prises dans l'application.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Cette application nécessite l&apos;accès à votre appareil photo pour vous permettre de prendre des photos pour vos signalements et propositions.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Votre position est nécessaire pour situer précisément vos signalements sur la carte de la commune lors de l&apos;utilisation de l&apos;application.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Votre position est nécessaire pour situer précisément vos signalements sur la carte de la commune, même en arrière-plan pour le suivi de vos demandes.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>CAPACITOR_DEBUG</key>
 	<string>$(CAPACITOR_DEBUG)</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>Commune Plus</string>
+	<string>Commune Plus</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -24,6 +36,10 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

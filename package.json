@@ -12,10 +12,11 @@
     "assets:generate": "capacitor-assets generate --assetPath public/assets --iconBackgroundColor '#2563eb' --splashBackgroundColor '#2563eb'"
   },
   "dependencies": {
+    "@capacitor-firebase/messaging": "^8.1.0",
     "@capacitor/android": "^8.0.0",
     "@capacitor/app": "^8.0.0",
     "@capacitor/camera": "^8.0.0",
-    "@capacitor/core": "^8.0.0",
+    "@capacitor/core": "^8.1.0",
     "@capacitor/geolocation": "^8.0.0",
     "@capacitor/haptics": "^8.0.0",
     "@capacitor/ios": "^8.1.0",
@@ -27,6 +28,7 @@
     "@ionic/vue-router": "^8.0.0",
     "@supabase/supabase-js": "^2.39.0",
     "axios": "^1.6.2",
+    "firebase": "^12.10.0",
     "ionicons": "^8.0.0",
     "leaflet": "^1.9.4",
     "posthog-js": "^1.313.0",
@@ -37,7 +39,7 @@
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
-    "@capacitor/cli": "^8.0.0",
+    "@capacitor/cli": "^8.1.0",
     "@vitejs/plugin-vue": "^4.5.0",
     "@vue/eslint-config-prettier": "^8.0.0",
     "eslint": "^8.53.0",
