@@ -220,6 +220,10 @@
                   >Raison de la réservation (obligatoire)</ion-label
                 >
                 <ion-textarea
+                  shape="round"
+                  mode="ios"
+                  fill="outline"
+                  class="custom"
                   v-model="editForm.reason"
                   placeholder="Décrivez l'événement..."
                   rows="4"
@@ -234,6 +238,10 @@
                   <ion-item lines="none" class="form-item">
                     <ion-label position="stacked">Nom *</ion-label>
                     <ion-input
+                      class="custom"
+                      shape="round"
+                      mode="ios"
+                      fill="outline"
                       v-model="editForm.name"
                       placeholder="Votre nom"
                       required
@@ -243,6 +251,10 @@
                   <ion-item lines="none" class="form-item">
                     <ion-label position="stacked">Email *</ion-label>
                     <ion-input
+                      class="custom"
+                      shape="round"
+                      mode="ios"
+                      fill="outline"
                       v-model="editForm.email"
                       type="email"
                       placeholder="votre.email@exemple.com"
@@ -253,6 +265,10 @@
                   <ion-item lines="none" class="form-item">
                     <ion-label position="stacked">Téléphone</ion-label>
                     <ion-input
+                      class="custom"
+                      shape="round"
+                      mode="ios"
+                      fill="outline"
                       v-model="editForm.phone"
                       type="tel"
                       placeholder="06 12 34 56 78"

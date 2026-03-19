@@ -3,17 +3,20 @@
     <ion-tabs>
       <ion-router-outlet></ion-router-outlet>
       <ion-tab-bar slot="bottom" color="primary">
-        <ion-tab-button tab="home" href="/tabs/home">
+        <ion-tab-button tab="home" @click.prevent="navigate('home')">
           <ion-icon :icon="home" />
           <ion-label>Accueil</ion-label>
         </ion-tab-button>
 
-        <ion-tab-button tab="signalements" href="/tabs/signalements">
+        <ion-tab-button
+          tab="signalements"
+          @click.prevent="navigate('signalements')"
+        >
           <ion-icon :icon="warning" />
           <ion-label>Signalements</ion-label>
         </ion-tab-button>
 
-        <ion-tab-button tab="info" href="/tabs/info">
+        <ion-tab-button tab="info" @click.prevent="navigate('info')">
           <ion-icon :icon="newspaper" />
           <ion-label>Actualités</ion-label>
         </ion-tab-button>
@@ -36,9 +39,30 @@ import {
   IonLabel,
   IonIcon,
   IonPage,
-  menuController
+  menuController,
+  useIonRouter
 } from '@ionic/vue'
 import { home, warning, newspaper, menuOutline } from 'ionicons/icons'
+import { useRoute } from 'vue-router'
+
+const ionRouter = useIonRouter()
+const route = useRoute()
+
+const tabs = ['home', 'signalements', 'info']
+
+const navigate = (tab) => {
+  const currentIndex = tabs.findIndex((t) => route.path.includes(t))
+  const targetIndex = tabs.indexOf(tab)
+
+  // Si on est déjà sur l'onglet, on ne fait rien
+  if (currentIndex === targetIndex) return
+
+  const direction =
+    currentIndex === -1 || targetIndex > currentIndex ? 'forward' : 'back'
+  const path = `/tabs/${tab}`
+
+  ionRouter.navigate(path, direction, 'push')
+}
 
 const openMenu = () => {
   menuController.open()

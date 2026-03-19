@@ -11,23 +11,23 @@
         <div class="menu-content">
           <ion-list>
             <ion-menuToggle auto-hide>
-              <ion-item button href="/tabs/home">
+              <ion-item button router-link="/tabs/home" lines="none">
                 <ion-icon :icon="homeOutline" slot="start" />
                 <ion-label>Accueil</ion-label>
               </ion-item>
-              <ion-item button href="/tabs/signalements">
+              <ion-item button router-link="/tabs/signalements" lines="none">
                 <ion-icon :icon="warningOutline" slot="start" />
                 <ion-label>Signalements</ion-label>
               </ion-item>
-              <ion-item button href="/tabs/info">
+              <ion-item button router-link="/tabs/info" lines="none">
                 <ion-icon :icon="newspaperOutline" slot="start" />
                 <ion-label>Actualités</ion-label>
               </ion-item>
-              <ion-item button href="/tabs/reservations">
+              <ion-item button router-link="/tabs/reservations" lines="none">
                 <ion-icon :icon="calendarOutline" slot="start" />
                 <ion-label>Réservations</ion-label>
               </ion-item>
-              <ion-item button href="/tabs/propositions">
+              <ion-item button router-link="/tabs/propositions" lines="none">
                 <ion-icon :icon="bookOutline" slot="start" />
                 <ion-label>Doléances</ion-label>
               </ion-item>
@@ -40,7 +40,10 @@
               class="menu-footer-logo"
             />
             <span class="menu-footer-name">Commune Plus</span>
-            <a href="mailto:contact@commune-plus.fr" class="menu-footer-contact">
+            <a
+              href="mailto:contact@commune-plus.fr"
+              class="menu-footer-contact"
+            >
               contact@commune-plus.fr
             </a>
             <span class="menu-footer-version">Version {{ appVersion }}</span>
@@ -50,7 +53,11 @@
     </ion-menu>
     <ion-router-outlet id="main-content" />
   </ion-app>
-  <CitySetupModal :is-open="showCitySetupModal" @saved="handleCityInfoSaved" :allow-cancel="false" />
+  <CitySetupModal
+    :is-open="showCitySetupModal"
+    @saved="handleCityInfoSaved"
+    :allow-cancel="false"
+  />
 </template>
 
 <script setup>

@@ -37,6 +37,10 @@
               <ion-text color="danger">*</ion-text></ion-label
             >
             <ion-input
+              class="custom"
+              shape="round"
+              mode="ios"
+              fill="outline"
               v-model="formData.name"
               type="text"
               placeholder="Ex: Venerque"
@@ -50,6 +54,10 @@
               >Code postal <ion-text color="danger">*</ion-text></ion-label
             >
             <ion-input
+              class="custom"
+              shape="round"
+              mode="ios"
+              fill="outline"
               v-model="formData.postalCode"
               type="text"
               placeholder="Ex: 31810"
@@ -66,6 +74,10 @@
               <ion-text color="danger">*</ion-text></ion-label
             >
             <ion-input
+              class="custom"
+              shape="round"
+              mode="ios"
+              fill="outline"
               v-model="formData.email"
               type="email"
               placeholder="Ex: contact@mairie.fr"

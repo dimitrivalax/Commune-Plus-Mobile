@@ -37,17 +37,20 @@
                     class="info-thumb"
                   />
                 </IonThumbnail>
-                <IonIcon v-else :icon="newspaper" slot="start" class="info-icon" />
+                <IonIcon
+                  v-else
+                  :icon="newspaper"
+                  slot="start"
+                  class="info-icon"
+                />
                 <IonLabel>
                   <p class="info-item-title">{{ item.title }}</p>
                   <div class="item-meta">
-
                     <IonBadge v-if="item.category" class="category-badge">
                       {{ item.category }}
                     </IonBadge>
                   </div>
                 </IonLabel>
-                <IonIcon :icon="chevronForward" slot="end" class="chevron-icon" />
               </IonItem>
             </IonList>
           </div>
@@ -97,7 +100,12 @@ import {
   IonInfiniteScrollContent,
   IonSpinner
 } from '@ionic/vue'
-import { newspaper, newspaperOutline, chevronForward, calendarOutline } from 'ionicons/icons'
+import {
+  newspaper,
+  newspaperOutline,
+  chevronForward,
+  calendarOutline
+} from 'ionicons/icons'
 import AppHeader from '@/components/app-header.vue'
 import { InformationService } from '@/services/information-service'
 import { formatDateGroupLabel } from '@/utils/date'
@@ -153,7 +161,12 @@ const groupedByDate = computed(() => {
 const loadInitial = async () => {
   const communeId = await getCommuneId()
   const today = new Date().toISOString().split('T')[0]
-  const { data, error, hasMoreOlder: moreOlder, hasMoreNewer: moreNewer } = await InformationService.getInitial(communeId, today)
+  const {
+    data,
+    error,
+    hasMoreOlder: moreOlder,
+    hasMoreNewer: moreNewer
+  } = await InformationService.getInitial(communeId, today)
   if (error) throw error
   infoItems.value = data || []
   hasMoreOlder.value = moreOlder
@@ -175,7 +188,10 @@ const loadOlder = async (event) => {
   loadingOlder.value = true
   try {
     const communeId = await getCommuneId()
-    const { data, error, hasMore } = await InformationService.getOlderThan(communeId, minDate)
+    const { data, error, hasMore } = await InformationService.getOlderThan(
+      communeId,
+      minDate
+    )
     if (error) throw error
     if (data?.length) {
       infoItems.value = [...(data || []), ...infoItems.value]
@@ -204,7 +220,10 @@ const loadNewer = async (event) => {
   loadingNewer.value = true
   try {
     const communeId = await getCommuneId()
-    const { data, error, hasMore } = await InformationService.getNewerThan(communeId, maxDate)
+    const { data, error, hasMore } = await InformationService.getNewerThan(
+      communeId,
+      maxDate
+    )
     if (error) throw error
     if (data?.length) {
       infoItems.value = [...infoItems.value, ...(data || [])]

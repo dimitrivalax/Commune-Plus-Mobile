@@ -21,6 +21,10 @@
           <ion-item lines="none" class="form-item">
             <ion-label position="stacked">Description du signalement</ion-label>
             <ion-textarea
+              shape="round"
+              mode="ios"
+              fill="outline"
+              class="custom"
               v-model="description"
               placeholder="Décrivez le signalement..."
               rows="4"
@@ -47,7 +51,11 @@
               Position enregistrée : {{ location.latitude.toFixed(6) }},
               {{ location.longitude.toFixed(6) }}
               <span v-if="addressFromGps" class="address-gps">
-                {{ addressFromGpsLoading ? 'Mise à jour de l\'adresse…' : addressFromGps }}
+                {{
+                  addressFromGpsLoading
+                    ? "Mise à jour de l'adresse…"
+                    : addressFromGps
+                }}
               </span>
             </p>
             <div v-if="location" class="signalement-map-wrapper">
@@ -56,7 +64,10 @@
                 <ion-icon :icon="locationIcon" />
               </div>
             </div>
-            <p v-if="location" class="map-hint">Déplacez la carte pour ajuster la position ; le point reste au centre.</p>
+            <p v-if="location" class="map-hint">
+              Déplacez la carte pour ajuster la position ; le point reste au
+              centre.
+            </p>
             <p v-if="locationError" class="location-error">
               <ion-icon :icon="alertCircleOutline" />
               {{ locationError }}
@@ -69,6 +80,10 @@
               <ion-item lines="none" class="form-item">
                 <ion-label position="stacked">Adresse</ion-label>
                 <ion-input
+                  class="custom"
+                  shape="round"
+                  mode="ios"
+                  fill="outline"
                   v-model="address"
                   placeholder="Adresse où se trouve le signalement"
                 ></ion-input>
@@ -115,6 +130,10 @@
           <ion-item v-if="photo" lines="none" class="form-item">
             <ion-label position="stacked">Commentaire sur la photo</ion-label>
             <ion-textarea
+              shape="round"
+              mode="ios"
+              fill="outline"
+              class="custom"
               v-model="comment"
               placeholder="Ajoutez un commentaire sur cette photo (optionnel)..."
               rows="3"
@@ -137,6 +156,10 @@
               <ion-item lines="none" class="form-item">
                 <ion-label position="stacked">Nom *</ion-label>
                 <ion-input
+                  class="custom"
+                  shape="round"
+                  mode="ios"
+                  fill="outline"
                   v-model="lastName"
                   placeholder="Votre nom"
                   required
@@ -146,6 +169,10 @@
               <ion-item lines="none" class="form-item">
                 <ion-label position="stacked">Prénom *</ion-label>
                 <ion-input
+                  class="custom"
+                  shape="round"
+                  mode="ios"
+                  fill="outline"
                   v-model="firstName"
                   placeholder="Votre prénom"
                   required
@@ -155,6 +182,10 @@
               <ion-item lines="none" class="form-item">
                 <ion-label position="stacked">Email *</ion-label>
                 <ion-input
+                  class="custom"
+                  shape="round"
+                  mode="ios"
+                  fill="outline"
                   v-model="email"
                   type="email"
                   placeholder="votre.email@exemple.com"
@@ -165,6 +196,10 @@
               <ion-item lines="none" class="form-item">
                 <ion-label position="stacked">Téléphone</ion-label>
                 <ion-input
+                  class="custom"
+                  shape="round"
+                  mode="ios"
+                  fill="outline"
                   v-model="phone"
                   type="tel"
                   placeholder="06 12 34 56 78"
@@ -361,7 +396,10 @@ async function updateLocationFromMapCenter() {
   }
   addressFromGpsLoading.value = true
   try {
-    addressFromGps.value = await getAddressFromCoordinates(center.lat, center.lng)
+    addressFromGps.value = await getAddressFromCoordinates(
+      center.lat,
+      center.lng
+    )
   } catch (e) {
     addressFromGps.value = ''
   }

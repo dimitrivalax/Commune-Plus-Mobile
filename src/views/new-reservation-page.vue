@@ -32,7 +32,9 @@
             </ion-select-option>
           </ion-select>
           <p v-if="newForm.salleId" class="salle-description">
-            {{ salles.find((salle) => salle.id === newForm.salleId).description }}
+            {{
+              salles.find((salle) => salle.id === newForm.salleId).description
+            }}
           </p>
         </ion-item>
 
@@ -125,6 +127,10 @@
           <ion-item lines="none">
             <ion-label position="stacked">Nom *</ion-label>
             <ion-input
+              class="custom"
+              shape="round"
+              mode="ios"
+              fill="outline"
               v-model="newForm.name"
               placeholder="Votre nom"
               required
@@ -134,6 +140,10 @@
           <ion-item lines="none">
             <ion-label position="stacked">Email *</ion-label>
             <ion-input
+              class="custom"
+              shape="round"
+              mode="ios"
+              fill="outline"
               v-model="newForm.email"
               type="email"
               placeholder="Votre email"
@@ -144,6 +154,10 @@
           <ion-item lines="none">
             <ion-label position="stacked">Téléphone</ion-label>
             <ion-input
+              class="custom"
+              shape="round"
+              mode="ios"
+              fill="outline"
               v-model="newForm.phone"
               type="tel"
               placeholder="Votre téléphone"
@@ -157,6 +171,10 @@
             >Raison de la réservation (obligatoire)</ion-label
           >
           <ion-textarea
+            shape="round"
+            mode="ios"
+            fill="outline"
+            class="custom"
             v-model="newForm.reason"
             placeholder="Événement, réunion, etc..."
             rows="4"

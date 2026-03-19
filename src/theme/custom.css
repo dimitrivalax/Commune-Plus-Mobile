@@ -148,7 +148,19 @@ ion-textarea {
   --padding-top: 12px;
   --padding-bottom: 12px;
   margin-top: var(--spacing-sm);
+  --background: rgba(44, 163, 217, 0.1);
+  
 }
+ /* ion-input.custom, ion-textarea.custom {
+    --background: rgba(44, 163, 217, 0.1);
+    --placeholder-opacity: 0.6;
+    --border-radius: var(--border-radius-sm);
+
+    --padding-bottom: 10px;
+    --padding-end: 10px;
+    --padding-start: 10px;
+    --padding-top: 10px;
+  } */
 
 ion-card-title{
   color: var(--ion-color-dark);
@@ -249,4 +261,11 @@ ion-content::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.3);
 }
 
+.background-primary-light{
+  background-color: rgba(44, 163, 217, 0.1);
+}
 
+ion-item::part(native) {
+    background: rgba(44, 163, 217, 0.1);
+    border-radius: var(--border-radius-sm);
+  }

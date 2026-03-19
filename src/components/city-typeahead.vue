@@ -1,10 +1,14 @@
 <template>
   <div class="city-typeahead">
-    <ion-item>
+    <ion-item lines="none">
       <ion-label position="stacked">
         Rechercher une commune existante
       </ion-label>
       <ion-input
+        class="custom"
+        shape="round"
+        mode="ios"
+        fill="outline"
         v-model="searchTerm"
         type="text"
         placeholder="Tapez le nom ou le code postal..."
@@ -67,13 +71,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import {
-  IonItem,
-  IonLabel,
-  IonInput,
-  IonIcon,
-  IonSpinner
-} from '@ionic/vue'
+import { IonItem, IonLabel, IonInput, IonIcon, IonSpinner } from '@ionic/vue'
 import { searchOutline, hourglassOutline } from 'ionicons/icons'
 import { searchCitiesInDatabase } from '@/utils/storage'
 

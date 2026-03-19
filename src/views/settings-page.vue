@@ -25,45 +25,65 @@
           <ion-card>
             <ion-card-content>
               <form @submit.prevent="saveUserContactForm">
-                <ion-item>
+                <ion-item lines="none">
                   <ion-label position="stacked">Prénom</ion-label>
                   <ion-input
+                    class="custom"
+                    shape="round"
+                    mode="ios"
+                    fill="outline"
                     v-model="userForm.firstName"
                     type="text"
                     placeholder="Votre prénom"
                   ></ion-input>
                 </ion-item>
 
-                <ion-item>
+                <ion-item lines="none">
                   <ion-label position="stacked">Nom</ion-label>
                   <ion-input
+                    class="custom"
+                    shape="round"
+                    mode="ios"
+                    fill="outline"
                     v-model="userForm.lastName"
                     type="text"
                     placeholder="Votre nom"
                   ></ion-input>
                 </ion-item>
 
-                <ion-item>
+                <ion-item lines="none">
                   <ion-label position="stacked">Email</ion-label>
                   <ion-input
+                    class="custom"
+                    shape="round"
+                    mode="ios"
+                    fill="outline"
                     v-model="userForm.email"
                     type="email"
                     placeholder="votre.email@exemple.com"
                   ></ion-input>
                 </ion-item>
 
-                <ion-item>
+                <ion-item lines="none">
                   <ion-label position="stacked">Téléphone</ion-label>
                   <ion-input
+                    class="custom"
+                    shape="round"
+                    mode="ios"
+                    fill="outline"
                     v-model="userForm.phone"
                     type="tel"
                     placeholder="06 12 34 56 78"
                   ></ion-input>
                 </ion-item>
 
-                <ion-item>
+                <ion-item lines="none">
                   <ion-label position="stacked">Adresse</ion-label>
                   <ion-input
+                    class="custom"
+                    shape="round"
+                    mode="ios"
+                    fill="outline"
                     v-model="userForm.address"
                     type="text"
                     placeholder="Votre adresse (optionnel)"
@@ -116,21 +136,21 @@
                     />
                   </div>
 
-                  <ion-item>
+                  <ion-item lines="none">
                     <ion-label>
                       <h3>Nom de la commune</h3>
                       <p>{{ cityInfo.name }}</p>
                     </ion-label>
                   </ion-item>
 
-                  <ion-item>
+                  <ion-item lines="none">
                     <ion-label>
                       <h3>Code postal</h3>
                       <p>{{ cityInfo.postalCode }}</p>
                     </ion-label>
                   </ion-item>
 
-                  <ion-item>
+                  <ion-item lines="none">
                     <ion-label>
                       <h3>Email</h3>
                       <p>{{ cityInfo.email }}</p>
@@ -364,7 +384,7 @@ ion-item {
   h3 {
     font-size: 14px;
     font-weight: 600;
-    color: var(--ion-color-light);
+    color: var(--ion-color-dark);
     margin: 0 0 4px 0;
   }
 

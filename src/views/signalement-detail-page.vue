@@ -159,6 +159,10 @@
                   Description du signalement
                 </ion-label>
                 <ion-textarea
+                  shape="round"
+                  mode="ios"
+                  fill="outline"
+                  class="custom"
                   v-model="editForm.description"
                   placeholder="Décrivez le signalement..."
                   rows="4"
@@ -195,6 +199,10 @@
                   Commentaire
                 </ion-label>
                 <ion-textarea
+                  shape="round"
+                  mode="ios"
+                  fill="outline"
+                  class="custom"
                   v-model="editForm.comment"
                   placeholder="Commentaire sur la photo (optionnel)..."
                   rows="3"
