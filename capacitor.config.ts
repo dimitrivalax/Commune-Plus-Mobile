@@ -10,7 +10,7 @@ const config: CapacitorConfig = {
   splashScreen: {
     launchShowDuration: 2000,
     launchAutoHide: true,
-    backgroundColor: '#2563eb', // Couleur de fond (couleur primaire)
+    backgroundColor: '#ffffff', // Couleur de fond (blanc pour correspondre à l'icône)
     androidSplashResourceName: 'splash',
     androidScaleType: 'CENTER_CROP',
     showSpinner: false, // On utilise notre propre spinner dans le composant
