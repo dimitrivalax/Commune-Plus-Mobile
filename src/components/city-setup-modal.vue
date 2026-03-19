@@ -16,14 +16,14 @@
       <div class="modal-content">
         <div class="modal-header">
           <ion-icon :icon="locationOutline" class="header-icon"></ion-icon>
-          <h2>Actualités de votre commune</h2>
-          <p>Veuillez rechercher la commune dans la liste ci-dessous</p>
+          <!-- <h2>Informations de votre commune</h2> -->
+          <h2>Veuillez rechercher la commune dans la liste ci-dessous</h2>
         </div>
 
         <form @submit.prevent="handleSubmit">
           <CityTypeahead @select="handleCitySelect" :disabled="isSubmitting" />
 
-          <div class="modal-header">
+          <div class="sub-menu">
             <p>Ou renseignez les informations manuellement</p>
           </div>
 
@@ -275,14 +275,18 @@ watch(
     margin: 0 0 8px 0;
     font-size: 24px;
     font-weight: 600;
-    color: var(--ion-color-light);
+    color: var(--ion-color-dark);
   }
 
   p {
-    margin: 0;
     color: var(--ion-color-medium);
     font-size: 14px;
   }
+}
+
+.sub-menu {
+  margin-top: 72px;
+  text-align: center;
 }
 
 .logo-image {
