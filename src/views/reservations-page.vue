@@ -19,6 +19,7 @@
             v-for="reservation in reservations"
             :key="reservation.id"
             class="reservation-item"
+            :class="getStatusRowClass(reservation.status)"
             button
             @click="$router.push(`/reservation/${reservation.id}`)"
           >
@@ -122,6 +123,18 @@ const loadReservations = async (event) => {
   }
 }
 
+const getStatusRowClass = (status) => {
+  switch (status) {
+    case 'confirmée':
+      return 'reservation-row--confirmed'
+    case 'refusée':
+      return 'reservation-row--refused'
+    case 'en_attente':
+    default:
+      return 'reservation-row--pending'
+  }
+}
+
 const getStatusColor = (status) => {
   switch (status) {
     case 'confirmée':
@@ -166,6 +179,22 @@ onActivated(() => {
   margin-bottom: 12px;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border-left: 4px solid var(--status-accent, var(--ion-color-warning));
+
+  &.reservation-row--confirmed {
+    --status-accent: var(--ion-color-success);
+    --background: color-mix(in srgb, var(--ion-color-success) 12%, white);
+  }
+
+  &.reservation-row--refused {
+    --status-accent: var(--ion-color-danger);
+    --background: color-mix(in srgb, var(--ion-color-danger) 12%, white);
+  }
+
+  &.reservation-row--pending {
+    --status-accent: var(--ion-color-warning);
+    --background: color-mix(in srgb, var(--ion-color-warning) 12%, white);
+  }
 
   .reservation-icon {
     font-size: 24px;
