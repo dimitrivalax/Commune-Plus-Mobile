@@ -29,7 +29,7 @@
               </ion-item>
               <ion-item button router-link="/tabs/propositions" lines="none">
                 <ion-icon :icon="bookOutline" slot="start" />
-                <ion-label>Doléances</ion-label>
+                <ion-label>Propositions</ion-label>
               </ion-item>
             </ion-menuToggle>
           </ion-list>

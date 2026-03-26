@@ -1,6 +1,6 @@
 <template>
   <IonPage>
-    <AppHeader title="Cahier de Doléances"></AppHeader>
+    <AppHeader title="Cahier de Propositions"></AppHeader>
     <IonContent :fullscreen="true">
       <IonFab vertical="bottom" horizontal="end" slot="fixed">
         <IonFabButton @click="$router.push('/proposition/new')">
@@ -68,14 +68,14 @@
 
         <div v-else-if="!loading" class="empty-state">
           <IonIcon :icon="bookOutline" class="empty-icon" />
-          <h3>Aucune doléance</h3>
+          <h3>Aucune proposition</h3>
           <p>Soyez le premier à proposer une idée pour votre commune !</p>
           <IonButton
             expand="block"
             @click="$router.push('/proposition/new')"
             class="empty-action"
           >
-            Créer une doléance
+            Créer une proposition
           </IonButton>
         </div>
 
