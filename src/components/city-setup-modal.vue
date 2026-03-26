@@ -20,16 +20,17 @@
           <h2>Veuillez rechercher la commune dans la liste ci-dessous</h2>
         </div>
 
-        <form @submit.prevent="handleSubmit">
+        <form id="city-setup-form" @submit.prevent="handleSubmit">
           <CityTypeahead @select="handleCitySelect" :disabled="isSubmitting" />
 
-          <div class="sub-menu">
-            <p>Ou renseignez les informations manuellement</p>
+          <div class="sub-menu" v-if="!formData.name">
+            <p>Si vous ne trouvez pas votre commune, envoyez-nous un email à <strong><a href="mailto:contact@commune-plus.fr">contact@commune-plus.fr</a></strong></p>
           </div>
 
-          <ion-item v-if="formData.logo" lines="none">
-            <IonImg :src="formData.logo" alt="Logo" class="logo-image" />
-          </ion-item>
+          <template v-if="formData.name">
+            <ion-item v-if="formData.logo" lines="none">
+              <IonImg :src="formData.logo" alt="Logo" class="logo-image" />
+            </ion-item>
 
           <ion-item lines="none">
             <ion-label position="stacked"
@@ -45,7 +46,7 @@
               type="text"
               placeholder="Ex: Venerque"
               required
-              :disabled="isSubmitting"
+              :disabled="true"
             ></ion-input>
           </ion-item>
 
@@ -64,13 +65,13 @@
               pattern="[0-9]{5}"
               maxlength="5"
               required
-              :disabled="isSubmitting"
+              :disabled="true"
             ></ion-input>
           </ion-item>
 
           <ion-item lines="none">
             <ion-label position="stacked"
-              >Email de la commune (pour les test je bloque ce champ)
+              >Email de la commune
               <ion-text color="danger">*</ion-text></ion-label
             >
             <ion-input
@@ -85,20 +86,25 @@
               :disabled="true"
             ></ion-input>
           </ion-item>
-
-          <div class="form-actions">
-            <ion-button
-              type="submit"
-              expand="block"
-              :disabled="!isFormValid || isSubmitting"
-            >
-              <ion-spinner v-if="isSubmitting" name="crescent"></ion-spinner>
-              <span v-else>Enregistrer</span>
-            </ion-button>
-          </div>
+          </template>
         </form>
       </div>
     </ion-content>
+
+    <ion-footer v-if="formData.name" class="city-setup-footer">
+      <ion-toolbar>
+        <ion-button
+          type="submit"
+          form="city-setup-form"
+          expand="block"
+          class="footer-save-button"
+          :disabled="!isFormValid || isSubmitting"
+        >
+          <ion-spinner v-if="isSubmitting" name="crescent"></ion-spinner>
+          <span v-else>Enregistrer</span>
+        </ion-button>
+      </ion-toolbar>
+    </ion-footer>
   </ion-modal>
 </template>
 
@@ -119,10 +125,11 @@ import {
   IonIcon,
   IonSpinner,
   IonButtons,
+  IonFooter,
   toastController
 } from '@ionic/vue'
 import { locationOutline } from 'ionicons/icons'
-import { saveCityInfoToDatabase } from '@/utils/storage'
+import { saveCityInfo } from '@/utils/storage'
 import CityTypeahead from './city-typeahead.vue'
 
 const props = defineProps({
@@ -139,9 +146,11 @@ const props = defineProps({
 const emit = defineEmits(['close', 'saved'])
 
 const formData = ref({
+  id: null,
   name: '',
   postalCode: '',
-  email: 'contact@commune-plus.fr'
+  email: 'contact@commune-plus.fr',
+  logo: null
 })
 
 const isSubmitting = ref(false)
@@ -149,6 +158,7 @@ const isSaved = ref(false)
 
 const isFormValid = computed(() => {
   return !!(
+    formData.value.id &&
     formData.value.name.trim() &&
     formData.value.postalCode.trim() &&
     formData.value.email.trim() &&
@@ -174,45 +184,35 @@ const showToast = async (message, color = 'danger') => {
 const handleSubmit = async () => {
   if (!isFormValid.value || isSubmitting.value) return
 
+  const communeId = formData.value.id
+  if (!communeId) {
+    await showToast('Sélectionnez une commune dans la liste.', 'warning')
+    return
+  }
+
   isSubmitting.value = true
 
   try {
-    const result = await saveCityInfoToDatabase({
+    saveCityInfo({
       name: formData.value.name.trim(),
       postalCode: formData.value.postalCode.trim(),
       email: formData.value.email.trim(),
-      logo: formData.value.logo?.trim() || null
+      logo: formData.value.logo?.trim() || null,
+      id: communeId
     })
 
-    if (!result) {
-      throw new Error('Aucune donnée retournée par la sauvegarde')
-    }
-
-    // Mettre à jour le token push avec la nouvelle commune
-    if (result.id) {
-      const { updatePushTokenCommune } =
-        await import('@/services/push-notifications')
-      await updatePushTokenCommune(result.id)
-    }
+    const { updatePushTokenCommune } =
+      await import('@/services/push-notifications')
+    await updatePushTokenCommune(communeId)
 
     isSaved.value = true
-    await showToast(
-      'Actualités de la commune enregistrées avec succès',
-      'success'
-    )
+    await showToast('Commune sélectionnée.', 'success')
     emit('saved')
   } catch (error) {
-    console.error('Error saving city info:', error)
+    console.error('Error confirming city selection:', error)
     const errorMessage =
-      error.message || "Erreur lors de l'enregistrement en base de données"
-    await showToast(
-      `${errorMessage}. Les données ont été sauvegardées localement.`,
-      'warning'
-    )
-    // Les données sont quand même sauvegardées dans le localStorage grâce au fallback dans saveCityInfoToDatabase
-    // Mais on ne ferme pas la modale si l'erreur est critique
-    isSaved.value = true
-    emit('saved')
+      error.message || 'Erreur lors de la mise à jour des notifications'
+    await showToast(errorMessage, 'danger')
   } finally {
     isSubmitting.value = false
   }
@@ -229,12 +229,12 @@ const handleCancel = () => {
 }
 
 const handleCitySelect = (city) => {
-  // Remplir automatiquement les champs du formulaire avec la commune sélectionnée
   formData.value = {
+    id: city.id ?? null,
     name: city.name,
     postalCode: city.postalCode,
     email: city.email,
-    logo: city.logo
+    logo: city.logo ?? null
   }
 }
 
@@ -244,10 +244,11 @@ watch(
   (newValue) => {
     if (newValue) {
       formData.value = {
+        id: null,
         name: '',
         postalCode: '',
         email: '',
-        logo: ''
+        logo: null
       }
       isSaved.value = false
     }
@@ -306,12 +307,15 @@ ion-label {
   margin-bottom: 8px;
 }
 
-.form-actions {
-  margin-top: 32px;
+.city-setup-footer ion-toolbar {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 8px;
+  --padding-bottom: calc(8px + env(safe-area-inset-bottom));
 }
 
-ion-button {
-  margin-top: 8px;
+.footer-save-button {
+  margin: 0;
 }
 
 ion-spinner {
