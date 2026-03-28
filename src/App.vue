@@ -23,11 +23,21 @@
                 <ion-icon :icon="newspaperOutline" slot="start" />
                 <ion-label>Actualités</ion-label>
               </ion-item>
-              <ion-item button router-link="/tabs/reservations" lines="none">
+              <ion-item
+                v-if="isReservationsEnabled"
+                button
+                router-link="/tabs/reservations"
+                lines="none"
+              >
                 <ion-icon :icon="calendarOutline" slot="start" />
                 <ion-label>Réservations</ion-label>
               </ion-item>
-              <ion-item button router-link="/tabs/propositions" lines="none">
+              <ion-item
+                v-if="isPropositionsEnabled"
+                button
+                router-link="/tabs/propositions"
+                lines="none"
+              >
                 <ion-icon :icon="bookOutline" slot="start" />
                 <ion-label>Propositions</ion-label>
               </ion-item>
@@ -83,7 +93,8 @@ import { App } from '@capacitor/app'
 import { useRouter } from 'vue-router'
 import SplashScreen from '@/components/splash-screen.vue'
 import CitySetupModal from '@/components/city-setup-modal.vue'
-import { isCityInfoComplete } from '@/utils/storage'
+import { isCityInfoComplete, refreshCityInfoFromDatabase } from '@/utils/storage'
+import { useCommuneFeatures } from '@/composables/useCommuneFeatures'
 import {
   homeOutline,
   warningOutline,
@@ -94,6 +105,9 @@ import {
 
 const router = useRouter()
 const showCitySetupModal = ref(false)
+
+const { isReservationsEnabled, isPropositionsEnabled } = useCommuneFeatures()
+
 
 const checkCityInfo = () => {
   if (!isCityInfoComplete()) {
@@ -106,6 +120,7 @@ const checkCityInfo = () => {
 
 const handleCityInfoSaved = () => {
   showCitySetupModal.value = false
+  refreshCityInfoFromDatabase()
 }
 
 // Gérer l'ouverture de l'app depuis une notification
@@ -132,6 +147,9 @@ const handleAppUrlOpen = async (event) => {
 }
 
 onMounted(() => {
+  if (isCityInfoComplete()) {
+    refreshCityInfoFromDatabase()
+  }
   checkCityInfo()
 
   // Écouter l'événement d'ouverture de l'app depuis une notification

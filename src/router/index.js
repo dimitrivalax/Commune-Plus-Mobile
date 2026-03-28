@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router'
 import TabsPage from '../views/tabs-page.vue'
+import { getCityInfo } from '@/utils/storage'
 
 const routes = [
   {
@@ -78,11 +79,35 @@ const routes = [
   }
 ]
 
+function reservationsAllowed() {
+  const c = getCityInfo()
+  return !c || c.feature_reservations_salles !== false
+}
+
+function propositionsAllowed() {
+  const c = getCityInfo()
+  return !c || c.feature_propositions !== false
+}
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes
 })
 
-export default router
+router.beforeEach((to) => {
+  const path = to.path
+  if (
+    !reservationsAllowed() &&
+    (path === '/tabs/reservations' || path.startsWith('/reservation'))
+  ) {
+    return { path: '/tabs/home', replace: true }
+  }
+  if (
+    !propositionsAllowed() &&
+    (path === '/tabs/propositions' || path.startsWith('/proposition'))
+  ) {
+    return { path: '/tabs/home', replace: true }
+  }
+})
 
+export default router

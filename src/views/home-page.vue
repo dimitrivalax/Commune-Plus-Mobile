@@ -19,6 +19,7 @@
           </IonCard>
 
           <IonCard
+            v-if="isReservationsEnabled"
             button
             @click="$router.push('/tabs/reservations')"
             class="service-card"
@@ -47,6 +48,7 @@
           </IonCard>
 
           <IonCard
+            v-if="isPropositionsEnabled"
             button
             @click="$router.push('/tabs/propositions')"
             class="service-card"
@@ -75,6 +77,9 @@ import {
 } from '@ionic/vue'
 import { warning, calendar, informationCircle, book } from 'ionicons/icons'
 import AppHeader from '@/components/app-header.vue'
+import { useCommuneFeatures } from '@/composables/useCommuneFeatures'
+
+const { isReservationsEnabled, isPropositionsEnabled } = useCommuneFeatures()
 </script>
 
 <style lang="scss" scoped>

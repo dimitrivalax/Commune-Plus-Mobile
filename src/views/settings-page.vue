@@ -219,7 +219,8 @@ import {
   saveUserContact,
   getUserContact,
   getCityInfo,
-  getCityInfoFromDatabase
+  getCityInfoFromDatabase,
+  refreshCityInfoFromDatabase
 } from '@/utils/storage'
 import { updatePushTokenEmail } from '@/services/push-notifications'
 import { updateUserAndCommuneContext } from '@/services/posthog'
@@ -254,6 +255,10 @@ const loadData = async () => {
 
   // Charger les informations de la commune depuis le localStorage d'abord
   let savedCityInfo = getCityInfo()
+  if (savedCityInfo?.id) {
+    await refreshCityInfoFromDatabase()
+    savedCityInfo = getCityInfo()
+  }
 
   // Si pas dans le localStorage, essayer de charger depuis la base de données
   if (!savedCityInfo || !savedCityInfo.name) {

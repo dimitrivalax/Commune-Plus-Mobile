@@ -108,7 +108,9 @@ const formData = ref({
   name: '',
   postalCode: '',
   email: 'contact@commune-plus.fr',
-  logo: null
+  logo: null,
+  feature_reservations_salles: true,
+  feature_propositions: true
 })
 
 const isSubmitting = ref(false)
@@ -156,7 +158,10 @@ const handleSubmit = async () => {
       postalCode: formData.value.postalCode.trim(),
       email: formData.value.email.trim(),
       logo: formData.value.logo?.trim() || null,
-      id: communeId
+      id: communeId,
+      feature_reservations_salles:
+        formData.value.feature_reservations_salles !== false,
+      feature_propositions: formData.value.feature_propositions !== false
     })
 
     const { updatePushTokenCommune } =
@@ -192,7 +197,9 @@ const handleCitySelect = (city) => {
     name: city.name,
     postalCode: city.postalCode,
     email: city.email,
-    logo: city.logo ?? null
+    logo: city.logo ?? null,
+    feature_reservations_salles: city.feature_reservations_salles !== false,
+    feature_propositions: city.feature_propositions !== false
   }
 }
 
@@ -206,7 +213,9 @@ watch(
         name: '',
         postalCode: '',
         email: '',
-        logo: null
+        logo: null,
+        feature_reservations_salles: true,
+        feature_propositions: true
       }
       isSaved.value = false
     }

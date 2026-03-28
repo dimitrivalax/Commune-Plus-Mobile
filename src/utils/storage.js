@@ -2,18 +2,9 @@
  * Service de gestion du localStorage pour les coordonnées utilisateur
  */
 
-const STORAGE_KEY = 'commune-plus-user-contact'
+import { bumpCommuneFeaturesVersion } from '@/utils/commune-features-version'
 
-/**
- * Structure des données sauvegardées :
- * {
- *   firstName: string,
- *   lastName: string,
- *   email: string,
- *   phone: string,
- *   address: string (optionnel, pour le fallback)
- * }
- */
+const STORAGE_KEY = 'commune-plus-user-contact'
 
 /**
  * Sauvegarde les coordonnées utilisateur dans le localStorage
@@ -35,8 +26,7 @@ export const saveUserContact = (contactData) => {
 }
 
 /**
- * Récupère les coordonnées utilisateur depuis le localStorage
- * @returns {Object|null} Les données de contact ou null si aucune donnée n'est trouvée
+ * @returns {Object|null}
  */
 export const getUserContact = () => {
   try {
@@ -57,9 +47,6 @@ export const getUserContact = () => {
   }
 }
 
-/**
- * Supprime les coordonnées utilisateur du localStorage
- */
 export const clearUserContact = () => {
   try {
     localStorage.removeItem(STORAGE_KEY)
@@ -68,25 +55,11 @@ export const clearUserContact = () => {
   }
 }
 
-/**
- * Service de gestion du localStorage pour les informations de la commune
- */
-
 const CITY_STORAGE_KEY = 'commune-plus-city-info'
 
 /**
- * Structure des données sauvegardées :
- * {
- *   name: string,
- *   postalCode: string,
- *   email: string,
- *   logo: string (optionnel)
- * }
- */
-
-/**
  * Sauvegarde les informations de la commune dans le localStorage
- * @param {Object} cityData - Les données de la commune à sauvegarder
+ * @param {Object} cityData
  */
 export const saveCityInfo = (cityData) => {
   try {
@@ -94,18 +67,20 @@ export const saveCityInfo = (cityData) => {
       name: cityData.name || '',
       postalCode: cityData.postalCode || '',
       email: cityData.email || '',
-      logo: cityData.logo || cityData.logo_url || null, // Support logo et logo_url
-      id: cityData.id || null // Sauvegarder aussi l'ID si disponible
+      logo: cityData.logo || cityData.logo_url || null,
+      id: cityData.id || null,
+      feature_reservations_salles: cityData.feature_reservations_salles !== false,
+      feature_propositions: cityData.feature_propositions !== false
     }
     localStorage.setItem(CITY_STORAGE_KEY, JSON.stringify(dataToSave))
+    bumpCommuneFeaturesVersion()
   } catch (error) {
     console.error('Error saving city info to localStorage:', error)
   }
 }
 
 /**
- * Récupère les informations de la commune depuis le localStorage
- * @returns {Object|null} Les données de la commune ou null si aucune donnée n'est trouvée
+ * @returns {Object|null}
  */
 export const getCityInfo = () => {
   try {
@@ -118,7 +93,9 @@ export const getCityInfo = () => {
       postalCode: data.postalCode || '',
       email: data.email || '',
       logo: data.logo || null,
-      id: data.id || null
+      id: data.id || null,
+      feature_reservations_salles: data.feature_reservations_salles !== false,
+      feature_propositions: data.feature_propositions !== false
     }
   } catch (error) {
     console.error('Error reading city info from localStorage:', error)
@@ -126,29 +103,24 @@ export const getCityInfo = () => {
   }
 }
 
-/**
- * Récupère l'ID de la commune depuis la base de données en utilisant les informations du localStorage
- * @returns {Promise<string|null>} L'ID de la commune ou null si non trouvée
- */
 export const getCityIdFromDatabase = async () => {
-  // Import dynamique pour éviter les problèmes de dépendances circulaires
   const { supabase } = await import('@/services/supabase')
 
   try {
-    // D'abord vérifier si on a déjà l'ID dans le localStorage
     const cityInfo = getCityInfo()
     if (cityInfo && cityInfo.id) {
       return cityInfo.id
     }
 
-    // Sinon, chercher dans la base de données avec le nom et le code postal
     if (!cityInfo || !cityInfo.name || !cityInfo.postalCode) {
       return null
     }
 
     const { data, error } = await supabase
       .from('commune')
-      .select('id')
+      .select(
+        'id, feature_reservations_salles, feature_propositions'
+      )
       .eq('name', cityInfo.name)
       .eq('postal_code', cityInfo.postalCode)
       .limit(1)
@@ -160,10 +132,11 @@ export const getCityIdFromDatabase = async () => {
     }
 
     if (data && data.id) {
-      // Sauvegarder l'ID dans le localStorage pour les prochaines fois
       saveCityInfo({
         ...cityInfo,
-        id: data.id
+        id: data.id,
+        feature_reservations_salles: data.feature_reservations_salles !== false,
+        feature_propositions: data.feature_propositions !== false
       })
       return data.id
     }
@@ -175,10 +148,6 @@ export const getCityIdFromDatabase = async () => {
   }
 }
 
-/**
- * Vérifie si les informations de la commune sont complètes
- * @returns {boolean} true si toutes les informations sont présentes, false sinon
- */
 export const isCityInfoComplete = () => {
   const cityInfo = getCityInfo()
   if (!cityInfo) return false
@@ -187,16 +156,45 @@ export const isCityInfoComplete = () => {
 }
 
 /**
- * Sauvegarde les informations de la commune dans le localStorage ET en base de données
- * @param {Object} cityData - Les données de la commune à sauvegarder
- * @returns {Promise<Object>} Les données sauvegardées ou null en cas d'erreur
+ * Met à jour le localStorage depuis Supabase pour l'ID de commune courant (flags inclus).
+ * @returns {Promise<Object|null>}
  */
-export const saveCityInfoToDatabase = async (cityData) => {
-  // Import dynamique pour éviter les problèmes de dépendances circulaires
+export const refreshCityInfoFromDatabase = async () => {
+  const cityInfo = getCityInfo()
+  if (!cityInfo?.id) return null
+
   const { supabase } = await import('@/services/supabase')
 
   try {
-    // Nettoyer les données et s'assurer qu'on n'inclut pas l'id lors de l'insertion
+    const { data, error } = await supabase
+      .from('commune')
+      .select('*')
+      .eq('id', cityInfo.id)
+      .maybeSingle()
+
+    if (error || !data) return null
+
+    const merged = {
+      name: data.name || cityInfo.name,
+      postalCode: data.postal_code || cityInfo.postalCode,
+      email: data.email || cityInfo.email,
+      logo: data.logo_url ?? cityInfo.logo,
+      id: data.id,
+      feature_reservations_salles: data.feature_reservations_salles !== false,
+      feature_propositions: data.feature_propositions !== false
+    }
+    saveCityInfo(merged)
+    return merged
+  } catch (error) {
+    console.error('Error refreshing city info:', error)
+    return null
+  }
+}
+
+export const saveCityInfoToDatabase = async (cityData) => {
+  const { supabase } = await import('@/services/supabase')
+
+  try {
     const dataToSave = {
       name: (cityData.name || '').trim(),
       postal_code: (cityData.postalCode || '').trim(),
@@ -204,12 +202,10 @@ export const saveCityInfoToDatabase = async (cityData) => {
       logo_url: (cityData.logo || cityData.logo_url || '').trim() || null
     }
 
-    // Valider que les champs requis ne sont pas vides
     if (!dataToSave.name || !dataToSave.postal_code || !dataToSave.email) {
       throw new Error('Tous les champs sont requis (nom, code postal, email)')
     }
 
-    // Vérifier s'il existe déjà une entrée avec le même nom et code postal
     const { data: existingData, error: checkError } = await supabase
       .from('commune')
       .select('id')
@@ -226,7 +222,6 @@ export const saveCityInfoToDatabase = async (cityData) => {
     let result
 
     if (existingData && existingData.id) {
-      // Mettre à jour l'entrée existante
       const { data, error } = await supabase
         .from('commune')
         .update(dataToSave)
@@ -245,8 +240,6 @@ export const saveCityInfoToDatabase = async (cityData) => {
 
       result = data
     } else {
-      // Créer une nouvelle entrée
-      // S'assurer qu'on n'inclut pas l'id (il sera généré automatiquement)
       const insertData = {
         name: dataToSave.name,
         postal_code: dataToSave.postal_code,
@@ -274,10 +267,11 @@ export const saveCityInfoToDatabase = async (cityData) => {
       result = data
     }
 
-    // Sauvegarder aussi dans le localStorage avec l'ID
     saveCityInfo({
       ...cityData,
-      id: result.id
+      id: result.id,
+      feature_reservations_salles: result.feature_reservations_salles !== false,
+      feature_propositions: result.feature_propositions !== false
     })
 
     return result
@@ -289,19 +283,12 @@ export const saveCityInfoToDatabase = async (cityData) => {
       details: error.details,
       hint: error.hint
     })
-    // En cas d'erreur de base de données, sauvegarder quand même dans le localStorage
     saveCityInfo(cityData)
-    // Propager l'erreur pour que l'appelant puisse la gérer
     throw error
   }
 }
 
-/**
- * Récupère les informations de la commune depuis la base de données
- * @returns {Promise<Object|null>} Les données de la commune ou null si aucune donnée n'est trouvée
- */
 export const getCityInfoFromDatabase = async () => {
-  // Import dynamique pour éviter les problèmes de dépendances circulaires
   const { supabase } = await import('@/services/supabase')
 
   try {
@@ -312,7 +299,6 @@ export const getCityInfoFromDatabase = async () => {
       .single()
 
     if (error) {
-      // Si aucune donnée n'existe, retourner null
       if (error.code === 'PGRST116') {
         return null
       }
@@ -321,33 +307,26 @@ export const getCityInfoFromDatabase = async () => {
 
     if (!data) return null
 
-    // Convertir les données de la base vers le format attendu
     const cityInfo = {
       name: data.name || '',
       postalCode: data.postal_code || '',
       email: data.email || '',
       logo: data.logo_url || null,
-      id: data.id || null
+      id: data.id || null,
+      feature_reservations_salles: data.feature_reservations_salles !== false,
+      feature_propositions: data.feature_propositions !== false
     }
 
-    // Synchroniser avec le localStorage (avec l'ID)
     saveCityInfo(cityInfo)
 
     return cityInfo
   } catch (error) {
     console.error('Error reading city info from database:', error)
-    // En cas d'erreur, essayer de récupérer depuis le localStorage
     return getCityInfo()
   }
 }
 
-/**
- * Recherche des communes dans la base de données
- * @param {string} searchTerm - Terme de recherche (nom ou code postal)
- * @returns {Promise<Array>} Liste des communes correspondantes
- */
 export const searchCitiesInDatabase = async (searchTerm) => {
-  // Import dynamique pour éviter les problèmes de dépendances circulaires
   const { supabase } = await import('@/services/supabase')
 
   try {
@@ -357,11 +336,11 @@ export const searchCitiesInDatabase = async (searchTerm) => {
 
     const search = searchTerm.trim()
 
-    // Recherche avec OR pour le nom ou le code postal
-    // Syntaxe PostgREST : colonne.opérateur.valeur
     const { data, error } = await supabase
       .from('commune')
-      .select('id, name, postal_code, email, logo_url')
+      .select(
+        'id, name, postal_code, email, logo_url, feature_reservations_salles, feature_propositions'
+      )
       .or(`name.ilike.%${search}%,postal_code.ilike.%${search}%`)
       .limit(10)
       .order('name', { ascending: true })
@@ -376,7 +355,9 @@ export const searchCitiesInDatabase = async (searchTerm) => {
       name: city.name || '',
       postalCode: city.postal_code || '',
       email: city.email || '',
-      logo: city.logo_url || null
+      logo: city.logo_url || null,
+      feature_reservations_salles: city.feature_reservations_salles !== false,
+      feature_propositions: city.feature_propositions !== false
     }))
   } catch (error) {
     console.error('Error searching cities in database:', error)
