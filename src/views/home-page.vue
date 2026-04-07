@@ -3,64 +3,26 @@
     <AppHeader title="Accueil" :logo="true"></AppHeader>
     <IonContent :fullscreen="true">
       <div class="ion-padding">
-        <div>
-          <IonCard
-            button
-            @click="$router.push('/tabs/signalements')"
-            class="service-card"
-          >
+        <div v-if="items.length > 0" class="cards-wrap">
+          <IonCard v-for="item in items" :key="item.id" class="info-card">
+            <img
+              v-if="item.photo_url"
+              :src="item.photo_url"
+              :alt="item.title"
+              class="info-image"
+            />
+            <IonCardHeader>
+              <IonCardTitle>{{ item.title }}</IonCardTitle>
+            </IonCardHeader>
             <IonCardContent>
-              <div class="service-icon">
-                <IonIcon :icon="warning" />
-              </div>
-              <h3>Faire un signalement</h3>
-              <p>Prenez une photo et faites un signalement dans votre ville.</p>
+              <div class="info-description" v-html="item.description"></div>
             </IonCardContent>
           </IonCard>
-
-          <IonCard
-            v-if="isReservationsEnabled"
-            button
-            @click="$router.push('/tabs/reservations')"
-            class="service-card"
-          >
-            <IonCardContent>
-              <div class="service-icon">
-                <IonIcon :icon="calendar" />
-              </div>
-              <h3>Réserver une salle</h3>
-              <p>Réservez une salle municipale pour vos événements.</p>
-            </IonCardContent>
-          </IonCard>
-
-          <IonCard
-            button
-            @click="$router.push('/tabs/actualite')"
-            class="service-card"
-          >
-            <IonCardContent>
-              <div class="service-icon">
-                <IonIcon :icon="informationCircle" />
-              </div>
-              <h3>Actualités municipales</h3>
-              <p>Consultez les dernières informations de la mairie.</p>
-            </IonCardContent>
-          </IonCard>
-
-          <IonCard
-            v-if="isPropositionsEnabled"
-            button
-            @click="$router.push('/tabs/propositions')"
-            class="service-card"
-          >
-            <IonCardContent>
-              <div class="service-icon">
-                <IonIcon :icon="book" />
-              </div>
-              <h3>Propositions</h3>
-              <p>Partagez vos idées et propositions pour la commune.</p>
-            </IonCardContent>
-          </IonCard>
+        </div>
+        <div v-else class="empty-state">
+          <IonIcon :icon="informationCircle" class="empty-icon" />
+          <h3>Aucune information communale</h3>
+          <p>Les informations de votre commune apparaîtront ici.</p>
         </div>
       </div>
     </IonContent>
@@ -72,66 +34,85 @@ import {
   IonPage,
   IonContent,
   IonCard,
+  IonCardHeader,
+  IonCardTitle,
   IonCardContent,
   IonIcon
 } from '@ionic/vue'
-import { warning, calendar, informationCircle, book } from 'ionicons/icons'
+import { informationCircle } from 'ionicons/icons'
+import { onMounted, ref } from 'vue'
 import AppHeader from '@/components/app-header.vue'
-import { useCommuneFeatures } from '@/composables/useCommuneFeatures'
+import { InformationCommuneService } from '@/services/information-commune-service'
+import { getCityInfo, getCityIdFromDatabase } from '@/utils/storage'
 
-const { isReservationsEnabled, isPropositionsEnabled } = useCommuneFeatures()
+const items = ref([])
+
+const getCommuneId = async () => {
+  const cityInfo = getCityInfo()
+  if (cityInfo?.id) return cityInfo.id
+  return await getCityIdFromDatabase()
+}
+
+onMounted(async () => {
+  const communeId = await getCommuneId()
+  const { data } = await InformationCommuneService.getAll(communeId)
+  items.value = data || []
+})
 </script>
 
 <style lang="scss" scoped>
-.service-card {
-  margin-bottom: 16px;
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
+.cards-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
 
-  &:active {
-    transform: scale(0.98);
+.info-card {
+  margin: 0;
+}
+
+.info-image {
+  display: block;
+  width: 100%;
+  max-height: 210px;
+  object-fit: cover;
+}
+
+.info-description {
+  line-height: 1.5;
+  color: var(--ion-color-medium-shade);
+
+  :deep(p) {
+    margin: 0 0 10px 0;
   }
 
-  ion-card-content {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 24px;
+  :deep(p:last-child) {
+    margin-bottom: 0;
   }
 
-  .service-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 12px;
-    background: linear-gradient(
-      135deg,
-      var(--ion-color-primary),
-      var(--ion-color-primary-shade)
-    );
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  :deep(strong) {
+    color: var(--ion-color-dark);
+    font-weight: 600;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+
+  .empty-icon {
+    font-size: 64px;
+    color: var(--ion-color-light);
     margin-bottom: 16px;
-
-    ion-icon {
-      font-size: 28px;
-      color: white;
-    }
   }
 
   h3 {
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--ion-color-dark);
     margin: 0 0 8px 0;
   }
 
   p {
-    font-size: 14px;
-    color: var(--ion-color-medium);
     margin: 0;
-    line-height: 1.5;
+    color: var(--ion-color-medium);
   }
 }
 </style>
