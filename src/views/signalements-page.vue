@@ -71,10 +71,10 @@
         </IonList>
 
         <div v-else class="empty-state">
-          <IonIcon :icon="documentText" class="empty-icon" />
+          <IonIcon :icon="bookOutline" class="empty-icon" />
           <h3>Aucun signalement</h3>
           <p v-if="selectedStatus === 'all'">
-            Aucun signalement pour le moment.
+            Soyez le premier à faire un signalement pour votre commune !
           </p>
           <p v-else>Aucun signalement avec ce statut.</p>
           <IonButton
@@ -83,7 +83,7 @@
             @click="$router.push('/signalement/new')"
             class="empty-action"
           >
-            Faire un signalement
+            Créer un signalement
           </IonButton>
         </div>
       </div>
@@ -111,7 +111,7 @@ import {
   IonSelectOption,
   onIonViewWillEnter
 } from '@ionic/vue'
-import { add, documentText } from 'ionicons/icons'
+import { add, bookOutline } from 'ionicons/icons'
 import AppHeader from '@/components/app-header.vue'
 import { SignalementService } from '@/services/signalement-service'
 import { formatDateTime } from '@/utils/date'
