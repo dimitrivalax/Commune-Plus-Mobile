@@ -15,7 +15,7 @@
                 <ion-icon :icon="homeOutline" slot="start" />
                 <ion-label>Accueil</ion-label>
               </ion-item>
-              <ion-item button router-link="/tabs/info" lines="none">
+              <ion-item button router-link="/tabs/actualite" lines="none">
                 <ion-icon :icon="newspaperOutline" slot="start" />
                 <ion-label>Actualités</ion-label>
               </ion-item>
@@ -142,7 +142,7 @@ const handleAppUrlOpen = async (event) => {
       await router.isReady()
 
       // Naviguer vers la page de détail
-      router.push(`/info/${infoId}`)
+      router.push(`/actualite/${infoId}`)
     }
   }
 }

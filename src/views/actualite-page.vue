@@ -24,7 +24,7 @@
                 lines="none"
                 button
                 class="info-item"
-                @click="$router.push(`/info/${item.id}`)"
+                @click="$router.push(`/actualite/${item.id}`)"
               >
                 <IonThumbnail
                   v-if="item.image_url"
@@ -107,7 +107,7 @@ import {
   calendarOutline
 } from 'ionicons/icons'
 import AppHeader from '@/components/app-header.vue'
-import { InformationService } from '@/services/information-service'
+import { InformationService } from '@/services/actualite-service'
 import { formatDateGroupLabel } from '@/utils/date'
 import { getCityInfo, getCityIdFromDatabase } from '@/utils/storage'
 

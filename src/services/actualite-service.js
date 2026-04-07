@@ -26,7 +26,7 @@ function eventDateString(row) {
 }
 
 async function fetchForCommune(communeId) {
-  const ref = collection(db(), 'municipal_info')
+  const ref = collection(db(), 'actualite')
   const snap = await getDocs(
     query(ref, where('commune_id', 'in', [communeId, null]))
   )
@@ -116,7 +116,7 @@ export const InformationService = {
       return { data: null, error: { message: 'Commune non sélectionnée' } }
     }
     try {
-      const dref = doc(db(), 'municipal_info', id)
+      const dref = doc(db(), 'actualite', id)
       const snap = await getDoc(dref)
       if (!snap.exists()) {
         return { data: null, error: { message: 'Not found' } }

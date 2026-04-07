@@ -8,7 +8,7 @@
           <ion-label>Accueil</ion-label>
         </ion-tab-button>
 
-        <ion-tab-button tab="info" @click.prevent="navigate('info')">
+        <ion-tab-button tab="info" @click.prevent="navigate('actualite')">
           <ion-icon :icon="newspaper" />
           <ion-label>Actualités</ion-label>
         </ion-tab-button>

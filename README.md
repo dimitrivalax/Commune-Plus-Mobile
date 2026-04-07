@@ -77,7 +77,7 @@ L'application utilise un design épuré et lisible en marque blanche. Pour perso
 - `salle`
 - `signalement`
 - `reservation_salle`
-- `municipal_info`
+- `actualite`
 - `proposition`
 - `proposition_comment`
 - `proposition_vote`

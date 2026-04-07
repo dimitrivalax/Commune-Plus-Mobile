@@ -51,10 +51,10 @@ export async function initializePushNotifications() {
         // Attendre que le router soit prêt
         await router.isReady()
 
-        console.log('Navigating to info page:', `/info/${infoId}`)
+        console.log('Navigating to actualite page:', `/actualite/${infoId}`)
 
         // Naviguer vers la page de détail de l'information
-        router.push(`/info/${infoId}`)
+        router.push(`/actualite/${infoId}`)
       } catch (error) {
         console.error('Error navigating to info:', error)
       }
@@ -159,7 +159,7 @@ export async function initializePushNotifications() {
             await navigateToSignalement(signalementId)
           }
         } else if (
-          notificationType === 'municipal_info' ||
+          notificationType === 'actualite' ||
           data?.info_id ||
           data?.infoId
         ) {
@@ -234,7 +234,7 @@ export async function initializePushNotifications() {
             )
           }
         } else if (
-          notificationType === 'municipal_info' ||
+          notificationType === 'actualite' ||
           data?.info_id ||
           data?.infoId
         ) {
@@ -340,7 +340,7 @@ export async function initializePushNotifications() {
             }, 1500)
           }
         } else if (
-          notificationType === 'municipal_info' ||
+          notificationType === 'actualite' ||
           data?.info_id ||
           data?.infoId
         ) {

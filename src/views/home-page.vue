@@ -35,7 +35,7 @@
 
           <IonCard
             button
-            @click="$router.push('/tabs/info')"
+            @click="$router.push('/tabs/actualite')"
             class="service-card"
           >
             <IonCardContent>

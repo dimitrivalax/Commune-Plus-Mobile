@@ -68,7 +68,7 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    match /municipal_info/{id} {
+    match /actualite/{id} {
       allow read: if true;
       allow write: if false;
     }

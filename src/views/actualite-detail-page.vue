@@ -3,9 +3,9 @@
     <ion-header>
       <ion-toolbar color="primary">
         <ion-buttons slot="start">
-          <ion-back-button default-href="/tabs/info"></ion-back-button>
+          <ion-back-button default-href="/tabs/actualite"></ion-back-button>
         </ion-buttons>
-        <ion-title>Détail de l'information</ion-title>
+        <ion-title>Détail de l'actualité</ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
@@ -101,7 +101,7 @@ import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Pagination } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/pagination'
-import { InformationService } from '@/services/information-service'
+import { InformationService } from '@/services/actualite-service'
 import { formatDate } from '@/utils/date'
 import { getCityInfo } from '@/utils/storage'
 import { getCityIdFromDatabase } from '@/utils/storage'

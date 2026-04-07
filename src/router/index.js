@@ -31,9 +31,9 @@ const routes = [
         component: () => import('@/views/reservations-page.vue')
       },
       {
-        path: 'info',
-        name: 'info',
-        component: () => import('@/views/info-page.vue')
+        path: 'actualite',
+        name: 'actualite',
+        component: () => import('@/views/actualite-page.vue')
       },
       {
         path: 'propositions',
@@ -70,8 +70,8 @@ const routes = [
     component: () => import('@/views/reservation-detail-page.vue')
   },
   {
-    path: '/info/:id',
-    component: () => import('@/views/info-detail-page.vue')
+    path: '/actualite/:id',
+    component: () => import('@/views/actualite-detail-page.vue')
   },
   {
     path: '/settings',
