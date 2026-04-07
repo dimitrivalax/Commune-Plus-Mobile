@@ -58,12 +58,12 @@
               :disabled="voting"
             >
               <IonIcon :icon="thumbsUpOutline" slot="start" />
-              Soutenir cette doléance
+              Soutenir cette proposition
             </IonButton>
             <div v-else class="voted-message">
               <span class="voted-message-text">
                 <IonIcon :icon="checkmarkCircle" />
-                Vous soutenez déjà cette doléance
+                Vous soutenez déjà cette proposition
               </span>
               <IonButton
                 fill="outline"
@@ -215,7 +215,7 @@ const getEmailForVote = async () => {
       .create({
         header: 'Email requis',
         message:
-          "Pour soutenir cette doléance, merci de renseigner votre adresse email. Elle permet d'identifier votre vote.",
+          "Pour soutenir cette proposition, merci de renseigner votre adresse email. Elle permet d'identifier votre vote.",
         inputs: [
           {
             name: 'email',
@@ -272,7 +272,7 @@ const handleVote = async () => {
     const toast = await toastController.create({
       message:
         error?.message === 'Already voted'
-          ? 'Vous soutenez déjà cette doléance.'
+          ? 'Vous soutenez déjà cette proposition.'
           : "Impossible d'enregistrer le vote.",
       duration: 2000,
       color: 'danger'
@@ -298,7 +298,7 @@ const handleUnvote = async () => {
     await loadProposition()
 
     const toast = await toastController.create({
-      message: 'Vous ne soutenez plus cette doléance.',
+      message: 'Vous ne soutenez plus cette proposition.',
       duration: 2000,
       color: 'medium'
     })
@@ -395,7 +395,7 @@ const performAddComment = async (firstName, lastName, email) => {
 
 const confirmDelete = async () => {
   const alert = await alertController.create({
-    header: 'Supprimer la doléance ?',
+    header: 'Supprimer la proposition ?',
     message: 'Cette action est irréversible.',
     buttons: [
       { text: 'Annuler', role: 'cancel' },

@@ -15,7 +15,7 @@
           <h3 class="section-title">Ma proposition</h3>
 
           <IonItem lines="none" class="form-item">
-            <IonLabel position="stacked">Nom de la doléance *</IonLabel>
+            <IonLabel position="stacked">Nom de la proposition *</IonLabel>
             <IonInput
               v-model="name"
               placeholder="Ex: Aménagement du parc"
@@ -47,7 +47,7 @@
           <div v-if="photo" class="photo-preview-container">
             <img
               :src="photo"
-              alt="Photo de la doléance"
+              alt="Photo de la proposition"
               class="photo-preview"
             />
             <IonButton
@@ -73,7 +73,7 @@
         <div class="form-section">
           <h3 class="section-title">Vos informations</h3>
           <p class="section-subtitle">
-            Ces informations seront affichées avec votre doléance.
+            Ces informations seront affichées avec votre proposition.
           </p>
 
           <IonItem lines="none" class="form-item">
@@ -106,7 +106,7 @@
             class="submit-button"
           >
             <IonSpinner v-if="loading" name="crescent" slot="start" />
-            {{ loading ? 'Envoi en cours...' : 'Publier ma doléance' }}
+            {{ loading ? 'Envoi en cours...' : 'Publier ma proposition' }}
           </IonButton>
         </div>
       </div>
@@ -268,7 +268,7 @@ const submitProposition = async () => {
     })
 
     const toast = await toastController.create({
-      message: 'Votre doléance a été publiée !',
+      message: 'Votre proposition a été publiée !',
       duration: 2000,
       color: 'success'
     })

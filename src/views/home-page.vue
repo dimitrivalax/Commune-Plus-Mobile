@@ -57,7 +57,7 @@
               <div class="service-icon">
                 <IonIcon :icon="book" />
               </div>
-              <h3>Cahier de Doléances</h3>
+              <h3>Propositions</h3>
               <p>Partagez vos idées et propositions pour la commune.</p>
             </IonCardContent>
           </IonCard>

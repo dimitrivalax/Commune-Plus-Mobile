@@ -22,7 +22,7 @@ Selon les fonctionnalités que vous utilisez, les données suivantes peuvent êt
 ### 2.1 Données d’identification et de contact
 
 - Nom, prénom, adresse e-mail, numéro de téléphone, adresse postale (saisis dans les paramètres ou les formulaires).
-- Ces informations peuvent être stockées localement sur l’appareil et transmises aux serveurs du service pour la gestion des signalements, réservations, doléances / propositions et communications associées.
+- Ces informations peuvent être stockées localement sur l’appareil et transmises aux serveurs du service pour la gestion des signalements, réservations, propositions et communications associées.
 
 ### 2.2 Données relatives à la commune
 
@@ -38,7 +38,7 @@ Selon les fonctionnalités que vous utilisez, les données suivantes peuvent êt
 ### 2.4 Notifications push
 
 - Si vous acceptez les notifications : un **jeton d’appareil** (token FCM / équivalent) est généré et enregistré, avec l’**identifiant de plateforme** (Android / iOS), un **identifiant utilisateur** technique, l’**identifiant de commune** concernée et, le cas échéant, votre **adresse e-mail** pour associer le bon compte appareil aux messages.
-- Le traitement permet l’envoi d’alertes liées aux informations municipales, signalements ou doléances.
+- Le traitement permet l’envoi d’alertes liées aux informations municipales, signalements ou propositions.
 - L’infrastructure de livraison des messages peut passer par **Google Firebase Cloud Messaging** (Google LLC).
 
 ### 2.5 Données techniques et d’usage (analyse produit)

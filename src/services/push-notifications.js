@@ -80,7 +80,7 @@ export async function initializePushNotifications() {
       }
     }
 
-    // Fonction helper pour naviguer vers une doléance
+    // Fonction helper pour naviguer vers une proposition
     const navigateToProposition = async (propositionId) => {
       if (!propositionId) {
         console.warn('No proposition ID provided for navigation')
@@ -173,7 +173,7 @@ export async function initializePushNotifications() {
           data?.proposition_id ||
           data?.propositionId
         ) {
-          // Notification pour une doléance
+          // Notification pour une proposition
           const propositionId = data.proposition_id || data.propositionId
           if (propositionId) {
             await navigateToProposition(propositionId)
@@ -257,7 +257,7 @@ export async function initializePushNotifications() {
           data?.proposition_id ||
           data?.propositionId
         ) {
-          // Notification pour une doléance
+          // Notification pour une proposition
           const propositionId = data.proposition_id || data.propositionId
           if (propositionId) {
             console.log(
