@@ -8,6 +8,11 @@
           <ion-label>Accueil</ion-label>
         </ion-tab-button>
 
+        <ion-tab-button tab="info" @click.prevent="navigate('info')">
+          <ion-icon :icon="newspaper" />
+          <ion-label>Actualités</ion-label>
+        </ion-tab-button>
+
         <ion-tab-button
           tab="signalements"
           @click.prevent="navigate('signalements')"
@@ -16,10 +21,7 @@
           <ion-label>Signalements</ion-label>
         </ion-tab-button>
 
-        <ion-tab-button tab="info" @click.prevent="navigate('info')">
-          <ion-icon :icon="newspaper" />
-          <ion-label>Actualités</ion-label>
-        </ion-tab-button>
+
 
         <ion-tab-button tab="menu" @click.prevent="openMenu">
           <ion-icon :icon="menuOutline" />

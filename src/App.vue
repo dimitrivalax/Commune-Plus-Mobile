@@ -15,14 +15,15 @@
                 <ion-icon :icon="homeOutline" slot="start" />
                 <ion-label>Accueil</ion-label>
               </ion-item>
-              <ion-item button router-link="/tabs/signalements" lines="none">
-                <ion-icon :icon="warningOutline" slot="start" />
-                <ion-label>Signalements</ion-label>
-              </ion-item>
               <ion-item button router-link="/tabs/info" lines="none">
                 <ion-icon :icon="newspaperOutline" slot="start" />
                 <ion-label>Actualités</ion-label>
               </ion-item>
+              <ion-item button router-link="/tabs/signalements" lines="none">
+                <ion-icon :icon="warningOutline" slot="start" />
+                <ion-label>Signalements</ion-label>
+              </ion-item>
+
               <ion-item
                 v-if="isReservationsEnabled"
                 button
