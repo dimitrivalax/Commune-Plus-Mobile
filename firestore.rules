@@ -1,0 +1,117 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isNonEmptyString(v) {
+      return v is string && v.size() > 0;
+    }
+
+    function isValidEmail(v) {
+      return isNonEmptyString(v) && v.matches('^.+@.+\\..+$');
+    }
+
+    function isOptionalEmail(v) {
+      return v == null || isValidEmail(v);
+    }
+
+    function isSignalementPayload(d) {
+      return isNonEmptyString(d.first_name)
+        && isNonEmptyString(d.last_name)
+        && isNonEmptyString(d.description)
+        && isOptionalEmail(d.email)
+        && (d.city_id == null || isNonEmptyString(d.city_id));
+    }
+
+    function isReservationPayload(d) {
+      return isNonEmptyString(d.salle_id)
+        && isValidEmail(d.email)
+        && isNonEmptyString(d.name)
+        && isNonEmptyString(d.date)
+        && isNonEmptyString(d.start_time)
+        && isNonEmptyString(d.end_time);
+    }
+
+    function isPropositionPayload(d) {
+      return isNonEmptyString(d.commune_id)
+        && isNonEmptyString(d.user_id)
+        && isNonEmptyString(d.name)
+        && isNonEmptyString(d.description)
+        && isNonEmptyString(d.user_firstname)
+        && isNonEmptyString(d.user_lastname)
+        && isValidEmail(d.user_email);
+    }
+
+    function isPropositionCommentPayload(d) {
+      return isNonEmptyString(d.proposition_id)
+        && isNonEmptyString(d.content)
+        && isNonEmptyString(d.user_firstname)
+        && isNonEmptyString(d.user_lastname)
+        && isValidEmail(d.user_email);
+    }
+
+    function isPushTokenPayload(d) {
+      return isNonEmptyString(d.token)
+        && isNonEmptyString(d.user_id)
+        && (d.email == null || isValidEmail(d.email))
+        && (d.platform == null || d.platform in ['android', 'ios', 'web'])
+        && (d.device_id == null || d.device_id is string)
+        && (d.commune_id == null || d.commune_id is string)
+        && (d.is_active == null || d.is_active is bool);
+    }
+
+    match /commune/{id} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /salle/{id} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /municipal_info/{id} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /signalement/{id} {
+      allow read: if true;
+      allow create: if isSignalementPayload(request.resource.data);
+      allow update: if true;
+      allow delete: if false;
+    }
+
+    match /reservation_salle/{id} {
+      allow read: if true;
+      allow create: if isReservationPayload(request.resource.data);
+      allow update: if true;
+      allow delete: if true;
+    }
+
+    match /proposition/{id} {
+      allow read: if true;
+      allow create: if isPropositionPayload(request.resource.data);
+      allow update: if true;
+      allow delete: if true;
+    }
+
+    match /proposition_comment/{id} {
+      allow read: if true;
+      allow create: if isPropositionCommentPayload(request.resource.data);
+      allow update, delete: if false;
+    }
+
+    match /proposition_vote/{id} {
+      allow read: if true;
+      allow create: if isNonEmptyString(request.resource.data.proposition_id)
+        && isValidEmail(request.resource.data.email);
+      allow delete: if true;
+      allow update: if false;
+    }
+
+    match /push_token/{id} {
+      allow read: if true;
+      allow create, update: if isPushTokenPayload(request.resource.data);
+      allow delete: if false;
+    }
+  }
+}

@@ -1,47 +1,52 @@
-# Commune Plus
+## Commune Plus Mobile
 
-Application mobile développée avec Ionic et Vue.js pour la gestion des signalements, réservations de salles municipales et réception des informations de la mairie.
+Application citoyenne Ionic + Vue pour les signalements, réservations de salles et informations municipales.
 
-## Fonctionnalités
+## Stack
 
-- 📸 **Signalements** : Prendre des photos et faire des signalements avec géolocalisation GPS (fallback sur adresse si GPS indisponible)
-- 📅 **Réservation de salles** : Réserver des salles municipales pour vos événements
-- 📢 **Informations municipales** : Recevoir et consulter les dernières informations de la mairie
-
-## Technologies
-
-- **Frontend** : Ionic 7 + Vue.js 3
-- **Backend** : Supabase
-- **Stockage d'images** : Cloudinary
-- **Analytics** : PostHog
-- **Build** : Vite
+- Frontend : Ionic 8 + Vue 3
+- Données : Firebase Firestore
+- Notifications push : FCM (via Capacitor)
+- Images : Cloudinary
+- Build : Vite
 
 ## Installation
 
 1. Installer les dépendances :
 
-Avec **pnpm** (recommandé) :
 ```bash
 pnpm install
 ```
 
-Ou avec **npm** :
-```bash
-npm install
-```
+2. Copier les variables d'environnement :
 
-2. Configurer les variables d'environnement :
 ```bash
 cp .env.example .env
 ```
 
-Puis remplir le fichier `.env` avec vos credentials :
-- `VITE_SUPABASE_URL` : URL de votre projet Supabase
-- `VITE_SUPABASE_ANON_KEY` : Clé anonyme de votre projet Supabase
-- `VITE_CLOUDINARY_CLOUD_NAME` : Nom de votre cloud Cloudinary
-- `VITE_CLOUDINARY_UPLOAD_PRESET` : Preset d'upload Cloudinary
-- `VITE_POSTHOG_API_KEY` : Clé API PostHog (optionnel, pour l'analytics)
-- `VITE_POSTHOG_HOST` : URL de votre instance PostHog (optionnel, par défaut: https://app.posthog.com)
+3. Renseigner au minimum :
+
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_STORAGE_BUCKET`
+- `VITE_FIREBASE_MESSAGING_SENDER_ID`
+- `VITE_FIREBASE_APP_ID`
+- `VITE_BACKOFFICE_API_URL`
+- `VITE_CLOUDINARY_CLOUD_NAME`
+- `VITE_CLOUDINARY_UPLOAD_PRESET`
+
+## Firestore Rules
+
+Un fichier `firestore.rules` est fourni à la racine de ce projet.
+
+Déploiement :
+
+```bash
+firebase deploy --only firestore:rules
+```
+
+Ces règles sont compatibles avec le fonctionnement actuel de l'app mobile (lecture publique + validations minimales d'écriture côté client).
 
 ## Personnalisation du design
 
@@ -66,94 +71,17 @@ L'application utilise un design épuré et lisible en marque blanche. Pour perso
    - La couleur principale sera automatiquement appliquée à tous les éléments de l'interface
    - Les nuances (shade/tint) sont générées automatiquement
 
-## Configuration Supabase
+## Modèle Firestore (collections utilisées)
 
-⚠️ **IMPORTANT** : Vous devez créer les tables dans Supabase avant d'utiliser l'application !
-
-### Configuration CORS (Important pour le développement local)
-
-Si vous rencontrez des erreurs CORS lors du développement local :
-
-1. Allez dans **Supabase Dashboard** → **Settings** → **API**
-2. Dans la section **CORS**, ajoutez :
-   - `http://localhost:5173`
-   - `http://localhost:*` (pour autoriser tous les ports)
-3. Sauvegardez
-
-📖 **Guide détaillé** : Consultez `CORS_FIX.md` pour plus d'informations
-
-### Étapes rapides
-
-1. Connectez-vous à [Supabase](https://supabase.com) et ouvrez votre projet
-2. Allez dans **SQL Editor** → **New query**
-3. Copiez-collez le contenu du fichier `supabase-schema.sql`
-4. Cliquez sur **Run** pour exécuter le script
-5. Vérifiez dans **Table Editor** que les 3 tables sont créées
-
-📖 **Guide détaillé** : Consultez `SUPABASE_SETUP.md` pour plus d'informations
-
-### Tables à créer
-
-Vous devez créer les tables suivantes dans Supabase :
-
-### Table `signalements`
-```sql
-CREATE TABLE signalements (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  description TEXT,
-  latitude DOUBLE PRECISION NOT NULL,
-  longitude DOUBLE PRECISION NOT NULL,
-  location_accuracy DOUBLE PRECISION,
-  comment TEXT,
-  photo_url TEXT,
-  last_name TEXT NOT NULL,
-  first_name TEXT NOT NULL,
-  email TEXT,
-  phone TEXT,
-  status TEXT DEFAULT 'en_attente' CHECK (status IN ('en_attente', 'en_cours', 'traité')),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  CONSTRAINT check_contact_info CHECK (email IS NOT NULL OR phone IS NOT NULL),
-  CONSTRAINT check_latitude CHECK (latitude >= -90 AND latitude <= 90),
-  CONSTRAINT check_longitude CHECK (longitude >= -180 AND longitude <= 180)
-);
-```
-
-**Note** : 
-- L'application utilise la **géolocalisation GPS** en priorité pour enregistrer la position des signalements
-- Si le GPS n'est pas disponible (permission refusée, GPS désactivé), l'utilisateur peut renseigner une adresse manuellement
-- Le schéma accepte soit les coordonnées GPS (latitude/longitude) soit une adresse textuelle
-- Si vous avez déjà créé la table `incivilities`, utilisez d'abord le script `supabase-migration-rename-table.sql` pour la renommer en `signalements`, puis `supabase-migration-gps.sql` pour ajouter le support GPS
-
-### Table `reservations_salles`
-```sql
-CREATE TABLE reservations_salles (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  salle_id UUID NOT NULL REFERENCES salles(id) ON DELETE CASCADE,
-  date DATE NOT NULL,
-  start_time TIME NOT NULL,
-  end_time TIME NOT NULL,
-  reason TEXT,
-  name TEXT NOT NULL,
-  email TEXT NOT NULL,
-  phone TEXT,
-  status TEXT DEFAULT 'en_attente',
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-```
-
-### Table `municipal_info`
-```sql
-CREATE TABLE municipal_info (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  title TEXT NOT NULL,
-  content TEXT NOT NULL,
-  category TEXT,
-  image_url TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-```
+- `commune`
+- `salle`
+- `signalement`
+- `reservation_salle`
+- `municipal_info`
+- `proposition`
+- `proposition_comment`
+- `proposition_vote`
+- `push_token`
 
 ## Configuration Cloudinary
 
@@ -218,7 +146,8 @@ npx cap open android
 ```
 src/
 ├── views/          # Pages de l'application
-├── services/       # Services (Supabase, Cloudinary)
+├── services/       # Services Firestore / Cloudinary / Push
+├── utils/          # Helpers (storage, firestore, etc.)
 ├── router/         # Configuration du routage
 ├── theme/          # Variables CSS Ionic
 └── main.js         # Point d'entrée

@@ -4,7 +4,14 @@ Ce dossier contient les Architecture Decision Records (ADR) et la documentation 
 
 ## Fichiers
 
-Les ADR et documentations techniques seront ajoutés ici au fur et à mesure du développement.
+- `GUIDE_DEMARRAGE.md` : setup rapide local (Firebase/Firestore + BackOffice API).
+- `PUSH_NOTIFICATIONS_SETUP.md` : configuration FCM mobile + stockage des tokens `push_token` dans Firestore.
+- `RESEND_SETUP.md` : envoi d'emails de signalement via `POST /api/public/signalement-email` (BackOffice).
+- `CLOUDINARY_SETUP.md` : configuration upload presets Cloudinary.
+- `CORS_FIX.md` : dépannage CORS (API BackOffice / Cloudinary).
+- `SUPABASE_SETUP.md` : note d'archive (migration vers Firebase).
+- `CONFIGURATION_SMTP_RAPIDE.md` : note d'archive (SMTP remplacé par Resend).
+- `SMTP_INFOMANIAK_SETUP.md` : note d'archive (SMTP remplacé par Resend).
 
 ## Qu'est-ce qu'un ADR ?
 

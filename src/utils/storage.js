@@ -1,15 +1,29 @@
 /**
  * Service de gestion du localStorage pour les coordonnées utilisateur
+ * et synchronisation Firestore (communes).
  */
 
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  limit,
+  addDoc,
+  updateDoc,
+  serverTimestamp
+} from 'firebase/firestore'
 import { bumpCommuneFeaturesVersion } from '@/utils/commune-features-version'
+import { getFirestoreDb } from '@/services/firebase'
+import { docToPlain } from '@/utils/firestore'
+
+const db = () => getFirestoreDb()
 
 const STORAGE_KEY = 'commune-plus-user-contact'
 
-/**
- * Sauvegarde les coordonnées utilisateur dans le localStorage
- * @param {Object} contactData - Les données de contact à sauvegarder
- */
 export const saveUserContact = (contactData) => {
   try {
     const dataToSave = {
@@ -25,9 +39,6 @@ export const saveUserContact = (contactData) => {
   }
 }
 
-/**
- * @returns {Object|null}
- */
 export const getUserContact = () => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
@@ -57,10 +68,6 @@ export const clearUserContact = () => {
 
 const CITY_STORAGE_KEY = 'commune-plus-city-info'
 
-/**
- * Sauvegarde les informations de la commune dans le localStorage
- * @param {Object} cityData
- */
 export const saveCityInfo = (cityData) => {
   try {
     const dataToSave = {
@@ -69,7 +76,8 @@ export const saveCityInfo = (cityData) => {
       email: cityData.email || '',
       logo: cityData.logo || cityData.logo_url || null,
       id: cityData.id || null,
-      feature_reservations_salles: cityData.feature_reservations_salles !== false,
+      feature_reservations_salles:
+        cityData.feature_reservations_salles !== false,
       feature_propositions: cityData.feature_propositions !== false
     }
     localStorage.setItem(CITY_STORAGE_KEY, JSON.stringify(dataToSave))
@@ -79,9 +87,6 @@ export const saveCityInfo = (cityData) => {
   }
 }
 
-/**
- * @returns {Object|null}
- */
 export const getCityInfo = () => {
   try {
     const stored = localStorage.getItem(CITY_STORAGE_KEY)
@@ -104,8 +109,6 @@ export const getCityInfo = () => {
 }
 
 export const getCityIdFromDatabase = async () => {
-  const { supabase } = await import('@/services/supabase')
-
   try {
     const cityInfo = getCityInfo()
     if (cityInfo && cityInfo.id) {
@@ -116,34 +119,30 @@ export const getCityIdFromDatabase = async () => {
       return null
     }
 
-    const { data, error } = await supabase
-      .from('commune')
-      .select(
-        'id, feature_reservations_salles, feature_propositions'
-      )
-      .eq('name', cityInfo.name)
-      .eq('postal_code', cityInfo.postalCode)
-      .limit(1)
-      .maybeSingle()
+    const ref = collection(db(), 'commune')
+    const qy = query(
+      ref,
+      where('name', '==', cityInfo.name.trim()),
+      where('postal_code', '==', String(cityInfo.postalCode).trim()),
+      limit(1)
+    )
+    const snap = await getDocs(qy)
 
-    if (error) {
-      console.error('Error getting city ID:', error)
+    if (snap.empty) {
       return null
     }
 
-    if (data && data.id) {
-      saveCityInfo({
-        ...cityInfo,
-        id: data.id,
-        feature_reservations_salles: data.feature_reservations_salles !== false,
-        feature_propositions: data.feature_propositions !== false
-      })
-      return data.id
-    }
-
-    return null
+    const d = snap.docs[0]
+    const row = docToPlain(d.id, d.data())
+    saveCityInfo({
+      ...cityInfo,
+      id: row.id,
+      feature_reservations_salles: row.feature_reservations_salles !== false,
+      feature_propositions: row.feature_propositions !== false
+    })
+    return row.id
   } catch (error) {
-    console.error('Error getting city ID from database:', error)
+    console.error('Error getting city ID:', error)
     return null
   }
 }
@@ -155,25 +154,16 @@ export const isCityInfoComplete = () => {
   return !!(cityInfo.name && cityInfo.postalCode && cityInfo.email)
 }
 
-/**
- * Met à jour le localStorage depuis Supabase pour l'ID de commune courant (flags inclus).
- * @returns {Promise<Object|null>}
- */
 export const refreshCityInfoFromDatabase = async () => {
   const cityInfo = getCityInfo()
   if (!cityInfo?.id) return null
 
-  const { supabase } = await import('@/services/supabase')
-
   try {
-    const { data, error } = await supabase
-      .from('commune')
-      .select('*')
-      .eq('id', cityInfo.id)
-      .maybeSingle()
+    const dref = doc(db(), 'commune', cityInfo.id)
+    const snap = await getDoc(dref)
+    if (!snap.exists()) return null
 
-    if (error || !data) return null
-
+    const data = docToPlain(snap.id, snap.data())
     const merged = {
       name: data.name || cityInfo.name,
       postalCode: data.postal_code || cityInfo.postalCode,
@@ -192,8 +182,6 @@ export const refreshCityInfoFromDatabase = async () => {
 }
 
 export const saveCityInfoToDatabase = async (cityData) => {
-  const { supabase } = await import('@/services/supabase')
-
   try {
     const dataToSave = {
       name: (cityData.name || '').trim(),
@@ -206,65 +194,42 @@ export const saveCityInfoToDatabase = async (cityData) => {
       throw new Error('Tous les champs sont requis (nom, code postal, email)')
     }
 
-    const { data: existingData, error: checkError } = await supabase
-      .from('commune')
-      .select('id')
-      .eq('name', dataToSave.name)
-      .eq('postal_code', dataToSave.postal_code)
-      .limit(1)
-      .maybeSingle()
-
-    if (checkError) {
-      console.error('Error checking existing city:', checkError)
-      throw new Error(`Erreur lors de la vérification: ${checkError.message}`)
-    }
+    const ref = collection(db(), 'commune')
+    const qy = query(
+      ref,
+      where('name', '==', dataToSave.name),
+      where('postal_code', '==', dataToSave.postal_code),
+      limit(1)
+    )
+    const existingSnap = await getDocs(qy)
 
     let result
 
-    if (existingData && existingData.id) {
-      const { data, error } = await supabase
-        .from('commune')
-        .update(dataToSave)
-        .eq('id', existingData.id)
-        .select()
-        .single()
-
-      if (error) {
-        console.error('Error updating city info:', error)
-        throw new Error(`Erreur lors de la mise à jour: ${error.message}`)
-      }
-
-      if (!data) {
-        throw new Error('Aucune donnée retournée après la mise à jour')
-      }
-
-      result = data
-    } else {
-      const insertData = {
+    if (!existingSnap.empty) {
+      const id = existingSnap.docs[0].id
+      const pref = doc(db(), 'commune', id)
+      await updateDoc(pref, {
         name: dataToSave.name,
         postal_code: dataToSave.postal_code,
         email: dataToSave.email,
-        logo_url: dataToSave.logo_url
-      }
-
-      console.log('Inserting city info:', insertData)
-
-      const { data, error } = await supabase
-        .from('commune')
-        .insert(insertData)
-        .select()
-        .single()
-
-      if (error) {
-        console.error('Error inserting city info:', error)
-        throw new Error(`Erreur lors de l'insertion: ${error.message}`)
-      }
-
-      if (!data) {
-        throw new Error("Aucune donnée retournée après l'insertion")
-      }
-
-      result = data
+        logo_url: dataToSave.logo_url,
+        updated_at: serverTimestamp()
+      })
+      const snap = await getDoc(pref)
+      result = docToPlain(snap.id, snap.data())
+    } else {
+      const newRef = await addDoc(ref, {
+        name: dataToSave.name,
+        postal_code: dataToSave.postal_code,
+        email: dataToSave.email,
+        logo_url: dataToSave.logo_url,
+        feature_reservations_salles: true,
+        feature_propositions: true,
+        created_at: serverTimestamp(),
+        updated_at: serverTimestamp()
+      })
+      const snap = await getDoc(newRef)
+      result = docToPlain(snap.id, snap.data())
     }
 
     saveCityInfo({
@@ -289,22 +254,12 @@ export const saveCityInfoToDatabase = async (cityData) => {
 }
 
 export const getCityInfoFromDatabase = async () => {
-  const { supabase } = await import('@/services/supabase')
-
   try {
-    const { data, error } = await supabase
-      .from('commune')
-      .select('*')
-      .limit(1)
-      .single()
+    const snap = await getDocs(query(collection(db(), 'commune'), limit(1)))
+    if (snap.empty) return null
 
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null
-      }
-      throw error
-    }
-
+    const d = snap.docs[0]
+    const data = docToPlain(d.id, d.data())
     if (!data) return null
 
     const cityInfo = {
@@ -327,38 +282,35 @@ export const getCityInfoFromDatabase = async () => {
 }
 
 export const searchCitiesInDatabase = async (searchTerm) => {
-  const { supabase } = await import('@/services/supabase')
-
   try {
     if (!searchTerm || searchTerm.trim().length < 2) {
       return []
     }
 
-    const search = searchTerm.trim()
+    const search = searchTerm.trim().toLowerCase()
 
-    const { data, error } = await supabase
-      .from('commune')
-      .select(
-        'id, name, postal_code, email, logo_url, feature_reservations_salles, feature_propositions'
+    const snap = await getDocs(
+      query(collection(db(), 'commune'), orderBy('name'), limit(500))
+    )
+
+    return snap.docs
+      .map((d) => docToPlain(d.id, d.data()))
+      .filter(
+        (city) =>
+          (city.name && String(city.name).toLowerCase().includes(search)) ||
+          (city.postal_code &&
+            String(city.postal_code).toLowerCase().includes(search))
       )
-      .or(`name.ilike.%${search}%,postal_code.ilike.%${search}%`)
-      .limit(10)
-      .order('name', { ascending: true })
-
-    if (error) {
-      console.error('Error searching cities:', error)
-      return []
-    }
-
-    return (data || []).map((city) => ({
-      id: city.id,
-      name: city.name || '',
-      postalCode: city.postal_code || '',
-      email: city.email || '',
-      logo: city.logo_url || null,
-      feature_reservations_salles: city.feature_reservations_salles !== false,
-      feature_propositions: city.feature_propositions !== false
-    }))
+      .slice(0, 10)
+      .map((city) => ({
+        id: city.id,
+        name: city.name || '',
+        postalCode: city.postal_code || '',
+        email: city.email || '',
+        logo: city.logo_url || null,
+        feature_reservations_salles: city.feature_reservations_salles !== false,
+        feature_propositions: city.feature_propositions !== false
+      }))
   } catch (error) {
     console.error('Error searching cities in database:', error)
     return []

@@ -1,95 +1,76 @@
-import { supabase } from '@/services/supabase'
+import {
+  collection,
+  addDoc,
+  doc,
+  getDoc,
+  updateDoc,
+  query,
+  where,
+  getDocs,
+  serverTimestamp
+} from 'firebase/firestore'
+import { getFirestoreDb } from '@/services/firebase'
+import { docToPlain } from '@/utils/firestore'
+
+const db = () => getFirestoreDb()
 
 export const SignalementService = {
-  /**
-   * Create a new signalement.
-   * If the table does not have user_id column yet (PGRST204), retries without user_id.
-   * @param {object} data - The signalement data
-   * @returns {Promise<{data: any[]|null, error: any}>}
-   */
   async create(data) {
-    let { data: resultData, error } = await supabase
-      .from('signalements')
-      .insert([data])
-      .select()
-
-    if (error && error.code === 'PGRST204' && error.message?.includes('user_id')) {
-      console.warn(
-        'Column user_id does not exist yet, retrying without it. Please run the migration SQL.'
-      )
-      const dataWithoutUserId = { ...data }
-      delete dataWithoutUserId.user_id
-      const retry = await supabase
-        .from('signalements')
-        .insert([dataWithoutUserId])
-        .select()
-      if (retry.error) return { data: null, error: retry.error }
-      return { data: retry.data, error: null }
+    try {
+      const ref = await addDoc(collection(db(), 'signalement'), {
+        ...data,
+        created_at: serverTimestamp(),
+        updated_at: serverTimestamp()
+      })
+      const snap = await getDoc(ref)
+      return { data: [docToPlain(snap.id, snap.data())], error: null }
+    } catch (e) {
+      return { data: null, error: e }
     }
-
-    if (error) return { data: null, error }
-    return { data: resultData, error: null }
   },
 
-  /**
-   * Fetch signalements for the current user in the given commune only.
-   * Same pattern as reservations: filter by email and commune (city_id).
-   * @param {string} communeId - Current commune ID (from getCityIdFromDatabase)
-   * @param {string} userEmail - Current user email (from getUserContact)
-   * @returns {Promise<{data: any[], error: any}>}
-   */
   async getMySignalementsInCommune(communeId, userEmail) {
     if (!communeId || !userEmail) {
       return { data: [], error: null }
     }
-
     const normalizedEmail = userEmail.trim().toLowerCase()
-    return await supabase
-      .from('signalements')
-      .select('*')
-      .eq('city_id', communeId)
-      .eq('email', normalizedEmail)
-      .order('created_at', { ascending: false })
+    const qy = query(
+      collection(db(), 'signalement'),
+      where('city_id', '==', communeId)
+    )
+    const snap = await getDocs(qy)
+    const rows = snap.docs
+      .map((d) => docToPlain(d.id, d.data()))
+      .filter(
+        (r) =>
+          String(r.email || '')
+            .trim()
+            .toLowerCase() === normalizedEmail
+      )
+      .sort((a, b) =>
+        String(b.created_at || '').localeCompare(String(a.created_at || ''))
+      )
+    return { data: rows, error: null }
   },
 
-  /**
-   * Fetch a single signalement by ID
-   * @param {string} id - The ID of the signalement
-   * @returns {Promise<{data: any, error: any}>}
-   */
   async getById(id) {
-    return await supabase
-      .from('signalements')
-      .select('*')
-      .eq('id', id)
-      .single()
+    const dref = doc(db(), 'signalement', id)
+    const d = await getDoc(dref)
+    if (!d.exists()) return { data: null, error: { message: 'Not found' } }
+    return { data: docToPlain(d.id, d.data()), error: null }
   },
 
-  /**
-   * Update a signalement
-   * @param {string} id - The ID of the signalement
-   * @param {object} updates - The data to update
-   * @returns {Promise<{data: any, error: any}>}
-   */
   async update(id, updates) {
-    return await supabase
-      .from('signalements')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single()
+    const dref = doc(db(), 'signalement', id)
+    await updateDoc(dref, {
+      ...updates,
+      updated_at: serverTimestamp()
+    })
+    const snap = await getDoc(dref)
+    return { data: docToPlain(snap.id, snap.data()), error: null }
   },
 
-  /**
-   * Archive a signalement
-   * @param {string} id - The ID of the signalement
-   * @returns {Promise<{data: any, error: any}>}
-   */
   async archive(id) {
-    return await supabase
-      .from('signalements')
-      .update({ status: 'archive', updated_at: new Date().toISOString() })
-      .eq('id', id)
-      .select()
+    return this.update(id, { status: 'archive' })
   }
 }

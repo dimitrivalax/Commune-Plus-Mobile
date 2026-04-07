@@ -1,145 +1,135 @@
-import { supabase } from '@/services/supabase'
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  runTransaction,
+  serverTimestamp,
+  increment
+} from 'firebase/firestore'
+import { getFirestoreDb } from '@/services/firebase'
+import { docToPlain } from '@/utils/firestore'
 
-/**
- * Derive a deterministic UUID from an email (for fallback when proposition_votes has no email column).
- * Same email always returns the same UUID so one person = one vote.
- * @param {string} email - Normalized email
- * @returns {Promise<string>} UUID string
- */
-async function userIdFromEmail(email) {
-  const buf = await crypto.subtle.digest(
-    'SHA-256',
-    new TextEncoder().encode(email.toLowerCase().trim())
-  )
-  const hex = Array.from(new Uint8Array(buf))
-    .slice(0, 16)
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('')
-  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-a${hex.slice(17, 20)}-${hex.slice(20, 32)}`
+const db = () => getFirestoreDb()
+
+/** ID stable pour le doc de vote (proposition_id + email). */
+function voteDocId(propositionId, emailNormalized) {
+  const s = `${propositionId}\n${emailNormalized}`
+  let h = 2166136261
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i)
+    h = Math.imul(h, 16777619)
+  }
+  return `${propositionId}_v_${(h >>> 0).toString(16)}`
 }
 
 export const PropositionService = {
-  /**
-   * Fetch all propositions for a commune
-   * @param {string} communeId - The ID of the commune
-   * @param {string} sortBy - The field to sort by ('updated_at' or 'votes_count')
-   * @returns {Promise<{data: any[], error: any}>}
-   */
   async getAll(communeId, sortBy = 'updated_at') {
-    return await supabase
-      .from('propositions')
-      .select('*')
-      .eq('commune_id', communeId)
-      .eq('is_archived', false)
-      .order(sortBy, { ascending: false })
-  },
-
-  /**
-   * Fetch a single proposition by ID with its comments and user's vote status.
-   * Vote status is determined by user email (from getUserContact).
-   * @param {string} id - The proposition ID
-   * @param {string} [userEmail] - The current user's email (optional; if missing, has_voted will be false)
-   * @returns {Promise<{data: any, error: any}>}
-   */
-  async getById(id, userEmail) {
-    // Get proposition
-    const { data: proposition, error: propError } = await supabase
-      .from('propositions')
-      .select('*')
-      .eq('id', id)
-      .single()
-
-    if (propError) return { data: null, error: propError }
-
-    // Get comments
-    const { data: comments, error: commError } = await supabase
-      .from('proposition_comments')
-      .select('*')
-      .eq('proposition_id', id)
-      .order('created_at', { ascending: true })
-
-    // Check if current user has voted (by email, or by user_id if schema has no email column)
-    let hasVoted = false
-    const emailNormalized =
-      userEmail && typeof userEmail === 'string'
-        ? userEmail.trim().toLowerCase()
-        : null
-    if (emailNormalized) {
-      let { data: userVote, error: voteErr } = await supabase
-        .from('proposition_votes')
-        .select('id')
-        .eq('proposition_id', id)
-        .eq('email', emailNormalized)
-        .maybeSingle()
-      if (voteErr && voteErr.code === 'PGRST204' && voteErr.message?.includes('email')) {
-        const uid = await userIdFromEmail(emailNormalized)
-        const retry = await supabase
-          .from('proposition_votes')
-          .select('id')
-          .eq('proposition_id', id)
-          .eq('user_id', uid)
-          .maybeSingle()
-        userVote = retry.data
+    try {
+      const qy = query(
+        collection(db(), 'proposition'),
+        where('commune_id', '==', communeId)
+      )
+      const snap = await getDocs(qy)
+      let rows = snap.docs
+        .map((d) => docToPlain(d.id, d.data()))
+        .filter((r) => !r.is_archived)
+      if (sortBy === 'votes_count') {
+        rows.sort(
+          (a, b) => (Number(b.votes_count) || 0) - (Number(a.votes_count) || 0)
+        )
+      } else {
+        rows.sort((a, b) =>
+          String(b.updated_at || '').localeCompare(String(a.updated_at || ''))
+        )
       }
-      hasVoted = !!userVote
-    }
-
-    return {
-      data: {
-        ...proposition,
-        comments: comments || [],
-        has_voted: hasVoted
-      },
-      error: null
+      return { data: rows, error: null }
+    } catch (e) {
+      return { data: [], error: e }
     }
   },
 
-  /**
-   * Create a new proposition
-   * @param {object} propositionData - The proposition data
-   * @returns {Promise<{data: any, error: any}>}
-   */
+  async getById(id, userEmail) {
+    try {
+      const psnap = await getDoc(doc(db(), 'proposition', id))
+      if (!psnap.exists()) {
+        return { data: null, error: { message: 'Not found' } }
+      }
+      const proposition = docToPlain(psnap.id, psnap.data())
+
+      const cq = query(
+        collection(db(), 'proposition_comment'),
+        where('proposition_id', '==', id)
+      )
+      const csnap = await getDocs(cq)
+      const comments = csnap.docs
+        .map((d) => docToPlain(d.id, d.data()))
+        .sort((a, b) =>
+          String(a.created_at || '').localeCompare(String(b.created_at || ''))
+        )
+
+      let hasVoted = false
+      const emailNormalized =
+        userEmail && typeof userEmail === 'string'
+          ? userEmail.trim().toLowerCase()
+          : null
+      if (emailNormalized) {
+        const vsnap = await getDoc(
+          doc(db(), 'proposition_vote', voteDocId(id, emailNormalized))
+        )
+        hasVoted = vsnap.exists()
+      }
+
+      return {
+        data: {
+          ...proposition,
+          comments,
+          has_voted: hasVoted
+        },
+        error: null
+      }
+    } catch (e) {
+      return { data: null, error: e }
+    }
+  },
+
   async create(propositionData) {
-    return await supabase
-      .from('propositions')
-      .insert([propositionData])
-      .select()
-      .single()
+    try {
+      const ref = await addDoc(collection(db(), 'proposition'), {
+        ...propositionData,
+        created_at: serverTimestamp(),
+        updated_at: serverTimestamp()
+      })
+      const snap = await getDoc(ref)
+      return { data: docToPlain(snap.id, snap.data()), error: null }
+    } catch (e) {
+      return { data: null, error: e }
+    }
   },
 
-  /**
-   * Update a proposition
-   * @param {string} id - The proposition ID
-   * @param {object} updates - The data to update
-   * @returns {Promise<{data: any, error: any}>}
-   */
   async update(id, updates) {
-    return await supabase
-      .from('propositions')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single()
+    try {
+      const pref = doc(db(), 'proposition', id)
+      await updateDoc(pref, {
+        ...updates,
+        updated_at: serverTimestamp()
+      })
+      const snap = await getDoc(pref)
+      return { data: docToPlain(snap.id, snap.data()), error: null }
+    } catch (e) {
+      return { data: null, error: e }
+    }
   },
 
-  /**
-   * Delete a proposition
-   * @param {string} id - The proposition ID
-   * @returns {Promise<{error: any}>}
-   */
   async delete(id) {
-    return await supabase
-      .from('propositions')
-      .delete()
-      .eq('id', id)
+    await deleteDoc(doc(db(), 'proposition', id))
   },
 
-  /**
-   * Vote for a proposition (identified by email).
-   * @param {string} propositionId - The proposition ID
-   * @param {string} userEmail - The user's email
-   * @returns {Promise<{data: any, error: any}>}
-   */
   async vote(propositionId, userEmail) {
     const emailNormalized =
       userEmail && typeof userEmail === 'string'
@@ -149,68 +139,53 @@ export const PropositionService = {
       return { data: null, error: { message: 'Email requis pour voter' } }
     }
 
-    // 1. Check if already voted (by email, or by user_id if schema has no email)
-    let { data: existingVote, error: checkErr } = await supabase
-      .from('proposition_votes')
-      .select('id')
-      .eq('proposition_id', propositionId)
-      .eq('email', emailNormalized)
-      .maybeSingle()
+    const vid = voteDocId(propositionId, emailNormalized)
+    const voteRef = doc(db(), 'proposition_vote', vid)
+    const propRef = doc(db(), 'proposition', propositionId)
 
-    if (checkErr && checkErr.code === 'PGRST204' && checkErr.message?.includes('email')) {
-      const uid = await userIdFromEmail(emailNormalized)
-      const retry = await supabase
-        .from('proposition_votes')
-        .select('id')
-        .eq('proposition_id', propositionId)
-        .eq('user_id', uid)
-        .maybeSingle()
-      existingVote = retry.data
+    let alreadyVoted = false
+    let propositionMissing = false
+    try {
+      await runTransaction(db(), async (t) => {
+        const [voteSnap, propSnap] = await Promise.all([
+          t.get(voteRef),
+          t.get(propRef)
+        ])
+        if (!propSnap.exists()) {
+          propositionMissing = true
+          return
+        }
+        if (voteSnap.exists()) {
+          alreadyVoted = true
+          return
+        }
+        t.set(voteRef, {
+          proposition_id: propositionId,
+          email: emailNormalized,
+          created_at: serverTimestamp()
+        })
+        t.update(propRef, {
+          votes_count: increment(1),
+          updated_at: serverTimestamp()
+        })
+      })
+    } catch (e) {
+      return { data: null, error: e }
     }
-    if (existingVote) return { data: null, error: { message: 'Already voted' } }
-
-    // 2. Insert vote (email, or user_id if schema has no email column)
-    let votePayload = { proposition_id: propositionId, email: emailNormalized }
-    let { error: voteError } = await supabase
-      .from('proposition_votes')
-      .insert([votePayload])
-
-    if (voteError && voteError.code === 'PGRST204' && voteError.message?.includes('email')) {
-      const uid = await userIdFromEmail(emailNormalized)
-      votePayload = { proposition_id: propositionId, user_id: uid }
-      const retry = await supabase.from('proposition_votes').insert([votePayload])
-      voteError = retry.error
+    if (propositionMissing) {
+      return { data: null, error: { message: 'Proposition introuvable' } }
     }
-    if (voteError) return { data: null, error: voteError }
-
-    // 3. Increment vote count on proposition
-    const { data, error } = await supabase.rpc('increment_votes', { proposition_id: propositionId })
-    
-    // If RPC doesn't exist, fallback to manual increment (less atomic but works for now)
-    if (error) {
-        const { data: prop } = await supabase.from('propositions').select('votes_count').eq('id', propositionId).single()
-        return await supabase
-            .from('propositions')
-            .update({ votes_count: (prop.votes_count || 0) + 1 })
-            .eq('id', propositionId)
-            .select()
-            .single()
+    if (alreadyVoted) {
+      return { data: null, error: { message: 'Already voted' } }
     }
 
-    if (data || !error) {
-      // Trigger notification in background
-      this.notify(propositionId, 'vote').catch(err => console.error('Notify error:', err))
-    }
-
-    return { data, error }
+    this.notify(propositionId, 'vote').catch((err) =>
+      console.error('Notify error:', err)
+    )
+    const snap = await getDoc(propRef)
+    return { data: docToPlain(snap.id, snap.data()), error: null }
   },
 
-  /**
-   * Remove vote for a proposition (unvote), identified by email.
-   * @param {string} propositionId - The proposition ID
-   * @param {string} userEmail - The user's email
-   * @returns {Promise<{data: any, error: any}>}
-   */
   async unvote(propositionId, userEmail) {
     const emailNormalized =
       userEmail && typeof userEmail === 'string'
@@ -220,96 +195,74 @@ export const PropositionService = {
       return { data: null, error: { message: 'Email requis' } }
     }
 
-    let { data: existingVote, error: findError } = await supabase
-      .from('proposition_votes')
-      .select('id')
-      .eq('proposition_id', propositionId)
-      .eq('email', emailNormalized)
-      .maybeSingle()
+    const vid = voteDocId(propositionId, emailNormalized)
+    const voteRef = doc(db(), 'proposition_vote', vid)
+    const propRef = doc(db(), 'proposition', propositionId)
 
-    let deleteFilter = { proposition_id: propositionId, email: emailNormalized }
-    if (findError && findError.code === 'PGRST204' && findError.message?.includes('email')) {
-      const uid = await userIdFromEmail(emailNormalized)
-      const retry = await supabase
-        .from('proposition_votes')
-        .select('id')
-        .eq('proposition_id', propositionId)
-        .eq('user_id', uid)
-        .maybeSingle()
-      findError = retry.error
-      existingVote = retry.data
-      deleteFilter = { proposition_id: propositionId, user_id: uid }
+    let noVote = false
+    let propositionMissing = false
+    try {
+      await runTransaction(db(), async (t) => {
+        const voteSnap = await t.get(voteRef)
+        if (!voteSnap.exists()) {
+          noVote = true
+          return
+        }
+        const propSnap = await t.get(propRef)
+        if (!propSnap.exists()) {
+          propositionMissing = true
+          return
+        }
+        t.delete(voteRef)
+        const prev = propSnap.data().votes_count || 0
+        const newCount = Math.max(0, prev - 1)
+        t.update(propRef, {
+          votes_count: newCount,
+          updated_at: serverTimestamp()
+        })
+      })
+    } catch (e) {
+      return { data: null, error: e }
     }
-    if (findError) return { data: null, error: findError }
-    if (!existingVote) return { data: null, error: { message: 'No vote to remove' } }
-
-    let deleteError
-    if (deleteFilter.email !== undefined) {
-      const res = await supabase
-        .from('proposition_votes')
-        .delete()
-        .eq('proposition_id', propositionId)
-        .eq('email', emailNormalized)
-      deleteError = res.error
-    } else {
-      const res = await supabase
-        .from('proposition_votes')
-        .delete()
-        .eq('proposition_id', propositionId)
-        .eq('user_id', deleteFilter.user_id)
-      deleteError = res.error
+    if (propositionMissing) {
+      return { data: null, error: { message: 'Proposition introuvable' } }
+    }
+    if (noVote) {
+      return { data: null, error: { message: 'No vote to remove' } }
     }
 
-    if (deleteError) return { data: null, error: deleteError }
-
-    const { data: prop } = await supabase
-      .from('propositions')
-      .select('votes_count')
-      .eq('id', propositionId)
-      .single()
-
-    const newCount = Math.max(0, (prop?.votes_count ?? 1) - 1)
-    const { data, error } = await supabase
-      .from('propositions')
-      .update({ votes_count: newCount, updated_at: new Date().toISOString() })
-      .eq('id', propositionId)
-      .select()
-      .single()
-
-    return { data, error }
+    const snap = await getDoc(propRef)
+    return { data: docToPlain(snap.id, snap.data()), error: null }
   },
 
-  /**
-   * Add a comment to a proposition
-   * @param {object} commentData - The comment data (proposition_id, user_firstname, user_lastname, user_email, content)
-   * @returns {Promise<{data: any, error: any}>}
-   */
   async addComment(commentData) {
-    const result = await supabase
-      .from('proposition_comments')
-      .insert([commentData])
-      .select()
-      .single()
-    
-    if (result.data && !result.error) {
-       // Trigger notification in background
-       this.notify(commentData.proposition_id, 'comment', commentData.content).catch(err => console.error('Notify error:', err))
+    try {
+      const cref = await addDoc(collection(db(), 'proposition_comment'), {
+        ...commentData,
+        created_at: serverTimestamp()
+      })
+      const snap = await getDoc(cref)
+      const row = docToPlain(snap.id, snap.data())
+      if (row) {
+        this.notify(
+          commentData.proposition_id,
+          'comment',
+          commentData.content
+        ).catch((err) => console.error('Notify error:', err))
+      }
+      return { data: row, error: null }
+    } catch (e) {
+      return { data: null, error: e }
     }
-    
-    return result
   },
 
-  /**
-   * Notify the creator of a proposition about a new vote or comment
-   * @param {string} propositionId - The proposition ID
-   * @param {'vote' | 'comment'} type - The notification type
-   * @param {string} [commentContent] - The comment content
-   */
   async notify(propositionId, type, commentContent) {
     try {
       const apiUrl = import.meta.env.VITE_BACKOFFICE_API_URL
       if (!apiUrl) {
-        console.warn('VITE_BACKOFFICE_API_URL not defined, skipping notification')
+        console.warn(
+          'VITE_BACKOFFICE_API_URL not defined, skipping notification'
+        )
         return
       }
 

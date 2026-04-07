@@ -1,25 +1,9 @@
 /**
- * Service d'envoi d'email via Supabase Edge Function
+ * Envoi d'e-mail signalement via l'API BackOffice (Resend côté serveur).
  */
 
-import { supabase } from './supabase'
 import { getAddressFromCoordinates } from '@/utils/geocoding'
 
-/**
- * Envoie un email de signalement à la mairie
- * @param {Object} signalementData - Les données du signalement
- * @param {string} signalementData.firstName - Prénom de l'utilisateur
- * @param {string} signalementData.lastName - Nom de l'utilisateur
- * @param {string} signalementData.email - Email de l'utilisateur
- * @param {string} signalementData.commune - Nom de la commune
- * @param {string} signalementData.description - Description du signalement
- * @param {string} signalementData.photoUrl - URL de la photo du signalement
- * @param {string} signalementData.mairieEmail - Email de la mairie destinataire
- * @param {string} [signalementData.address] - Adresse du signalement (optionnel)
- * @param {number} [signalementData.latitude] - Latitude pour reverse geocoding si pas d'adresse
- * @param {number} [signalementData.longitude] - Longitude pour reverse geocoding si pas d'adresse
- * @returns {Promise<Object>} Résultat de l'envoi
- */
 export const sendSignalementEmail = async (signalementData) => {
   try {
     let address = signalementData.address?.trim() || ''
@@ -34,25 +18,31 @@ export const sendSignalementEmail = async (signalementData) => {
       )
     }
 
-    const { data, error } = await supabase.functions.invoke(
-      'send-signalement-email',
-      {
-        body: {
-          firstName: signalementData.firstName,
-          lastName: signalementData.lastName,
-          email: signalementData.email,
-          commune: signalementData.commune,
-          description: signalementData.description,
-          photoUrl: signalementData.photoUrl,
-          address: address || null,
-          mairieEmail: signalementData.mairieEmail
-        }
-      }
-    )
+    const apiUrl = import.meta.env.VITE_BACKOFFICE_API_URL
+    if (!apiUrl) {
+      throw new Error('VITE_BACKOFFICE_API_URL is not configured')
+    }
 
-    if (error) {
-      console.error('Error calling email function:', error)
-      throw error
+    const res = await fetch(`${apiUrl}/api/public/signalement-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        firstName: signalementData.firstName,
+        lastName: signalementData.lastName,
+        email: signalementData.email,
+        commune: signalementData.commune,
+        description: signalementData.description,
+        photoUrl: signalementData.photoUrl,
+        address: address || null,
+        mairieEmail: signalementData.mairieEmail
+      })
+    })
+
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      const msg =
+        data.message || data.error || res.statusText || 'Échec envoi e-mail'
+      throw new Error(typeof msg === 'string' ? msg : JSON.stringify(msg))
     }
 
     return data
