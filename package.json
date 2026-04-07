@@ -8,6 +8,7 @@
     "dev": "vite",
     "dev:env": "dotenv -e .env -- vite",
     "dev:local": "dotenv -e .env.local -- vite",
+    "dev:dev": "dotenv -e .env.dev -- vite",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
