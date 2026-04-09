@@ -23,8 +23,8 @@ export const InformationCommuneService = {
         .map((d) => docToPlain(d.id, d.data()))
         .filter((row) => row?.published === true)
       rows.sort((a, b) => {
-        const ao = Number(a?.ordre_affichage ?? 0)
-        const bo = Number(b?.ordre_affichage ?? 0)
+        const ao = Number(a?.ordre_affichage ?? 1)
+        const bo = Number(b?.ordre_affichage ?? 1)
         if (ao !== bo) return ao - bo
         return asIso(b.updated_at || b.created_at).localeCompare(asIso(a.updated_at || a.created_at))
       })
