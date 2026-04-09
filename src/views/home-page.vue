@@ -37,10 +37,11 @@ import {
   IonCardHeader,
   IonCardTitle,
   IonCardContent,
-  IonIcon
+  IonIcon,
+  onIonViewWillEnter
 } from '@ionic/vue'
 import { informationCircle } from 'ionicons/icons'
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import AppHeader from '@/components/app-header.vue'
 import { InformationCommuneService } from '@/services/information-commune-service'
 import { getCityInfo, getCityIdFromDatabase } from '@/utils/storage'
@@ -53,10 +54,14 @@ const getCommuneId = async () => {
   return await getCityIdFromDatabase()
 }
 
-onMounted(async () => {
+const loadHomeData = async () => {
   const communeId = await getCommuneId()
   const { data } = await InformationCommuneService.getAll(communeId)
   items.value = data || []
+}
+
+onIonViewWillEnter(async () => {
+  await loadHomeData()
 })
 </script>
 

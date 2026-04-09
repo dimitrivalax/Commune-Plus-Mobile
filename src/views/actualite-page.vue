@@ -84,7 +84,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 import {
   IonPage,
   IonContent,
@@ -98,7 +98,8 @@ import {
   IonRefresherContent,
   IonInfiniteScroll,
   IonInfiniteScrollContent,
-  IonSpinner
+  IonSpinner,
+  onIonViewWillEnter
 } from '@ionic/vue'
 import {
   newspaper,
@@ -255,7 +256,7 @@ const onRefresh = async (event) => {
   }
 }
 
-onMounted(async () => {
+const initializeActualites = async () => {
   try {
     await loadInitial()
   } catch (err) {
@@ -267,6 +268,10 @@ onMounted(async () => {
       ionContentRef.value?.$el?.scrollToTop(0)
     }, 50)
   }
+}
+
+onIonViewWillEnter(async () => {
+  await initializeActualites()
 })
 </script>
 
