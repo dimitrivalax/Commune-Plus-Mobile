@@ -20,25 +20,13 @@
           <h3 class="section-title">Description</h3>
           <ion-item lines="none" class="form-item">
             <ion-label position="stacked">Description du signalement</ion-label>
-            <ion-textarea
-              shape="round"
-              mode="ios"
-              fill="outline"
-              class="custom"
-              v-model="description"
-              placeholder="Décrivez le signalement..."
-              rows="4"
-            ></ion-textarea>
+            <ion-textarea shape="round" mode="ios" fill="outline" class="custom" v-model="description"
+              placeholder="Décrivez le signalement..." rows="4"></ion-textarea>
           </ion-item>
 
           <div class="location-section">
-            <ion-button
-              expand="block"
-              @click="getCurrentLocation"
-              :disabled="loading || gettingLocation"
-              fill="outline"
-              class="location-button"
-            >
+            <ion-button expand="block" @click="getCurrentLocation" :disabled="loading || gettingLocation" fill="outline"
+              class="location-button">
               <ion-icon :icon="locationIcon" slot="start" />
               {{
                 location
@@ -79,14 +67,8 @@
               </p>
               <ion-item lines="none" class="form-item">
                 <ion-label position="stacked">Adresse</ion-label>
-                <ion-input
-                  class="custom"
-                  shape="round"
-                  mode="ios"
-                  fill="outline"
-                  v-model="address"
-                  placeholder="Adresse où se trouve le signalement"
-                ></ion-input>
+                <ion-input class="custom" shape="round" mode="ios" fill="outline" v-model="address"
+                  placeholder="Adresse où se trouve le signalement"></ion-input>
               </ion-item>
             </div>
           </div>
@@ -95,22 +77,12 @@
         <div class="form-section">
           <h3 class="section-title">Photo</h3>
           <div class="photo-actions">
-            <ion-button
-              expand="block"
-              @click="takePhoto"
-              :disabled="loading"
-              class="photo-button"
-            >
+            <ion-button expand="block" @click="takePhoto" :disabled="loading" class="photo-button">
               <ion-icon :icon="camera" slot="start" />
               {{ photo ? 'Reprendre la photo' : 'Prendre une photo' }}
             </ion-button>
-            <ion-button
-              expand="block"
-              fill="outline"
-              @click="pickFromGallery"
-              :disabled="loading"
-              class="photo-button photo-button-gallery"
-            >
+            <ion-button expand="block" fill="outline" @click="pickFromGallery" :disabled="loading"
+              class="photo-button photo-button-gallery">
               <ion-icon :icon="images" slot="start" />
               Choisir depuis la galerie
             </ion-button>
@@ -118,26 +90,15 @@
 
           <div v-if="photo" class="photo-preview">
             <img :src="photo" alt="Photo du signalement" />
-            <ion-button
-              fill="clear"
-              @click="removePhoto"
-              class="remove-photo-btn"
-            >
+            <ion-button fill="clear" @click="removePhoto" class="remove-photo-btn">
               <ion-icon :icon="close" />
             </ion-button>
           </div>
 
           <ion-item v-if="photo" lines="none" class="form-item">
             <ion-label position="stacked">Commentaire sur la photo</ion-label>
-            <ion-textarea
-              shape="round"
-              mode="ios"
-              fill="outline"
-              class="custom"
-              v-model="comment"
-              placeholder="Ajoutez un commentaire sur cette photo (optionnel)..."
-              rows="3"
-            ></ion-textarea>
+            <ion-textarea shape="round" mode="ios" fill="outline" class="custom" v-model="comment"
+              placeholder="Ajoutez un commentaire sur cette photo (optionnel)..." rows="3"></ion-textarea>
           </ion-item>
         </div>
 
@@ -154,74 +115,41 @@
           <ion-card class="contact-card">
             <ion-card-content>
               <ion-item lines="none" class="form-item">
-                <ion-label position="stacked">Nom *</ion-label>
-                <ion-input
-                  class="custom"
-                  shape="round"
-                  mode="ios"
-                  fill="outline"
-                  v-model="lastName"
-                  placeholder="Votre nom"
-                  required
-                ></ion-input>
-              </ion-item>
 
-              <ion-item lines="none" class="form-item">
-                <ion-label position="stacked">Prénom *</ion-label>
-                <ion-input
-                  class="custom"
-                  shape="round"
-                  mode="ios"
-                  fill="outline"
-                  v-model="firstName"
-                  placeholder="Votre prénom"
-                  required
-                ></ion-input>
+
+                <ion-item lines="none" class="form-item">
+                  <ion-label position="stacked">Prénom *</ion-label>
+                  <ion-input class="custom" shape="round" mode="ios" fill="outline" v-model="firstName"
+                    placeholder="Votre prénom" required></ion-input>
+                </ion-item>
+
+                <ion-label position="stacked">Nom *</ion-label>
+                <ion-input class="custom" shape="round" mode="ios" fill="outline" v-model="lastName"
+                  placeholder="Votre nom" required></ion-input>
               </ion-item>
 
               <ion-item lines="none" class="form-item">
                 <ion-label position="stacked">Email *</ion-label>
-                <ion-input
-                  class="custom"
-                  shape="round"
-                  mode="ios"
-                  fill="outline"
-                  v-model="email"
-                  type="email"
-                  placeholder="votre.email@exemple.com"
-                  required
-                ></ion-input>
+                <ion-input class="custom" shape="round" mode="ios" fill="outline" v-model="email" type="email"
+                  placeholder="votre.email@exemple.com" required></ion-input>
               </ion-item>
 
               <ion-item lines="none" class="form-item">
-                <ion-label position="stacked">Téléphone</ion-label>
-                <ion-input
-                  class="custom"
-                  shape="round"
-                  mode="ios"
-                  fill="outline"
-                  v-model="phone"
-                  type="tel"
-                  placeholder="06 12 34 56 78"
-                ></ion-input>
+                <ion-label position="stacked">Téléphone *</ion-label>
+                <ion-input class="custom" shape="round" mode="ios" fill="outline" v-model="phone" type="tel"
+                  placeholder="06 12 34 56 78" required></ion-input>
               </ion-item>
             </ion-card-content>
           </ion-card>
         </div>
 
-        <ion-button
-          expand="block"
-          @click="submitSignalement"
-          :disabled="
-            loading ||
-            !photo ||
-            !lastName ||
-            !firstName ||
-            !email ||
-            (!location && !address)
-          "
-          class="submit-button"
-        >
+        <ion-button expand="block" @click="submitSignalement" :disabled="loading ||
+          !photo ||
+          !lastName ||
+          !firstName ||
+          !email ||
+          (!location && !address)
+          " class="submit-button">
           <ion-icon :icon="checkmark" slot="start" />
           Envoyer le signalement
         </ion-button>
@@ -229,11 +157,7 @@
     </ion-content>
 
     <!-- Modale de configuration de la commune -->
-    <CitySetupModal
-      :is-open="showCityModal"
-      @saved="handleCityInfoSaved"
-      @close="showCityModal = false"
-    />
+    <CitySetupModal :is-open="showCityModal" @saved="handleCityInfoSaved" @close="showCityModal = false" />
   </ion-page>
 </template>
 

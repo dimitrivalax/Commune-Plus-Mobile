@@ -125,13 +125,26 @@
           </p>
 
           <ion-item lines="none">
+            <ion-label position="stacked">Prénom *</ion-label>
+            <ion-input
+              class="custom"
+              shape="round"
+              mode="ios"
+              fill="outline"
+              v-model="newForm.firstName"
+              placeholder="Votre prénom"
+              required
+            ></ion-input>
+          </ion-item>
+
+          <ion-item lines="none">
             <ion-label position="stacked">Nom *</ion-label>
             <ion-input
               class="custom"
               shape="round"
               mode="ios"
               fill="outline"
-              v-model="newForm.name"
+              v-model="newForm.lastName"
               placeholder="Votre nom"
               required
             ></ion-input>
@@ -152,7 +165,7 @@
           </ion-item>
 
           <ion-item lines="none">
-            <ion-label position="stacked">Téléphone</ion-label>
+            <ion-label position="stacked">Téléphone *</ion-label>
             <ion-input
               class="custom"
               shape="round"
@@ -238,7 +251,8 @@ const newForm = ref({
   startTime: '10:00',
   endTime: '12:00',
   reason: '',
-  name: '',
+  firstName: '',
+  lastName: '',
   email: '',
   phone: ''
 })
@@ -276,9 +290,10 @@ const isFormValid = computed(() => {
     newForm.value.date &&
     newForm.value.startTime &&
     newForm.value.endTime &&
-    newForm.value.name &&
-    newForm.value.email &&
-    newForm.value.phone &&
+    newForm.value.firstName.trim() &&
+    newForm.value.lastName.trim() &&
+    newForm.value.email.trim() &&
+    newForm.value.phone.trim() &&
     newForm.value.reason.trim() !== ''
   )
 })
@@ -396,7 +411,7 @@ const submitReservation = async () => {
       start_time: formatTime(newForm.value.startTime),
       end_time: formatTime(newForm.value.endTime),
       reason: newForm.value.reason,
-      name: newForm.value.name,
+      name: `${newForm.value.firstName} ${newForm.value.lastName}`.trim(),
       email: newForm.value.email,
       phone: newForm.value.phone,
       status: 'en_attente'
@@ -407,13 +422,9 @@ const submitReservation = async () => {
     if (error) throw error
 
     // Sauvegarder les coordonnées dans le localStorage pour les prochaines fois
-    const nameParts = newForm.value.name.trim().split(' ')
-    const firstName = nameParts[0] || ''
-    const lastName = nameParts.slice(1).join(' ') || ''
-
     saveUserContact({
-      firstName: firstName,
-      lastName: lastName,
+      firstName: newForm.value.firstName,
+      lastName: newForm.value.lastName,
       email: newForm.value.email,
       phone: newForm.value.phone || ''
     })
@@ -475,10 +486,8 @@ onMounted(async () => {
   const savedContact = getUserContact()
   if (savedContact) {
     hasSavedContact.value = true
-    if (savedContact.firstName || savedContact.lastName) {
-      newForm.value.name =
-        `${savedContact.firstName} ${savedContact.lastName}`.trim()
-    }
+    newForm.value.firstName = savedContact.firstName || ''
+    newForm.value.lastName = savedContact.lastName || ''
     newForm.value.email = savedContact.email || ''
     newForm.value.phone = savedContact.phone || ''
   }

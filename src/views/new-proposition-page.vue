@@ -78,12 +78,12 @@
 
           <IonItem lines="none" class="form-item">
             <IonLabel position="stacked">Prénom *</IonLabel>
-            <IonInput v-model="firstName" placeholder="Votre prénom"></IonInput>
+            <IonInput v-model="firstName" placeholder="Votre prénom" required></IonInput>
           </IonItem>
 
           <IonItem lines="none" class="form-item">
             <IonLabel position="stacked">Nom *</IonLabel>
-            <IonInput v-model="lastName" placeholder="Votre nom"></IonInput>
+            <IonInput v-model="lastName" placeholder="Votre nom" required></IonInput>
           </IonItem>
 
           <IonItem lines="none" class="form-item">
