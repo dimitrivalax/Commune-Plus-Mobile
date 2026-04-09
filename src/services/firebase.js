@@ -11,7 +11,9 @@ const cfg = {
   databaseName: import.meta.env.VITE_FIREBASE_DATABASE_NAME || '(default)'
 }
 
-console.log('firebase config :::::::::::: ', cfg.databaseName)
+console.info(
+  `[firebase] initialized with project_id="${cfg.projectId}" database_id="${cfg.databaseName}"`
+)
 
 let app
 export function getFirebaseApp() {
