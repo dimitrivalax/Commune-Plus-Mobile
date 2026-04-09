@@ -15,6 +15,64 @@ import { docToPlain } from '@/utils/firestore'
 
 const db = () => getFirestoreDb()
 
+const normalizeEmail = (email) =>
+  String(email || '')
+    .trim()
+    .toLowerCase()
+
+async function notifyBackofficeReservation(reservation) {
+  const apiUrl = import.meta.env.VITE_BACKOFFICE_API_URL
+  if (!apiUrl || !reservation?.id) return
+
+  const requesterName = String(reservation.name || '').trim()
+  const baseUrl = String(apiUrl)
+    .replace(/^http:\/\//i, 'https://')
+    .replace(/\/+$/, '')
+  const endpoints = [
+    `${baseUrl}/api/backoffice-notifications/notify`,
+    `${baseUrl}/backoffice-notifications/notify`
+  ]
+
+  let lastError = null
+  for (const endpoint of endpoints) {
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          type: 'reservation',
+          entity_id: String(reservation.id),
+          title: 'Nouvelle réservation',
+          message: requesterName
+            ? `${requesterName} a demandé une réservation de salle`
+            : 'Une nouvelle réservation de salle a été créée',
+          requester_name: requesterName || undefined
+        })
+      })
+
+      if (response.ok) {
+        return
+      }
+
+      const responseText = await response.text().catch(() => '')
+      lastError = new Error(
+        `HTTP ${response.status} on ${endpoint}${responseText ? ` - ${responseText}` : ''}`
+      )
+    } catch (error) {
+      lastError = error
+    }
+  }
+
+  if (lastError) {
+    console.error(
+      'Failed to send backoffice reservation notification:',
+      lastError
+    )
+  }
+}
+
 export const ReservationService = {
   async getMyReservationsInCommune(communeId, userEmail) {
     if (!communeId || !userEmail) {
@@ -65,7 +123,9 @@ export const ReservationService = {
         salle: salle ? { id: salle.id, nom: salle.nom } : null
       })
     }
-    list.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))
+    list.sort((a, b) =>
+      String(b.date || '').localeCompare(String(a.date || ''))
+    )
     return { data: list, error: null }
   },
 
@@ -87,13 +147,19 @@ export const ReservationService = {
   },
 
   async create(reservationData) {
+    const normalizedEmail = normalizeEmail(reservationData?.email)
     const ref = await addDoc(collection(db(), 'reservation_salle'), {
       ...reservationData,
+      email: normalizedEmail,
       created_at: serverTimestamp(),
       updated_at: serverTimestamp()
     })
     const snap = await getDoc(ref)
-    return { data: docToPlain(snap.id, snap.data()), error: null }
+    const created = docToPlain(snap.id, snap.data())
+    if (created) {
+      await notifyBackofficeReservation(created)
+    }
+    return { data: created, error: null }
   },
 
   async update(id, email, updates) {
@@ -103,8 +169,14 @@ export const ReservationService = {
     if (String(cur.data().email || '').toLowerCase() !== email.toLowerCase()) {
       return { data: null, error: { message: 'Forbidden' } }
     }
+    const normalizedUpdateEmail =
+      updates && 'email' in updates ? normalizeEmail(updates.email) : undefined
+
     await updateDoc(dref, {
       ...updates,
+      ...(normalizedUpdateEmail !== undefined
+        ? { email: normalizedUpdateEmail }
+        : {}),
       updated_at: serverTimestamp()
     })
     const snap = await getDoc(dref)
@@ -125,13 +197,26 @@ export const ReservationService = {
   async getSalles(communeId = null) {
     let qy = query(collection(db(), 'salle'))
     if (communeId) {
-      qy = query(collection(db(), 'salle'), where('commune_id', '==', communeId))
+      qy = query(
+        collection(db(), 'salle'),
+        where('commune_id', '==', communeId)
+      )
     }
     const snap = await getDocs(qy)
     const rows = snap.docs
       .map((d) => {
         const p = docToPlain(d.id, d.data())
-        return { id: p.id, nom: p.nom, description: p.description }
+        return {
+          id: p.id,
+          nom: p.nom,
+          description: p.description,
+          nombre_max_places: p.nombre_max_places,
+          adresse: p.adresse,
+          photo_url: p.photo_url,
+          photoUrl: p.photoUrl,
+          image_url: p.image_url,
+          imageUrl: p.imageUrl
+        }
       })
       .sort((a, b) => String(a.nom).localeCompare(String(b.nom), 'fr'))
     return { data: rows, error: null }

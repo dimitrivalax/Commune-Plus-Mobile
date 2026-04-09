@@ -114,14 +114,16 @@
 
           <ion-card class="contact-card">
             <ion-card-content>
+
+
+
               <ion-item lines="none" class="form-item">
+                <ion-label position="stacked">Prénom *</ion-label>
+                <ion-input class="custom" shape="round" mode="ios" fill="outline" v-model="firstName"
+                  placeholder="Votre prénom" required></ion-input>
+              </ion-item>
 
-
-                <ion-item lines="none" class="form-item">
-                  <ion-label position="stacked">Prénom *</ion-label>
-                  <ion-input class="custom" shape="round" mode="ios" fill="outline" v-model="firstName"
-                    placeholder="Votre prénom" required></ion-input>
-                </ion-item>
+              <ion-item lines="none" class="form-item">
 
                 <ion-label position="stacked">Nom *</ion-label>
                 <ion-input class="custom" shape="round" mode="ios" fill="outline" v-model="lastName"

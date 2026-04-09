@@ -1,5 +1,5 @@
 <template>
-  <IonPage @ionViewWillEnter="loadReservations">
+  <IonPage>
     <AppHeader title="Réservations"></AppHeader>
     <IonContent :fullscreen="true">
       <IonFab vertical="bottom" horizontal="end" slot="fixed">
@@ -85,7 +85,8 @@ import {
   IonBadge,
   IonButton,
   IonRefresher,
-  IonRefresherContent
+  IonRefresherContent,
+  onIonViewWillEnter
 } from '@ionic/vue'
 import { add, calendar, calendarOutline } from 'ionicons/icons'
 import { ReservationService } from '@/services/reservation-service'
@@ -165,6 +166,11 @@ onMounted(() => {
 
 // Recharger les réservations quand la page devient active (après création/suppression)
 onActivated(() => {
+  loadReservations()
+})
+
+// Hook Ionic: déclenché à chaque affichage de la vue (retour depuis détail inclus)
+onIonViewWillEnter(() => {
   loadReservations()
 })
 </script>

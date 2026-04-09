@@ -8,7 +8,7 @@
         <ion-title>Nouvelle réservation</ion-title>
       </ion-toolbar>
     </ion-header>
-    <ion-content :fullscreen="true">
+    <ion-content ref="contentRef" :fullscreen="true">
       <ion-header collapse="condense">
         <ion-toolbar color="primary">
           <ion-title size="large">Nouvelle réservation</ion-title>
@@ -16,29 +16,55 @@
       </ion-header>
 
       <div class="ion-padding">
-        <ion-item lines="none">
-          <ion-label position="stacked">Salle</ion-label>
-          <ion-select
-            v-model="newForm.salleId"
-            placeholder="Sélectionner une salle"
-            @ionChange="handleSalleChange"
-          >
-            <ion-select-option
+        <div class="salles-section">
+          <ion-label class="salles-label">Salle</ion-label>
+          <p class="salles-helper">
+            Sélectionnez une salle. Cliquez à nouveau sur la carte pour la
+            désélectionner.
+          </p>
+
+          <div v-if="salles.length === 0" class="empty-salles">
+            Aucune salle disponible
+          </div>
+
+          <div v-else class="salles-grid">
+            <ion-card
               v-for="salle in salles"
               :key="salle.id"
-              :value="salle.id"
+              button
+              class="salle-card"
+              :class="{ selected: newForm.salleId === salle.id }"
+              @click="toggleSalleSelection(salle.id)"
             >
-              {{ salle.nom }}
-            </ion-select-option>
-          </ion-select>
-          <p v-if="newForm.salleId" class="salle-description">
-            {{
-              salles.find((salle) => salle.id === newForm.salleId).description
-            }}
-          </p>
-        </ion-item>
+              <img
+                v-if="getSallePhotoUrl(salle)"
+                :src="getSallePhotoUrl(salle)"
+                :alt="`Photo de ${salle.nom}`"
+                class="salle-card-image"
+              />
+              <ion-card-header>
+                <ion-card-title>{{ salle.nom }}</ion-card-title>
+                <ion-card-subtitle v-if="salle.nombre_max_places">
+                  {{ salle.nombre_max_places }} places max
+                </ion-card-subtitle>
+              </ion-card-header>
+              <ion-card-content>
+                <p v-if="salle.description" class="salle-card-description">
+                  {{ salle.description }}
+                </p>
+                <p v-if="salle.adresse" class="salle-card-address">
+                  {{ salle.adresse }}
+                </p>
+              </ion-card-content>
+            </ion-card>
+          </div>
+        </div>
 
-        <div v-if="newForm.salleId" class="calendar-container">
+        <div
+          v-if="newForm.salleId"
+          class="calendar-container"
+          ref="availabilitySectionRef"
+        >
           <h2 class="section-title">Disponibilités</h2>
           <ion-datetime
             presentation="date"
@@ -209,7 +235,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   IonPage,
@@ -221,8 +247,11 @@ import {
   IonBackButton,
   IonItem,
   IonLabel,
-  IonSelect,
-  IonSelectOption,
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardSubtitle,
+  IonCardContent,
   IonModal,
   IonDatetime,
   IonDatetimeButton,
@@ -262,6 +291,8 @@ const hasSavedContact = ref(false)
 const salles = ref([])
 const reservations = ref([])
 const conflictMessage = ref('')
+const contentRef = ref(null)
+const availabilitySectionRef = ref(null)
 
 // On formattage du jour sélectionné pour l'affichage
 const selectedDayFormatted = computed(() => {
@@ -283,6 +314,16 @@ const highlightedDates = computed(() => {
     backgroundColor: 'var(--ion-color-secondary)'
   }))
 })
+
+const getSallePhotoUrl = (salle) => {
+  return (
+    salle?.photo_url ||
+    salle?.photoUrl ||
+    salle?.image_url ||
+    salle?.imageUrl ||
+    null
+  )
+}
 
 const isFormValid = computed(() => {
   return (
@@ -315,12 +356,46 @@ const fetchReservations = async (salleId) => {
   }
 }
 
-const handleSalleChange = (event) => {
-  const salleId = event.detail.value
-  newForm.value.salleDescription = salles.value.find(
-    (salle) => salle.id === salleId
-  ).description
+const scrollToAvailabilitySection = async () => {
+  await nextTick()
+
+  const targetEl = availabilitySectionRef.value
+  const ionContentEl = contentRef.value?.$el || contentRef.value
+
+  if (
+    !targetEl ||
+    !ionContentEl?.getScrollElement ||
+    !ionContentEl?.scrollToPoint
+  ) {
+    targetEl?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    })
+    return
+  }
+
+  const scrollEl = await ionContentEl.getScrollElement()
+  const targetTop =
+    targetEl.getBoundingClientRect().top -
+    scrollEl.getBoundingClientRect().top +
+    scrollEl.scrollTop
+
+  const extraTopOffset = 140
+  const y = Math.max(targetTop - extraTopOffset, 0)
+  await ionContentEl.scrollToPoint(0, y, 350)
+}
+
+const toggleSalleSelection = (salleId) => {
+  if (newForm.value.salleId === salleId) {
+    newForm.value.salleId = ''
+    reservations.value = []
+    conflictMessage.value = ''
+    return
+  }
+
+  newForm.value.salleId = salleId
   fetchReservations(salleId)
+  scrollToAvailabilitySection()
 }
 
 const handleDateChange = (event) => {
@@ -333,7 +408,7 @@ const getEndTimeOneHourAfter = (startTimeValue) => {
   const dateStr = formatDateForDB(newForm.value.date)
   const timeStr = formatTime(startTimeValue)
   const d = new Date(dateStr + 'T' + timeStr + ':00')
-  d.setHours(d.getHours() + 2)
+  d.setHours(d.getHours() + 3)
   return d.toISOString()
 }
 
@@ -503,6 +578,74 @@ onMounted(async () => {
   font-weight: 600;
   margin: 20px 0 10px 0;
   color: var(--ion-color-step-800);
+}
+
+.salles-section {
+  margin-bottom: 18px;
+}
+
+.salles-label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.salles-helper {
+  margin: 0 0 10px 0;
+  color: var(--ion-color-step-500);
+  font-size: 0.85rem;
+}
+
+.empty-salles {
+  background: var(--ion-color-step-50);
+  border-radius: 12px;
+  padding: 14px;
+  color: var(--ion-color-step-500);
+  font-size: 0.9rem;
+}
+
+.salles-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.salle-card {
+  margin: 0;
+  border: 2px solid transparent;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.salle-card.selected {
+  border-color: var(--ion-color-primary);
+  box-shadow: 0 6px 16px rgba(var(--ion-color-primary-rgb), 0.25);
+}
+
+.salle-card:active {
+  transform: scale(0.99);
+}
+
+.salle-card-image {
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+  display: block;
+}
+
+.salle-card-description,
+.salle-card-address {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--ion-color-step-600);
+}
+
+.salle-card-address {
+  margin-top: 8px;
+  font-weight: 500;
 }
 
 .calendar-container {

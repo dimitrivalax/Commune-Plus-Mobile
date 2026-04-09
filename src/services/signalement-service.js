@@ -14,6 +14,59 @@ import { docToPlain } from '@/utils/firestore'
 
 const db = () => getFirestoreDb()
 
+async function notifyBackofficeSignalement(signalement) {
+  const apiUrl = import.meta.env.VITE_BACKOFFICE_API_URL
+  if (!apiUrl || !signalement?.id) return
+
+  const requesterName = `${String(
+    signalement.first_name || ''
+  ).trim()} ${String(signalement.last_name || '').trim()}`.trim()
+  const baseUrl = String(apiUrl).replace(/\/+$/, '')
+  const endpoints = [
+    `${baseUrl}/api/backoffice-notifications/notify`,
+    `${baseUrl}/backoffice-notifications/notify`
+  ]
+
+  let lastError = null
+  for (const endpoint of endpoints) {
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          type: 'signalement',
+          entity_id: String(signalement.id),
+          title: 'Nouveau signalement',
+          message: requesterName
+            ? `${requesterName} a envoyé un signalement`
+            : 'Un nouveau signalement a été créé',
+          requester_name: requesterName || undefined
+        })
+      })
+
+      if (response.ok) {
+        return
+      }
+
+      const responseText = await response.text().catch(() => '')
+      lastError = new Error(
+        `HTTP ${response.status} on ${endpoint}${responseText ? ` - ${responseText}` : ''}`
+      )
+    } catch (error) {
+      lastError = error
+    }
+  }
+
+  if (lastError) {
+    console.error(
+      'Failed to send backoffice signalement notification:',
+      lastError
+    )
+  }
+}
+
 export const SignalementService = {
   async create(data) {
     try {
@@ -23,7 +76,11 @@ export const SignalementService = {
         updated_at: serverTimestamp()
       })
       const snap = await getDoc(ref)
-      return { data: [docToPlain(snap.id, snap.data())], error: null }
+      const created = docToPlain(snap.id, snap.data())
+      if (created) {
+        await notifyBackofficeSignalement(created)
+      }
+      return { data: [created], error: null }
     } catch (e) {
       return { data: null, error: e }
     }
