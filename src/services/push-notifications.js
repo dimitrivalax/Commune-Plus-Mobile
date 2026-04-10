@@ -14,6 +14,7 @@ import {
 } from 'firebase/firestore'
 import { getFirestoreDb } from './firebase'
 import { getCityInfo, getUserContact } from '@/utils/storage'
+import { trackEvent } from './posthog'
 
 /**
  * Service de gestion des push notifications
@@ -151,6 +152,7 @@ export async function initializePushNotifications() {
 
         // Gérer les différents types de notifications
         const notificationType = data?.type || data?.notification_type
+        const communeId = data?.commune_id || getCityInfo()?.id || undefined
 
         if (notificationType === 'signalement') {
           // Notification pour un signalement
@@ -219,6 +221,16 @@ export async function initializePushNotifications() {
           // Notification pour un signalement
           const signalementId = data?.signalement_id || data?.signalementId
           if (signalementId) {
+            trackEvent('notification_clicked', {
+              notification_id:
+                data?.notification_id
+                || data?.campaign_key
+                || `signalement_${signalementId}`,
+              target_type: 'signalement',
+              target_id: String(signalementId),
+              commune_id: communeId,
+              source: 'push_action'
+            })
             console.log(
               'Found signalement_id in notification, navigating to:',
               signalementId
@@ -241,6 +253,14 @@ export async function initializePushNotifications() {
           // Notification pour une information municipale
           const infoId = data.info_id || data.infoId
           if (infoId) {
+            trackEvent('notification_clicked', {
+              notification_id:
+                data?.notification_id || data?.campaign_key || `actualite_${infoId}`,
+              target_type: 'actualite',
+              target_id: String(infoId),
+              commune_id: communeId,
+              source: 'push_action'
+            })
             console.log('Found info_id in notification, navigating to:', infoId)
             // Attendre un peu pour que l'app soit complètement initialisée
             setTimeout(async () => {
@@ -260,6 +280,16 @@ export async function initializePushNotifications() {
           // Notification pour une proposition
           const propositionId = data.proposition_id || data.propositionId
           if (propositionId) {
+            trackEvent('notification_clicked', {
+              notification_id:
+                data?.notification_id
+                || data?.campaign_key
+                || `proposition_${propositionId}`,
+              target_type: 'proposition',
+              target_id: String(propositionId),
+              commune_id: communeId,
+              source: 'push_action'
+            })
             console.log(
               'Found proposition_id in notification, navigating to:',
               propositionId

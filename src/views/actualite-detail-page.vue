@@ -105,6 +105,7 @@ import { InformationService } from '@/services/actualite-service'
 import { formatDate } from '@/utils/date'
 import { getCityInfo } from '@/utils/storage'
 import { getCityIdFromDatabase } from '@/utils/storage'
+import { trackEvent } from '@/services/posthog'
 
 const route = useRoute()
 const router = useRouter()
@@ -112,6 +113,14 @@ const infoItems = ref([])
 const loading = ref(true)
 const initialSlide = ref(0)
 const fullscreenImageUrl = ref(null)
+
+const trackActualiteView = (item, source) => {
+  if (!item?.id) return
+  trackEvent('actualite_viewed', {
+    actualite_id: String(item.id),
+    source
+  })
+}
 
 const openFullscreenImage = (url) => {
   fullscreenImageUrl.value = url
@@ -142,6 +151,11 @@ const loadInfoItems = async () => {
         initialSlide.value = index
       }
     }
+
+    const initialItem = infoItems.value[initialSlide.value]
+    if (initialItem) {
+      trackActualiteView(initialItem, 'detail_page_initial')
+    }
   } catch (error) {
     console.error('Error loading info items:', error)
   } finally {
@@ -154,6 +168,7 @@ const onSlideChange = (swiper) => {
   if (currentItem) {
     // Update the URL without reloading the page
     router.replace({ params: { id: currentItem.id } })
+    trackActualiteView(currentItem, 'detail_page_swipe')
   }
 }
 

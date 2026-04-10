@@ -1,27 +1,39 @@
 import posthog from 'posthog-js'
-import { getUserContact } from '@/utils/storage'
 import { getCityInfo } from '@/utils/storage'
 
 let posthogInstance = null
+const ANALYTICS_DISTINCT_ID_KEY = 'commune-plus-analytics-distinct-id'
+
+function getOrCreateAnalyticsDistinctId() {
+  let distinctId = localStorage.getItem(ANALYTICS_DISTINCT_ID_KEY)
+  if (!distinctId) {
+    distinctId = 'cp_analytics_xxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(
+      /[xy]/g,
+      function (c) {
+        const r = (Math.random() * 16) | 0
+        const v = c === 'x' ? r : (r & 0x3) | 0x8
+        return v.toString(16)
+      }
+    )
+    localStorage.setItem(ANALYTICS_DISTINCT_ID_KEY, distinctId)
+  }
+  return distinctId
+}
 
 /**
- * Build context (person + commune) to attach to every event
- * @returns {object} - { person: {...}, commune: {...} } for event properties
+ * Build analytics context to attach to every event.
+ * RGPD: no direct personal data is included.
+ * @returns {object} - { commune: {...}, platform: string }
  */
 function getEventContext() {
-  const contact = getUserContact()
   const city = getCityInfo()
+  let platform = 'web'
+  if (typeof window !== 'undefined') {
+    const ua = window.navigator?.userAgent || ''
+    if (/android/i.test(ua)) platform = 'android'
+    if (/iphone|ipad|ipod/i.test(ua)) platform = 'ios'
+  }
   return {
-    // Person (sans données sensibles en clair dans les props d'event si besoin de restreindre)
-    person: contact
-      ? {
-          has_contact: true,
-          first_name: contact.firstName || undefined,
-          last_name: contact.lastName || undefined,
-          email: contact.email || undefined
-        }
-      : { has_contact: false },
-    // Commune
     commune:
       city && (city.name || city.id)
         ? {
@@ -33,7 +45,8 @@ function getEventContext() {
             commune_id: undefined,
             commune_name: undefined,
             commune_postal_code: undefined
-          }
+          },
+    platform
   }
 }
 
@@ -41,19 +54,13 @@ function getEventContext() {
  * Flatten context for PostHog event properties (no nested object to simplify filters in PostHog)
  */
 function getFlattenedEventContext() {
-  const { person, commune } = getEventContext()
+  const { commune, platform } = getEventContext()
   return {
-    ...(person.has_contact
-      ? {
-          person_has_contact: true,
-          person_first_name: person.first_name,
-          person_last_name: person.last_name,
-          person_email: person.email
-        }
-      : { person_has_contact: false }),
     commune_id: commune.commune_id,
     commune_name: commune.commune_name,
-    commune_postal_code: commune.commune_postal_code
+    commune_postal_code: commune.commune_postal_code,
+    platform,
+    app_context: 'mobile'
   }
 }
 
@@ -127,7 +134,7 @@ export function resetUser() {
 }
 
 /**
- * Track a custom event (person + commune context added automatically)
+ * Track a custom event (commune + platform context added automatically)
  * @param {string} eventName - Name of the event
  * @param {object} properties - Event properties
  */
@@ -141,7 +148,7 @@ export function trackEvent(eventName, properties = {}) {
 }
 
 /**
- * Track a page view (person + commune context added automatically)
+ * Track a page view (commune + platform context added automatically)
  * @param {string} pageName - Name of the page
  * @param {object} properties - Additional properties
  */
@@ -166,23 +173,14 @@ export function setUserProperties(properties) {
 }
 
 /**
- * Sync current person and commune from storage to PostHog (identify + person properties).
- * Call at app startup and after saving contact/commune in settings.
+ * Sync current analytics context from storage to PostHog.
+ * Call at app startup and after saving commune in settings.
  */
 export function updateUserAndCommuneContext() {
   if (!posthogInstance) return
-  const contact = getUserContact()
   const city = getCityInfo()
-  const distinctId = contact?.email?.trim() || posthogInstance.get_distinct_id()
-  const personProps = {
-    ...(contact
-      ? {
-          email: contact.email || undefined,
-          first_name: contact.firstName || undefined,
-          last_name: contact.lastName || undefined,
-          has_contact: true
-        }
-      : { has_contact: false }),
+  const distinctId = getOrCreateAnalyticsDistinctId()
+  const analyticsProps = {
     ...(city && (city.name || city.id)
       ? {
           commune_id: city.id || undefined,
@@ -191,6 +189,6 @@ export function updateUserAndCommuneContext() {
         }
       : {})
   }
-  posthogInstance.identify(distinctId, personProps)
-  posthogInstance.setPersonProperties(personProps)
+  posthogInstance.identify(distinctId, analyticsProps)
+  posthogInstance.setPersonProperties(analyticsProps)
 }

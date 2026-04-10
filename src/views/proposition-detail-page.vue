@@ -166,6 +166,7 @@ import {
 import { PropositionService } from '@/services/proposition-service'
 import { getUserContact, saveUserContact } from '@/utils/storage'
 import { formatDate, formatDateTime } from '@/utils/date'
+import { trackEvent } from '@/services/posthog'
 
 const route = useRoute()
 const router = useRouter()
@@ -174,6 +175,7 @@ const loading = ref(true)
 const voting = ref(false)
 const commenting = ref(false)
 const newComment = ref('')
+const hasTrackedView = ref(false)
 
 /** Email de l'utilisateur courant (stocké en minuscules pour comparaison). */
 const currentUserEmail = computed(() => {
@@ -197,6 +199,13 @@ const loadProposition = async () => {
     )
     if (error) throw error
     proposition.value = data
+    if (proposition.value && !hasTrackedView.value) {
+      trackEvent('proposition_viewed', {
+        proposition_id: String(proposition.value.id),
+        source: 'detail_page'
+      })
+      hasTrackedView.value = true
+    }
   } catch (error) {
     console.error('Error loading proposition:', error)
   } finally {

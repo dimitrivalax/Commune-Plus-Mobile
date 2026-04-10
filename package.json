@@ -10,6 +10,7 @@
     "dev:local": "dotenv -e .env.local -- vite",
     "dev:dev": "dotenv -e .env.dev -- vite",
     "build": "dotenv -e .env -- vite build",
+    "build:local": "dotenv -e .env.local -- vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "assets:generate": "capacitor-assets generate --assetPath public/assets --iconBackgroundColor '#2563eb' --splashBackgroundColor '#2563eb'"

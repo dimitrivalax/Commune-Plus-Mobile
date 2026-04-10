@@ -109,25 +109,6 @@
             </ion-card-content>
           </ion-card>
 
-          <!-- Métadonnées -->
-          <ion-card class="info-card">
-            <ion-card-header>
-              <ion-card-title>
-                <ion-icon :icon="time" /> Actualités
-              </ion-card-title>
-            </ion-card-header>
-            <ion-card-content>
-              <p>
-                <strong>Date de création :</strong>
-                {{ formatDateTime(signalement.created_at) }}
-              </p>
-              <p v-if="signalement.updated_at !== signalement.created_at">
-                <strong>Dernière modification :</strong>
-                {{ formatDateTime(signalement.updated_at) }}
-              </p>
-            </ion-card-content>
-          </ion-card>
-
           <!-- Boutons d'action -->
           <div class="action-buttons" v-if="signalement.status !== 'archive'">
             <ion-button

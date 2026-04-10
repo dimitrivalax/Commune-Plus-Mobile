@@ -91,25 +91,6 @@
             </ion-card-content>
           </ion-card>
 
-          <!-- Métadonnées -->
-          <ion-card class="info-card">
-            <ion-card-header>
-              <ion-card-title>
-                <ion-icon :icon="time" /> Actualités
-              </ion-card-title>
-            </ion-card-header>
-            <ion-card-content>
-              <p>
-                <strong>Date de création :</strong>
-                {{ formatDateTime(reservation.created_at) }}
-              </p>
-              <p v-if="reservation.updated_at !== reservation.created_at">
-                <strong>Dernière modification :</strong>
-                {{ formatDateTime(reservation.updated_at) }}
-              </p>
-            </ion-card-content>
-          </ion-card>
-
           <!-- Bouton de suppression (seulement pour le propriétaire) -->
           <div v-if="isOwner" class="action-buttons">
             <ion-button
