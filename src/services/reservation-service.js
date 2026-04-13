@@ -20,6 +20,14 @@ const normalizeEmail = (email) =>
     .trim()
     .toLowerCase()
 
+const getTodayDateString = () => {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 async function notifyBackofficeReservation(reservation) {
   const apiUrl = import.meta.env.VITE_BACKOFFICE_API_URL
   if (!apiUrl || !reservation?.id) return
@@ -87,12 +95,14 @@ export const ReservationService = {
     if (salleIds.length === 0) return { data: [], error: null }
 
     const normalizedEmail = userEmail.trim().toLowerCase()
+    const todayDateString = getTodayDateString()
     const all = []
     for (const sid of salleIds) {
       const rq = query(
         collection(db(), 'reservation_salle'),
         where('salle_id', '==', sid),
-        where('email', '==', normalizedEmail)
+        where('email', '==', normalizedEmail),
+        where('date', '>=', todayDateString)
       )
       const rs = await getDocs(rq)
       for (const d of rs.docs) {
@@ -106,7 +116,7 @@ export const ReservationService = {
         })
       }
     }
-    all.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))
+    all.sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')))
     return { data: all, error: null }
   },
 

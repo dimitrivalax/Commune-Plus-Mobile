@@ -110,7 +110,7 @@ const loadReservations = async (event) => {
 
     if (error) throw error
 
-    // Extraire le nom de la salle pour chaque réservation
+    // Extraire le nom de la salle (filtrage déjà géré côté service)
     reservations.value = (data || []).map((reservation) => ({
       ...reservation,
       salle_nom: reservation.salle?.nom || 'Salle inconnue'

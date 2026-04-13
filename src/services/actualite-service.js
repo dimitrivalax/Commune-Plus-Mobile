@@ -25,12 +25,22 @@ function eventDateString(row) {
   return String(v)
 }
 
+function isPublished(row) {
+  const status = row?.publication_status
+  if (typeof status === 'string') {
+    return status === 'published'
+  }
+  return true
+}
+
 async function fetchForCommune(communeId) {
   const ref = collection(db(), 'actualite')
   const snap = await getDocs(
     query(ref, where('commune_id', 'in', [communeId, null]))
   )
-  return snap.docs.map((d) => docToPlain(d.id, d.data()))
+  return snap.docs
+    .map((d) => docToPlain(d.id, d.data()))
+    .filter((row) => isPublished(row))
 }
 
 export const InformationService = {
@@ -125,7 +135,7 @@ export const InformationService = {
       const cid = row.commune_id
       const ok =
         cid === communeId || cid === null || cid === undefined || cid === ''
-      if (!ok) {
+      if (!ok || !isPublished(row)) {
         return { data: null, error: { message: 'Forbidden' } }
       }
       return { data: row, error: null }
