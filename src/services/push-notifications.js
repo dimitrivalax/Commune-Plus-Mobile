@@ -216,6 +216,7 @@ export async function initializePushNotifications() {
 
         // Gérer les différents types de notifications
         const notificationType = data?.type || data?.notification_type
+        const communeId = data?.commune_id || getCityInfo()?.id || undefined
 
         if (notificationType === 'signalement') {
           // Notification pour un signalement
