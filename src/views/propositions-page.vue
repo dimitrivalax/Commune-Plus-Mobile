@@ -1,13 +1,7 @@
 <template>
   <IonPage>
-    <AppHeader title="Cahier de Propositions"></AppHeader>
+    <AppHeader title="Propositions"></AppHeader>
     <IonContent :fullscreen="true">
-      <IonFab vertical="bottom" horizontal="end" slot="fixed">
-        <IonFabButton @click="$router.push('/proposition/new')">
-          <IonIcon :icon="add" />
-        </IonFabButton>
-      </IonFab>
-
       <IonRefresher slot="fixed" @ionRefresh="loadPropositions($event)">
         <IonRefresherContent></IonRefresherContent>
       </IonRefresher>
@@ -69,14 +63,7 @@
         <div v-else-if="!loading" class="empty-state">
           <IonIcon :icon="bookOutline" class="empty-icon" />
           <h3>Aucune proposition</h3>
-          <p>Soyez le premier à proposer une idée pour votre commune !</p>
-          <IonButton
-            expand="block"
-            @click="$router.push('/proposition/new')"
-            class="empty-action"
-          >
-            Créer une proposition
-          </IonButton>
+          <p>La commune publiera prochainement de nouvelles propositions.</p>
         </div>
 
         <div v-if="loading" class="loading-state">
@@ -92,8 +79,6 @@ import { ref, onMounted } from 'vue'
 import {
   IonPage,
   IonContent,
-  IonFab,
-  IonFabButton,
   IonIcon,
   IonList,
   IonItem,
@@ -107,7 +92,7 @@ import {
   IonSpinner,
   onIonViewWillEnter
 } from '@ionic/vue'
-import { add, bookOutline, thumbsUp } from 'ionicons/icons'
+import { bookOutline, thumbsUp } from 'ionicons/icons'
 import AppHeader from '@/components/app-header.vue'
 import { PropositionService } from '@/services/proposition-service'
 import { formatDateTime } from '@/utils/date'
@@ -156,7 +141,8 @@ onIonViewWillEnter(() => {
 
 const truncateText = (text, length) => {
   if (!text) return ''
-  return text.length > length ? text.substring(0, length) + '...' : text
+  const plainText = String(text).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+  return plainText.length > length ? plainText.substring(0, length) + '...' : plainText
 }
 
 // onMounted removed in favor of onIonViewWillEnter for consistent refreshing

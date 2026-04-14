@@ -5,12 +5,7 @@
         <IonButtons slot="start">
           <IonBackButton default-href="/tabs/propositions"></IonBackButton>
         </IonButtons>
-        <IonTitle>Détail de la Doléance</IonTitle>
-        <IonButtons slot="end" v-if="isCreator">
-          <IonButton @click="confirmDelete">
-            <IonIcon :icon="trashOutline" slot="icon-only" />
-          </IonButton>
-        </IonButtons>
+        <IonTitle>Détail de la Proposition</IonTitle>
       </IonToolbar>
     </IonHeader>
 
@@ -47,7 +42,7 @@
             >
           </div>
 
-          <p class="description">{{ proposition.description }}</p>
+          <div class="description" v-html="proposition.description"></div>
 
           <!-- Vote Area -->
           <div class="vote-action-section">
@@ -99,7 +94,29 @@
                   <div class="comment-date">
                     {{ formatDateTime(comment.created_at) }}
                   </div>
-                  <p class="comment-content">{{ comment.content }}</p>
+                  <p v-if="editingCommentId !== comment.id" class="comment-content">{{ comment.content }}</p>
+                  <div v-else class="edit-comment-box">
+                    <IonTextarea v-model="editingCommentContent" rows="3" />
+                    <div class="edit-actions">
+                      <IonButton size="small" fill="clear" @click="cancelEditComment">Annuler</IonButton>
+                      <IonButton
+                        size="small"
+                        :disabled="!editingCommentContent.trim() || commenting"
+                        @click="saveEditedComment"
+                      >
+                        Enregistrer
+                      </IonButton>
+                    </div>
+                  </div>
+                  <IonButton
+                    v-if="canEditComment(comment) && editingCommentId !== comment.id"
+                    size="small"
+                    fill="clear"
+                    class="edit-comment-trigger"
+                    @click="startEditComment(comment)"
+                  >
+                    Modifier
+                  </IonButton>
                 </IonLabel>
               </IonItem>
               <div v-if="proposition.comments.length === 0" class="no-comments">
@@ -135,7 +152,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import {
   IonPage,
   IonHeader,
@@ -153,14 +170,12 @@ import {
   IonLabel,
   IonTextarea,
   alertController,
-  toastController,
-  loadingController
+  toastController
 } from '@ionic/vue'
 import {
   thumbsUp,
   thumbsUpOutline,
   personCircleOutline,
-  trashOutline,
   checkmarkCircle
 } from 'ionicons/icons'
 import { PropositionService } from '@/services/proposition-service'
@@ -169,24 +184,19 @@ import { formatDate, formatDateTime } from '@/utils/date'
 import { trackEvent } from '@/services/posthog'
 
 const route = useRoute()
-const router = useRouter()
 const proposition = ref(null)
 const loading = ref(true)
 const voting = ref(false)
 const commenting = ref(false)
 const newComment = ref('')
+const editingCommentId = ref(null)
+const editingCommentContent = ref('')
 const hasTrackedView = ref(false)
 
 /** Email de l'utilisateur courant (stocké en minuscules pour comparaison). */
 const currentUserEmail = computed(() => {
   const email = getUserContact()?.email?.trim()
   return email ? email.toLowerCase() : null
-})
-
-const isCreator = computed(() => {
-  if (!proposition.value || !currentUserEmail.value) return false
-  const creatorEmail = (proposition.value.user_email || '').trim().toLowerCase()
-  return creatorEmail === currentUserEmail.value
 })
 
 const loadProposition = async () => {
@@ -210,6 +220,51 @@ const loadProposition = async () => {
     console.error('Error loading proposition:', error)
   } finally {
     loading.value = false
+  }
+}
+
+const canEditComment = (comment) => {
+  const email = (comment?.user_email || '').trim().toLowerCase()
+  return !!currentUserEmail.value && email === currentUserEmail.value && comment?.author_type !== 'commune'
+}
+
+const startEditComment = (comment) => {
+  editingCommentId.value = comment.id
+  editingCommentContent.value = comment.content || ''
+}
+
+const cancelEditComment = () => {
+  editingCommentId.value = null
+  editingCommentContent.value = ''
+}
+
+const saveEditedComment = async () => {
+  if (!editingCommentId.value || !editingCommentContent.value.trim()) return
+  commenting.value = true
+  try {
+    const { error } = await PropositionService.updateComment(
+      editingCommentId.value,
+      editingCommentContent.value,
+      currentUserEmail.value
+    )
+    if (error) throw error
+    cancelEditComment()
+    await loadProposition()
+    const toast = await toastController.create({
+      message: 'Commentaire modifié.',
+      duration: 2000,
+      color: 'success'
+    })
+    await toast.present()
+  } catch (error) {
+    const toast = await toastController.create({
+      message: error?.message || 'Impossible de modifier ce commentaire.',
+      duration: 2000,
+      color: 'danger'
+    })
+    await toast.present()
+  } finally {
+    commenting.value = false
   }
 }
 
@@ -402,35 +457,6 @@ const performAddComment = async (firstName, lastName, email) => {
   }
 }
 
-const confirmDelete = async () => {
-  const alert = await alertController.create({
-    header: 'Supprimer la proposition ?',
-    message: 'Cette action est irréversible.',
-    buttons: [
-      { text: 'Annuler', role: 'cancel' },
-      {
-        text: 'Supprimer',
-        role: 'destructive',
-        handler: async () => {
-          const loadingEl = await loadingController.create({
-            message: 'Suppression...'
-          })
-          await loadingEl.present()
-          try {
-            await PropositionService.delete(proposition.value.id)
-            router.replace('/tabs/propositions')
-          } catch (error) {
-            console.error('Error deleting:', error)
-          } finally {
-            await loadingEl.dismiss()
-          }
-        }
-      }
-    ]
-  })
-  await alert.present()
-}
-
 onMounted(() => {
   loadProposition()
 })
@@ -499,8 +525,17 @@ onMounted(() => {
   font-size: 16px;
   line-height: 1.6;
   color: var(--ion-color-step-800);
-  white-space: pre-wrap;
   margin-bottom: 30px;
+}
+
+.description :deep(p) {
+  margin: 0 0 10px;
+}
+
+.description :deep(ul),
+.description :deep(ol) {
+  padding-left: 20px;
+  margin: 0 0 10px;
 }
 
 .vote-action-section {
@@ -573,6 +608,20 @@ onMounted(() => {
   font-size: 14px;
   color: var(--ion-color-step-700);
   line-height: 1.4;
+}
+
+.edit-comment-box {
+  margin-top: 8px;
+}
+
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.edit-comment-trigger {
+  margin-top: 6px;
 }
 
 .no-comments {

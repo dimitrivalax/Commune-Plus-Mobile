@@ -43,10 +43,6 @@ const routes = [
     ]
   },
   {
-    path: '/proposition/new',
-    component: () => import('@/views/new-proposition-page.vue')
-  },
-  {
     path: '/proposition/:id',
     name: 'proposition-detail',
     component: () => import('@/views/proposition-detail-page.vue')

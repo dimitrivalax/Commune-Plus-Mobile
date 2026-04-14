@@ -7,7 +7,6 @@ import {
   where,
   addDoc,
   updateDoc,
-  deleteDoc,
   runTransaction,
   serverTimestamp,
   increment
@@ -61,6 +60,10 @@ export const PropositionService = {
         return { data: null, error: { message: 'Not found' } }
       }
       const proposition = docToPlain(psnap.id, psnap.data())
+      const emailNormalized =
+        userEmail && typeof userEmail === 'string'
+          ? userEmail.trim().toLowerCase()
+          : null
 
       const cq = query(
         collection(db(), 'proposition_comment'),
@@ -69,15 +72,17 @@ export const PropositionService = {
       const csnap = await getDocs(cq)
       const comments = csnap.docs
         .map((d) => docToPlain(d.id, d.data()))
+        .filter((comment) => {
+          if (proposition.comments_public !== false) return true
+          if (comment.author_type === 'commune') return true
+          const email = (comment.user_email || '').trim().toLowerCase()
+          return !!emailNormalized && email === emailNormalized
+        })
         .sort((a, b) =>
           String(a.created_at || '').localeCompare(String(b.created_at || ''))
         )
 
       let hasVoted = false
-      const emailNormalized =
-        userEmail && typeof userEmail === 'string'
-          ? userEmail.trim().toLowerCase()
-          : null
       if (emailNormalized) {
         const vsnap = await getDoc(
           doc(db(), 'proposition_vote', voteDocId(id, emailNormalized))
@@ -96,38 +101,6 @@ export const PropositionService = {
     } catch (e) {
       return { data: null, error: e }
     }
-  },
-
-  async create(propositionData) {
-    try {
-      const ref = await addDoc(collection(db(), 'proposition'), {
-        ...propositionData,
-        created_at: serverTimestamp(),
-        updated_at: serverTimestamp()
-      })
-      const snap = await getDoc(ref)
-      return { data: docToPlain(snap.id, snap.data()), error: null }
-    } catch (e) {
-      return { data: null, error: e }
-    }
-  },
-
-  async update(id, updates) {
-    try {
-      const pref = doc(db(), 'proposition', id)
-      await updateDoc(pref, {
-        ...updates,
-        updated_at: serverTimestamp()
-      })
-      const snap = await getDoc(pref)
-      return { data: docToPlain(snap.id, snap.data()), error: null }
-    } catch (e) {
-      return { data: null, error: e }
-    }
-  },
-
-  async delete(id) {
-    await deleteDoc(doc(db(), 'proposition', id))
   },
 
   async vote(propositionId, userEmail) {
@@ -239,6 +212,8 @@ export const PropositionService = {
     try {
       const cref = await addDoc(collection(db(), 'proposition_comment'), {
         ...commentData,
+        author_type: 'user',
+        updated_at: serverTimestamp(),
         created_at: serverTimestamp()
       })
       const snap = await getDoc(cref)
@@ -251,6 +226,30 @@ export const PropositionService = {
         ).catch((err) => console.error('Notify error:', err))
       }
       return { data: row, error: null }
+    } catch (e) {
+      return { data: null, error: e }
+    }
+  },
+
+  async updateComment(id, content, userEmail) {
+    try {
+      const ref = doc(db(), 'proposition_comment', id)
+      const snap = await getDoc(ref)
+      if (!snap.exists()) {
+        return { data: null, error: { message: 'Commentaire introuvable' } }
+      }
+      const existing = docToPlain(snap.id, snap.data())
+      const ownerEmail = (existing?.user_email || '').trim().toLowerCase()
+      const emailNormalized = (userEmail || '').trim().toLowerCase()
+      if (!emailNormalized || ownerEmail !== emailNormalized) {
+        return { data: null, error: { message: 'Vous ne pouvez modifier que vos commentaires' } }
+      }
+      await updateDoc(ref, {
+        content: content.trim(),
+        updated_at: serverTimestamp(),
+      })
+      const updated = await getDoc(ref)
+      return { data: docToPlain(updated.id, updated.data()), error: null }
     } catch (e) {
       return { data: null, error: e }
     }

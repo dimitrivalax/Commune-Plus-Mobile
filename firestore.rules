@@ -30,22 +30,13 @@ service cloud.firestore {
         && isNonEmptyString(d.end_time);
     }
 
-    function isPropositionPayload(d) {
-      return isNonEmptyString(d.commune_id)
-        && isNonEmptyString(d.user_id)
-        && isNonEmptyString(d.name)
-        && isNonEmptyString(d.description)
-        && isNonEmptyString(d.user_firstname)
-        && isNonEmptyString(d.user_lastname)
-        && isValidEmail(d.user_email);
-    }
-
     function isPropositionCommentPayload(d) {
       return isNonEmptyString(d.proposition_id)
         && isNonEmptyString(d.content)
         && isNonEmptyString(d.user_firstname)
         && isNonEmptyString(d.user_lastname)
-        && isValidEmail(d.user_email);
+        && isValidEmail(d.user_email)
+        && (d.author_type == null || d.author_type in ['user', 'commune']);
     }
 
     function isPushTokenPayload(d) {
@@ -94,15 +85,18 @@ service cloud.firestore {
 
     match /proposition/{id} {
       allow read: if true;
-      allow create: if isPropositionPayload(request.resource.data);
-      allow update: if true;
-      allow delete: if true;
+      allow create, update, delete: if false;
     }
 
     match /proposition_comment/{id} {
       allow read: if true;
       allow create: if isPropositionCommentPayload(request.resource.data);
-      allow update, delete: if false;
+      allow update: if isNonEmptyString(resource.data.user_email)
+        && isNonEmptyString(request.resource.data.user_email)
+        && resource.data.user_email == request.resource.data.user_email
+        && request.resource.data.proposition_id == resource.data.proposition_id
+        && isNonEmptyString(request.resource.data.content);
+      allow delete: if false;
     }
 
     match /proposition_vote/{id} {
