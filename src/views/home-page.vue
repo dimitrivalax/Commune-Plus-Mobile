@@ -1,7 +1,7 @@
 <template>
   <IonPage>
     <AppHeader title="Accueil" :logo="true"></AppHeader>
-    <IonContent :fullscreen="true">
+    <IonContent class="page-content">
       <div class="ion-padding">
         <div v-if="items.length > 0" class="cards-wrap">
           <IonCard v-for="item in items" :key="item.id" class="info-card">
@@ -119,5 +119,9 @@ onIonViewWillEnter(async () => {
     margin: 0;
     color: var(--ion-color-medium);
   }
+}
+
+.page-content::part(scroll) {
+  overscroll-behavior-y: contain;
 }
 </style>

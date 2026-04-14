@@ -8,13 +8,7 @@
         <ion-title>Paramètres</ion-title>
       </ion-toolbar>
     </ion-header>
-    <ion-content :fullscreen="true">
-      <ion-header collapse="condense">
-        <ion-toolbar color="primary">
-          <ion-title size="large">Paramètres</ion-title>
-        </ion-toolbar>
-      </ion-header>
-
+    <ion-content class="page-content">
       <div class="ion-padding">
         <!-- Section Coordonnées utilisateur -->
         <div class="settings-section">
@@ -457,5 +451,9 @@ ion-item {
       text-decoration: underline;
     }
   }
+}
+
+.page-content::part(scroll) {
+  overscroll-behavior-y: contain;
 }
 </style>

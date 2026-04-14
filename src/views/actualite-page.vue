@@ -1,7 +1,7 @@
 <template>
   <IonPage>
     <AppHeader title="Actualités"></AppHeader>
-    <IonContent ref="ionContentRef" :fullscreen="true">
+    <IonContent ref="ionContentRef" class="page-content">
       <div class="ion-padding">
         <IonRefresher slot="fixed" @ionRefresh="onRefresh($event)">
           <IonRefresherContent></IonRefresherContent>
@@ -391,5 +391,9 @@ onIonViewWillEnter(async () => {
   p {
     color: var(--ion-color-medium);
   }
+}
+
+.page-content::part(scroll) {
+  overscroll-behavior-y: contain;
 }
 </style>

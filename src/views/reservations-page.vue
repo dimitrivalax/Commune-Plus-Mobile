@@ -1,7 +1,7 @@
 <template>
   <IonPage>
     <AppHeader title="Réservations"></AppHeader>
-    <IonContent :fullscreen="true">
+    <IonContent class="page-content">
       <IonFab vertical="bottom" horizontal="end" slot="fixed">
         <IonFabButton @click="$router.push('/reservation/new')">
           <IonIcon :icon="add" />
@@ -268,5 +268,9 @@ onIonViewWillEnter(() => {
     max-width: 300px;
     margin: 0 auto;
   }
+}
+
+.page-content::part(scroll) {
+  overscroll-behavior-y: contain;
 }
 </style>

@@ -8,13 +8,7 @@
         <ion-title>Nouveau signalement</ion-title>
       </ion-toolbar>
     </ion-header>
-    <ion-content :fullscreen="true">
-      <ion-header collapse="condense">
-        <ion-toolbar color="primary">
-          <ion-title size="large">Nouveau signalement</ion-title>
-        </ion-toolbar>
-      </ion-header>
-
+    <ion-content class="detail-content">
       <div class="form-container">
         <div class="form-section">
           <h3 class="section-title">Description</h3>
@@ -1009,5 +1003,9 @@ const submitSignalement = async () => {
       font-size: 20px;
     }
   }
+}
+
+.detail-content::part(scroll) {
+  overscroll-behavior-y: contain;
 }
 </style>

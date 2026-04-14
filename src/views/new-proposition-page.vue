@@ -5,11 +5,11 @@
         <IonButtons slot="start">
           <IonBackButton default-href="/tabs/propositions"></IonBackButton>
         </IonButtons>
-        <IonTitle>Nouvelle Doléance</IonTitle>
+        <IonTitle>Nouvelle Proposition</IonTitle>
       </IonToolbar>
     </IonHeader>
 
-    <IonContent :fullscreen="true">
+    <IonContent class="page-content">
       <div class="form-container">
         <div class="form-section">
           <h3 class="section-title">Ma proposition</h3>
@@ -368,5 +368,9 @@ const submitProposition = async () => {
   --border-radius: 12px;
   height: 54px;
   font-weight: 600;
+}
+
+.page-content::part(scroll) {
+  overscroll-behavior-y: contain;
 }
 </style>

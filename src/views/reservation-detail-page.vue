@@ -17,7 +17,7 @@
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
-    <ion-content :fullscreen="true">
+    <ion-content class="page-content">
       <div v-if="loading" class="loading-container">
         <ion-spinner></ion-spinner>
         <p>Chargement...</p>
@@ -861,5 +861,9 @@ onMounted(async () => {
   font-size: 14px;
   font-style: italic;
   margin-top: 16px;
+}
+
+.page-content::part(scroll) {
+  overscroll-behavior-y: contain;
 }
 </style>

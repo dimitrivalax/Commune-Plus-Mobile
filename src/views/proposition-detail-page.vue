@@ -9,7 +9,7 @@
       </IonToolbar>
     </IonHeader>
 
-    <IonContent :fullscreen="true">
+    <IonContent class="detail-content">
       <div v-if="loading" class="loading-state">
         <IonSpinner name="crescent" />
       </div>
@@ -648,5 +648,9 @@ onMounted(() => {
   --background: white;
   --border-radius: 8px;
   margin-bottom: 12px;
+}
+
+.detail-content::part(scroll) {
+  overscroll-behavior-y: contain;
 }
 </style>

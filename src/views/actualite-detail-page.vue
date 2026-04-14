@@ -8,7 +8,7 @@
         <ion-title>Détail de l'actualité</ion-title>
       </ion-toolbar>
     </ion-header>
-    <ion-content :fullscreen="true">
+    <ion-content class="page-content">
       <div v-if="loading" class="ion-padding ion-text-center">
         <ion-spinner name="crescent"></ion-spinner>
         <p>Chargement...</p>
@@ -343,5 +343,9 @@ onMounted(() => {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+}
+
+.page-content::part(scroll) {
+  overscroll-behavior-y: contain;
 }
 </style>

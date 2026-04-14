@@ -1,7 +1,7 @@
 <template>
   <IonPage>
     <AppHeader title="Propositions"></AppHeader>
-    <IonContent :fullscreen="true">
+    <IonContent class="page-content">
       <IonRefresher slot="fixed" @ionRefresh="loadPropositions($event)">
         <IonRefresherContent></IonRefresherContent>
       </IonRefresher>
@@ -254,5 +254,9 @@ const truncateText = (text, length) => {
   display: flex;
   justify-content: center;
   padding: 40px;
+}
+
+.page-content::part(scroll) {
+  overscroll-behavior-y: contain;
 }
 </style>

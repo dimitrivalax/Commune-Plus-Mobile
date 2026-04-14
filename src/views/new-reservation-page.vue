@@ -8,13 +8,7 @@
         <ion-title>Nouvelle réservation</ion-title>
       </ion-toolbar>
     </ion-header>
-    <ion-content ref="contentRef" :fullscreen="true">
-      <ion-header collapse="condense">
-        <ion-toolbar color="primary">
-          <ion-title size="large">Nouvelle réservation</ion-title>
-        </ion-toolbar>
-      </ion-header>
-
+    <ion-content ref="contentRef" class="page-content">
       <div class="ion-padding">
         <div class="salles-section">
           <ion-label class="salles-label">Salle</ion-label>
@@ -773,5 +767,9 @@ ion-item {
   --padding-start: 0;
   --inner-padding-end: 0;
   margin-bottom: 8px;
+}
+
+.page-content::part(scroll) {
+  overscroll-behavior-y: contain;
 }
 </style>

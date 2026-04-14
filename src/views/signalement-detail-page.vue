@@ -13,7 +13,7 @@
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
-    <ion-content :fullscreen="true">
+    <ion-content class="detail-content">
       <div v-if="loading" class="loading-container">
         <ion-spinner></ion-spinner>
         <p>Chargement...</p>
@@ -778,5 +778,9 @@ onMounted(() => {
 
 .form-section {
   // Styles for form sections can be added here if needed
+}
+
+.detail-content::part(scroll) {
+  overscroll-behavior-y: contain;
 }
 </style>

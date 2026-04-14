@@ -1,7 +1,7 @@
 <template>
   <IonPage>
     <AppHeader title="Signalements"></AppHeader>
-    <IonContent :fullscreen="true">
+    <IonContent class="page-content">
       <IonFab vertical="bottom" horizontal="end" slot="fixed">
         <IonFabButton @click="$router.push('/signalement/new')">
           <IonIcon :icon="add" />
@@ -263,5 +263,9 @@ onMounted(() => {
 .empty-action {
   max-width: 300px;
   margin: 0 auto;
+}
+
+.page-content::part(scroll) {
+  overscroll-behavior-y: contain;
 }
 </style>
