@@ -69,6 +69,11 @@
     @saved="handleCityInfoSaved"
     :allow-cancel="false"
   />
+  <NotificationContactModal
+    :is-open="showNotificationContactModal"
+    @close="showNotificationContactModal = false"
+    @saved="handleNotificationContactSaved"
+  />
 </template>
 
 <script setup>
@@ -94,6 +99,7 @@ import { App } from '@capacitor/app'
 import { useRouter } from 'vue-router'
 import SplashScreen from '@/components/splash-screen.vue'
 import CitySetupModal from '@/components/city-setup-modal.vue'
+import NotificationContactModal from '@/components/notification-contact-modal.vue'
 import { isCityInfoComplete, refreshCityInfoFromDatabase } from '@/utils/storage'
 import { useCommuneFeatures } from '@/composables/useCommuneFeatures'
 import {
@@ -106,12 +112,15 @@ import {
 
 const router = useRouter()
 const showCitySetupModal = ref(false)
+const showNotificationContactModal = ref(false)
+const shouldOpenNotificationModalAfterCitySetup = ref(false)
 
 const { isReservationsEnabled, isPropositionsEnabled } = useCommuneFeatures()
 
 
 const checkCityInfo = () => {
   if (!isCityInfoComplete()) {
+    shouldOpenNotificationModalAfterCitySetup.value = true
     // Attendre un peu pour que le splash screen se termine
     setTimeout(() => {
       showCitySetupModal.value = true
@@ -122,6 +131,15 @@ const checkCityInfo = () => {
 const handleCityInfoSaved = () => {
   showCitySetupModal.value = false
   refreshCityInfoFromDatabase()
+
+  if (shouldOpenNotificationModalAfterCitySetup.value) {
+    shouldOpenNotificationModalAfterCitySetup.value = false
+    showNotificationContactModal.value = true
+  }
+}
+
+const handleNotificationContactSaved = () => {
+  showNotificationContactModal.value = false
 }
 
 // Gérer l'ouverture de l'app depuis une notification
