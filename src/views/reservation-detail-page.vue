@@ -2,19 +2,25 @@
   <ion-page>
     <ion-header>
       <ion-toolbar color="primary">
-        <ion-buttons slot="start">
-          <ion-back-button default-href="/tabs/reservations"></ion-back-button>
-        </ion-buttons>
+        <template v-slot:start>
+          <ion-buttons>
+            <ion-back-button
+              default-href="/tabs/reservations"
+            ></ion-back-button>
+          </ion-buttons>
+        </template>
         <ion-title>Détail de la réservation</ion-title>
-        <ion-buttons slot="end">
-          <ion-button
-            @click="toggleEditMode"
-            v-if="!isDeleting && isOwner"
-            color="light"
-          >
-            <ion-icon :icon="isEditing ? close : create" />
-          </ion-button>
-        </ion-buttons>
+        <template v-slot:end>
+          <ion-buttons>
+            <ion-button
+              @click="toggleEditMode"
+              v-if="!isDeleting && isOwner"
+              color="light"
+            >
+              <ion-icon :icon="isEditing ? close : create" />
+            </ion-button>
+          </ion-buttons>
+        </template>
       </ion-toolbar>
     </ion-header>
     <ion-content class="page-content">
@@ -99,7 +105,9 @@
               @click="confirmDelete"
               :disabled="isDeleting"
             >
-              <ion-icon :icon="trash" slot="start" />
+              <template v-slot:start>
+                <ion-icon :icon="trash" />
+              </template>
               Supprimer la réservation
             </ion-button>
           </div>
@@ -266,7 +274,9 @@
                 :disabled="saving || !isFormValid"
                 class="save-button"
               >
-                <ion-icon :icon="checkmark" slot="start" />
+                <template v-slot:start>
+                  <ion-icon :icon="checkmark" />
+                </template>
                 Enregistrer les modifications
               </ion-button>
               <ion-button

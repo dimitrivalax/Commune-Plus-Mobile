@@ -34,8 +34,6 @@
                       class="info-thumb"
                     />
                   </IonThumbnail>
-                </template>
-                <template v-slot:start>
                   <IonIcon v-else :icon="newspaper" class="info-icon" />
                 </template>
                 <IonLabel>

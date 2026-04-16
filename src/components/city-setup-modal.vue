@@ -1,11 +1,17 @@
 <template>
-  <ion-modal :is-open="isOpen" @willDismiss="handleDismiss" :can-dismiss="canDismiss">
+  <ion-modal
+    :is-open="isOpen"
+    @willDismiss="handleDismiss"
+    :can-dismiss="canDismiss"
+  >
     <ion-header>
       <ion-toolbar color="primary">
         <ion-title>Configuration de la commune</ion-title>
-        <ion-buttons slot="end" v-if="allowCancel">
-          <ion-button @click="handleCancel">Annuler</ion-button>
-        </ion-buttons>
+        <template v-slot:end>
+          <ion-buttons v-if="allowCancel">
+            <ion-button @click="handleCancel">Annuler</ion-button>
+          </ion-buttons>
+        </template>
       </ion-toolbar>
     </ion-header>
     <ion-content class="ion-padding">
@@ -20,8 +26,14 @@
           <CityTypeahead @select="handleCitySelect" :disabled="isSubmitting" />
 
           <div class="sub-menu" v-if="!formData.name">
-            <p>Si vous ne trouvez pas votre commune, envoyez-nous un email à <strong><a
-                  href="mailto:contact@commune-plus.fr">contact@commune-plus.fr</a></strong></p>
+            <p>
+              Si vous ne trouvez pas votre commune, envoyez-nous un email à
+              <strong
+                ><a href="mailto:contact@commune-plus.fr"
+                  >contact@commune-plus.fr</a
+                ></strong
+              >
+            </p>
           </div>
 
           <template v-if="formData.name">
@@ -30,24 +42,58 @@
             </ion-item>
 
             <ion-item lines="none">
-              <ion-label position="stacked">Nom de la commune
-                <ion-text color="danger">*</ion-text></ion-label>
-              <ion-input class="custom" shape="round" mode="ios" fill="outline" v-model="formData.name" type="text"
-                placeholder="Ex: Venerque" required :disabled="true"></ion-input>
+              <ion-label position="stacked"
+                >Nom de la commune
+                <ion-text color="danger">*</ion-text></ion-label
+              >
+              <ion-input
+                class="custom"
+                shape="round"
+                mode="ios"
+                fill="outline"
+                v-model="formData.name"
+                type="text"
+                placeholder="Ex: Venerque"
+                required
+                :disabled="true"
+              ></ion-input>
             </ion-item>
 
             <ion-item lines="none">
-              <ion-label position="stacked">Code postal <ion-text color="danger">*</ion-text></ion-label>
-              <ion-input class="custom" shape="round" mode="ios" fill="outline" v-model="formData.postalCode"
-                type="text" placeholder="Ex: 31810" pattern="[0-9]{5}" maxlength="5" required
-                :disabled="true"></ion-input>
+              <ion-label position="stacked"
+                >Code postal <ion-text color="danger">*</ion-text></ion-label
+              >
+              <ion-input
+                class="custom"
+                shape="round"
+                mode="ios"
+                fill="outline"
+                v-model="formData.postalCode"
+                type="text"
+                placeholder="Ex: 31810"
+                pattern="[0-9]{5}"
+                maxlength="5"
+                required
+                :disabled="true"
+              ></ion-input>
             </ion-item>
 
             <ion-item lines="none">
-              <ion-label position="stacked">Email de la commune
-                <ion-text color="danger">*</ion-text></ion-label>
-              <ion-input class="custom" shape="round" mode="ios" fill="outline" v-model="formData.email" type="email"
-                placeholder="Ex: contact@mairie.fr" required :disabled="true"></ion-input>
+              <ion-label position="stacked"
+                >Email de la commune
+                <ion-text color="danger">*</ion-text></ion-label
+              >
+              <ion-input
+                class="custom"
+                shape="round"
+                mode="ios"
+                fill="outline"
+                v-model="formData.email"
+                type="email"
+                placeholder="Ex: contact@mairie.fr"
+                required
+                :disabled="true"
+              ></ion-input>
             </ion-item>
           </template>
         </form>
@@ -56,8 +102,13 @@
 
     <ion-footer v-if="formData.name" class="city-setup-footer">
       <ion-toolbar>
-        <ion-button type="submit" form="city-setup-form" expand="block" class="footer-save-button"
-          :disabled="!isFormValid || isSubmitting">
+        <ion-button
+          type="submit"
+          form="city-setup-form"
+          expand="block"
+          class="footer-save-button"
+          :disabled="!isFormValid || isSubmitting"
+        >
           <ion-spinner v-if="isSubmitting" name="crescent"></ion-spinner>
           <span v-else>Enregistrer</span>
         </ion-button>

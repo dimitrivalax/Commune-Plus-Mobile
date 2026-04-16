@@ -12,15 +12,21 @@
           <ion-list>
             <ion-menuToggle auto-hide>
               <ion-item button router-link="/tabs/home" lines="none">
-                <ion-icon :icon="homeOutline" slot="start" />
+                <template v-slot:start>
+                  <ion-icon :icon="homeOutline" />
+                </template>
                 <ion-label>Accueil</ion-label>
               </ion-item>
               <ion-item button router-link="/tabs/actualite" lines="none">
-                <ion-icon :icon="newspaperOutline" slot="start" />
+                <template v-slot:start>
+                  <ion-icon :icon="newspaperOutline" />
+                </template>
                 <ion-label>Actualités</ion-label>
               </ion-item>
               <ion-item button router-link="/tabs/signalements" lines="none">
-                <ion-icon :icon="warningOutline" slot="start" />
+                <template v-slot:start>
+                  <ion-icon :icon="warningOutline" />
+                </template>
                 <ion-label>Signalements</ion-label>
               </ion-item>
 
@@ -30,7 +36,9 @@
                 router-link="/tabs/reservations"
                 lines="none"
               >
-                <ion-icon :icon="calendarOutline" slot="start" />
+                <template v-slot:start>
+                  <ion-icon :icon="calendarOutline" />
+                </template>
                 <ion-label>Réservations</ion-label>
               </ion-item>
               <ion-item
@@ -39,7 +47,9 @@
                 router-link="/tabs/propositions"
                 lines="none"
               >
-                <ion-icon :icon="bookOutline" slot="start" />
+                <template v-slot:start>
+                  <ion-icon :icon="bookOutline" />
+                </template>
                 <ion-label>Propositions</ion-label>
               </ion-item>
             </ion-menuToggle>
@@ -100,7 +110,10 @@ import { useRouter } from 'vue-router'
 import SplashScreen from '@/components/splash-screen.vue'
 import CitySetupModal from '@/components/city-setup-modal.vue'
 import NotificationContactModal from '@/components/notification-contact-modal.vue'
-import { isCityInfoComplete, refreshCityInfoFromDatabase } from '@/utils/storage'
+import {
+  isCityInfoComplete,
+  refreshCityInfoFromDatabase
+} from '@/utils/storage'
 import { useCommuneFeatures } from '@/composables/useCommuneFeatures'
 import {
   homeOutline,
@@ -116,7 +129,6 @@ const showNotificationContactModal = ref(false)
 const shouldOpenNotificationModalAfterCitySetup = ref(false)
 
 const { isReservationsEnabled, isPropositionsEnabled } = useCommuneFeatures()
-
 
 const checkCityInfo = () => {
   if (!isCityInfoComplete()) {

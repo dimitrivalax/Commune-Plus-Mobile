@@ -1,6 +1,4 @@
-import {
-  Timestamp
-} from 'firebase/firestore'
+import { Timestamp } from 'firebase/firestore'
 
 /** Normalise les champs Firestore pour l’app (Timestamps → ISO). */
 export function docToPlain(id, data) {

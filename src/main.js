@@ -2,7 +2,11 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import { IonicVue } from '@ionic/vue'
-import { initPostHog, trackPageView, updateUserAndCommuneContext } from './services/posthog'
+import {
+  initPostHog,
+  trackPageView,
+  updateUserAndCommuneContext
+} from './services/posthog'
 import { initializePushNotifications } from './services/push-notifications'
 
 /* Core CSS required for Ionic components to work properly */
@@ -74,28 +78,28 @@ router.isReady().then(async () => {
       is_initial_load: true
     })
   }
-  
+
   // Initialize push notifications AVANT de monter l'app
   // pour s'assurer que les listeners sont prêts si l'app est ouverte depuis une notification
   await initializePushNotifications()
-  
+
   // Vérifier si l'app a été ouverte depuis une notification
   // Cela doit être fait après l'initialisation des notifications
   try {
     const { App } = await import('@capacitor/app')
     const { PushNotifications } = await import('@capacitor/push-notifications')
 
-    
     // Vérifier les notifications en attente (quand l'app était fermée)
-    const pendingNotifications = await PushNotifications.getDeliveredNotifications()
+    const pendingNotifications =
+      await PushNotifications.getDeliveredNotifications()
     console.log('Pending notifications on app start:', pendingNotifications)
-    
+
     // Si l'app a été ouverte depuis une notification, les données peuvent être dans le state
     // Capacitor gère cela automatiquement via le listener pushNotificationActionPerformed
     // mais on peut aussi vérifier manuellement
   } catch (error) {
     console.log('Could not check pending notifications:', error)
   }
-  
+
   app.mount('#app')
 })

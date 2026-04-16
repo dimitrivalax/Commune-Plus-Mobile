@@ -17,18 +17,18 @@
         @ion-blur="handleBlur"
         :disabled="disabled"
       >
-        <ion-icon
-          v-if="isSearching"
-          slot="end"
-          :icon="hourglassOutline"
-          class="search-icon"
-        ></ion-icon>
-        <ion-icon
-          v-else-if="searchTerm && !isSearching"
-          slot="end"
-          :icon="searchOutline"
-          class="search-icon"
-        ></ion-icon>
+        <template v-slot:end>
+          <ion-icon
+            v-if="isSearching"
+            :icon="hourglassOutline"
+            class="search-icon"
+          ></ion-icon>
+          <ion-icon
+            v-else-if="searchTerm && !isSearching"
+            :icon="searchOutline"
+            class="search-icon"
+          ></ion-icon>
+        </template>
       </ion-input>
     </ion-item>
 

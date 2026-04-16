@@ -39,9 +39,16 @@ export function applyCityTheme() {
   const root = document.documentElement
 
   root.style.setProperty('--ion-color-primary', cityConfig.primaryColor)
-  root.style.setProperty('--ion-color-primary-rgb', `${rgb.r}, ${rgb.g}, ${rgb.b}`)
-  root.style.setProperty('--ion-color-primary-shade', `rgb(${shade.r}, ${shade.g}, ${shade.b})`)
-  root.style.setProperty('--ion-color-primary-tint', `rgb(${tint.r}, ${tint.g}, ${tint.b})`)
+  root.style.setProperty(
+    '--ion-color-primary-rgb',
+    `${rgb.r}, ${rgb.g}, ${rgb.b}`
+  )
+  root.style.setProperty(
+    '--ion-color-primary-shade',
+    `rgb(${shade.r}, ${shade.g}, ${shade.b})`
+  )
+  root.style.setProperty(
+    '--ion-color-primary-tint',
+    `rgb(${tint.r}, ${tint.g}, ${tint.b})`
+  )
 }
-
-

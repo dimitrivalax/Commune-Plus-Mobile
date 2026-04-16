@@ -1,0 +1,37 @@
+{
+  "cookies": [
+    {
+      "name": "ph_phc_73rbuEKrrDAHQBZ3LSjNXOfAohpwRbTHoBIulHunMV8_posthog",
+      "value": "%7B%22%24device_id%22%3A%22019d9624-9927-7d92-9213-1bb616e6ba97%22%2C%22distinct_id%22%3A%22cp_anal8tics_3996-4857-418c-9102-8bce0d5101b9%22%2C%22%24epp%22%3Atrue%7D",
+      "domain": "127.0.0.1",
+      "path": "/",
+      "expires": 1807876474,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "http://127.0.0.1:5173",
+      "localStorage": [
+        {
+          "name": "commune-plus-city-info",
+          "value": "{\"name\":\"E2E Commune\",\"postalCode\":\"00000\",\"email\":\"mairie@example.com\",\"logo\":null,\"id\":\"e2e-commune-id\",\"feature_reservations_salles\":true,\"feature_propositions\":true}"
+        },
+        {
+          "name": "commune-plus-analytics-distinct-id",
+          "value": "cp_anal8tics_3996-4857-418c-9102-8bce0d5101b9"
+        },
+        {
+          "name": "commune-plus-user-contact",
+          "value": "{\"firstName\":\"E2E\",\"lastName\":\"User\",\"email\":\"e2e@example.com\",\"phone\":\"\",\"address\":\"\"}"
+        },
+        {
+          "name": "ph_phc_73rbuEKrrDAHQBZ3LSjNXOfAohpwRbTHoBIulHunMV8_posthog",
+          "value": "{\"$initialization_time\":\"2026-04-16T11:54:34.150Z\",\"$configured_session_timeout_ms\":1800000,\"distinct_id\":\"cp_anal8tics_3996-4857-418c-9102-8bce0d5101b9\",\"$device_id\":\"019d9624-9927-7d92-9213-1bb616e6ba97\",\"$user_state\":\"identified\",\"$epp\":true,\"$user_id\":\"cp_anal8tics_3996-4857-418c-9102-8bce0d5101b9\",\"$stored_person_properties\":{}}"
+        }
+      ]
+    }
+  ]
+}

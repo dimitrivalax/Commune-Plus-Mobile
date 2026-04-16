@@ -224,9 +224,9 @@ export async function initializePushNotifications() {
           if (signalementId) {
             trackEvent('notification_clicked', {
               notification_id:
-                data?.notification_id
-                || data?.campaign_key
-                || `signalement_${signalementId}`,
+                data?.notification_id ||
+                data?.campaign_key ||
+                `signalement_${signalementId}`,
               target_type: 'signalement',
               target_id: String(signalementId),
               commune_id: communeId,
@@ -256,7 +256,9 @@ export async function initializePushNotifications() {
           if (infoId) {
             trackEvent('notification_clicked', {
               notification_id:
-                data?.notification_id || data?.campaign_key || `actualite_${infoId}`,
+                data?.notification_id ||
+                data?.campaign_key ||
+                `actualite_${infoId}`,
               target_type: 'actualite',
               target_id: String(infoId),
               commune_id: communeId,
@@ -283,9 +285,9 @@ export async function initializePushNotifications() {
           if (propositionId) {
             trackEvent('notification_clicked', {
               notification_id:
-                data?.notification_id
-                || data?.campaign_key
-                || `proposition_${propositionId}`,
+                data?.notification_id ||
+                data?.campaign_key ||
+                `proposition_${propositionId}`,
               target_type: 'proposition',
               target_id: String(propositionId),
               commune_id: communeId,

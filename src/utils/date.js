@@ -9,7 +9,7 @@ export const formatDate = (dateString) => {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-    weekday: "long",
+    weekday: 'long'
   })
 }
 
@@ -42,7 +42,10 @@ export const formatTime = (timeString) => {
 export const formatTimeFromDateTime = (dateString) => {
   if (!dateString) return ''
   const date = new Date(dateString)
-  return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+  return date.toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit'
+  })
 }
 
 /**
@@ -59,7 +62,11 @@ export const formatDateGroupLabel = (dateString) => {
   if (diffDays === 0) return "Aujourd'hui"
   if (diffDays === 1) return 'Hier'
   if (diffDays < 7 && diffDays > 1) {
-    return date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
+    return date.toLocaleDateString('fr-FR', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long'
+    })
   }
   return date.toLocaleDateString('fr-FR', {
     year: 'numeric',
@@ -82,5 +89,3 @@ export const formatDateForDB = (dateString) => {
   const date = new Date(dateString)
   return date.toISOString().split('T')[0]
 }
-
-

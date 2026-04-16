@@ -2,9 +2,11 @@
   <ion-page>
     <ion-header>
       <ion-toolbar color="primary">
-        <ion-buttons slot="start">
-          <ion-back-button default-href="/tabs/home"></ion-back-button>
-        </ion-buttons>
+        <template v-slot:start>
+          <ion-buttons>
+            <ion-back-button default-href="/tabs/home"></ion-back-button>
+          </ion-buttons>
+        </template>
         <ion-title>Paramètres</ion-title>
       </ion-toolbar>
     </ion-header>

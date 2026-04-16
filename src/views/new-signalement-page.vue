@@ -314,6 +314,11 @@ const hasCityInfo = ref(false)
 const cityInfo = ref(null)
 const showCityModal = ref(false)
 
+const getE2EMocks = () => {
+  if (typeof window === 'undefined') return null
+  return window.__CP_E2E_MOCKS || null
+}
+
 const { getAddressFromCoordinates } = useGeocoding()
 
 const takePhoto = async () => {
@@ -643,6 +648,11 @@ onMounted(async () => {
     // Si le GPS échoue, le mode adresse sera activé automatiquement
     console.log('GPS non disponible, mode adresse activé')
   }
+
+  const e2eMocks = getE2EMocks()
+  if (e2eMocks?.initialPhotoDataUrl) {
+    photo.value = e2eMocks.initialPhotoDataUrl
+  }
 })
 
 const handleCityInfoSaved = () => {
@@ -711,6 +721,8 @@ const submitSignalement = async () => {
   await loadingToast.present()
 
   try {
+    const e2eMocks = getE2EMocks()
+
     // Convertir dataUrl en File pour Cloudinary
     const response = await fetch(photo.value)
     const blob = await response.blob()
@@ -736,13 +748,17 @@ const submitSignalement = async () => {
     })
 
     // Upload vers Cloudinary
-    const photoUrl = await uploadImageToCloudinary(file)
+    const photoUrl = e2eMocks?.uploadImageToCloudinary
+      ? await e2eMocks.uploadImageToCloudinary(file)
+      : await uploadImageToCloudinary(file)
 
     // Récupérer l'ID de la commune
     const cityId = await getCommuneId()
 
     // Récupérer ou créer l'ID utilisateur pour les notifications push
-    const userId = getOrCreateUserId()
+    const userId = e2eMocks?.getOrCreateUserId
+      ? e2eMocks.getOrCreateUserId()
+      : getOrCreateUserId()
 
     // Préparer les données à sauvegarder
     const dataToInsert = {
@@ -777,7 +793,9 @@ const submitSignalement = async () => {
     }
 
     // Sauvegarder via le service
-    const { data, error } = await SignalementService.create(dataToInsert)
+    const { data, error } = e2eMocks?.createSignalement
+      ? await e2eMocks.createSignalement(dataToInsert)
+      : await SignalementService.create(dataToInsert)
     if (error) throw error
 
     // Sauvegarder les coordonnées dans le localStorage pour les prochaines fois
@@ -790,25 +808,44 @@ const submitSignalement = async () => {
     })
 
     if (email.value?.trim()) {
-      await updatePushTokenEmail(email.value.trim())
+      if (e2eMocks?.updatePushTokenEmail) {
+        await e2eMocks.updatePushTokenEmail(email.value.trim())
+      } else {
+        await updatePushTokenEmail(email.value.trim())
+      }
     }
 
     // Envoyer l'email à la mairie si l'email de la mairie est configuré
     const cityInfoData = getCityInfo()
     if (cityInfoData && cityInfoData.email) {
       try {
-        await sendSignalementEmail({
-          firstName: firstName.value,
-          lastName: lastName.value,
-          email: email.value || null, // null si pas d'email utilisateur
-          commune: cityInfoData.name || '',
-          description: description.value,
-          photoUrl: photoUrl,
-          address: address.value || addressFromGps.value || null,
-          latitude: location.value?.latitude,
-          longitude: location.value?.longitude,
-          mairieEmail: cityInfoData.email
-        })
+        if (e2eMocks?.sendSignalementEmail) {
+          await e2eMocks.sendSignalementEmail({
+            firstName: firstName.value,
+            lastName: lastName.value,
+            email: email.value || null,
+            commune: cityInfoData.name || '',
+            description: description.value,
+            photoUrl: photoUrl,
+            address: address.value || addressFromGps.value || null,
+            latitude: location.value?.latitude,
+            longitude: location.value?.longitude,
+            mairieEmail: cityInfoData.email
+          })
+        } else {
+          await sendSignalementEmail({
+            firstName: firstName.value,
+            lastName: lastName.value,
+            email: email.value || null, // null si pas d'email utilisateur
+            commune: cityInfoData.name || '',
+            description: description.value,
+            photoUrl: photoUrl,
+            address: address.value || addressFromGps.value || null,
+            latitude: location.value?.latitude,
+            longitude: location.value?.longitude,
+            mairieEmail: cityInfoData.email
+          })
+        }
         console.log('Email envoyé avec succès à la mairie')
       } catch (emailError) {
         console.error("Erreur lors de l'envoi de l'email:", emailError)
