@@ -2,32 +2,30 @@
   <ion-page>
     <ion-tabs>
       <ion-router-outlet></ion-router-outlet>
-      <template v-slot:bottom>
-        <ion-tab-bar color="primary">
-          <ion-tab-button tab="home" @click.prevent="navigate('home')">
-            <ion-icon :icon="home" />
-            <ion-label>Accueil</ion-label>
-          </ion-tab-button>
+      <ion-tab-bar slot="bottom" color="primary">
+        <ion-tab-button tab="home" @click.prevent="navigate('home')">
+          <ion-icon :icon="home" />
+          <ion-label>Accueil</ion-label>
+        </ion-tab-button>
 
-          <ion-tab-button tab="info" @click.prevent="navigate('actualite')">
-            <ion-icon :icon="newspaper" />
-            <ion-label>Actualités</ion-label>
-          </ion-tab-button>
+        <ion-tab-button tab="info" @click.prevent="navigate('actualite')">
+          <ion-icon :icon="newspaper" />
+          <ion-label>Actualités</ion-label>
+        </ion-tab-button>
 
-          <ion-tab-button
-            tab="signalements"
-            @click.prevent="navigate('signalements')"
-          >
-            <ion-icon :icon="warning" />
-            <ion-label>Signalements</ion-label>
-          </ion-tab-button>
+        <ion-tab-button
+          tab="signalements"
+          @click.prevent="navigate('signalements')"
+        >
+          <ion-icon :icon="warning" />
+          <ion-label>Signalements</ion-label>
+        </ion-tab-button>
 
-          <ion-tab-button tab="menu" @click.prevent="openMenu">
-            <ion-icon :icon="menuOutline" />
-            <ion-label>Menu</ion-label>
-          </ion-tab-button>
-        </ion-tab-bar>
-      </template>
+        <ion-tab-button tab="menu" @click.prevent="openMenu">
+          <ion-icon :icon="menuOutline" />
+          <ion-label>Menu</ion-label>
+        </ion-tab-button>
+      </ion-tab-bar>
     </ion-tabs>
   </ion-page>
 </template>
@@ -67,7 +65,7 @@ const navigate = (tab) => {
 }
 
 const openMenu = () => {
-  menuController.open()
+  menuController.open('main-menu')
 }
 </script>
 

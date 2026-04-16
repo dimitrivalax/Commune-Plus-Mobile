@@ -8,6 +8,7 @@ export class ActualitePage {
     this.page = page
     this.emptyTitle = page.getByRole('heading', { name: 'Aucune information' })
     this.listItems = page.locator('.info-item')
+    this.backButton = page.getByRole('button', { name: 'back' })
   }
 
   async goto() {
@@ -32,5 +33,9 @@ export class ActualitePage {
     await this.listItems.first().click()
     await expect(this.page).toHaveURL(/\/actualite\/.+$/)
     return true
+  }
+
+  async expectBackButtonVisible() {
+    await expect(this.backButton).toBeVisible()
   }
 }

@@ -2,11 +2,9 @@
   <IonPage>
     <IonHeader>
       <IonToolbar color="primary">
-        <template v-slot:start>
-          <IonButtons>
-            <IonBackButton default-href="/tabs/propositions"></IonBackButton>
-          </IonButtons>
-        </template>
+        <IonButtons slot="start">
+          <IonBackButton default-href="/tabs/propositions"></IonBackButton>
+        </IonButtons>
         <IonTitle>Nouvelle Proposition</IonTitle>
       </IonToolbar>
     </IonHeader>

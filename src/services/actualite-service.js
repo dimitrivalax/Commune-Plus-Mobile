@@ -15,6 +15,11 @@ const db = () => getFirestoreDb()
 const INITIAL_FUTURE = 10
 const LOAD_MORE_SIZE = 10
 
+function getE2EMocks() {
+  if (typeof window === 'undefined') return null
+  return window.__CP_E2E_MOCKS || null
+}
+
 function eventDateString(row) {
   const v = row.event_date
   if (v == null) return ''
@@ -46,6 +51,10 @@ async function fetchForCommune(communeId) {
 
 export const InformationService = {
   async getAll(communeId = null) {
+    const e2eMocks = getE2EMocks()
+    if (typeof e2eMocks?.actualiteGetAll === 'function') {
+      return e2eMocks.actualiteGetAll(communeId)
+    }
     if (!communeId) {
       return { data: [], error: null }
     }
@@ -59,6 +68,10 @@ export const InformationService = {
   },
 
   async getInitial(communeId = null, todayIso = null) {
+    const e2eMocks = getE2EMocks()
+    if (typeof e2eMocks?.actualiteGetInitial === 'function') {
+      return e2eMocks.actualiteGetInitial(communeId, todayIso)
+    }
     if (!communeId) {
       return { data: [], error: null, hasMoreOlder: false, hasMoreNewer: false }
     }
@@ -123,6 +136,10 @@ export const InformationService = {
   },
 
   async getById(id, communeId = null) {
+    const e2eMocks = getE2EMocks()
+    if (typeof e2eMocks?.actualiteGetById === 'function') {
+      return e2eMocks.actualiteGetById(id, communeId)
+    }
     if (!communeId) {
       return { data: null, error: { message: 'Commune non sélectionnée' } }
     }

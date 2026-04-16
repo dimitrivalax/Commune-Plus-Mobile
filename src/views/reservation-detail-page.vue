@@ -2,25 +2,21 @@
   <ion-page>
     <ion-header>
       <ion-toolbar color="primary">
-        <template v-slot:start>
-          <ion-buttons>
-            <ion-back-button
-              default-href="/tabs/reservations"
-            ></ion-back-button>
-          </ion-buttons>
-        </template>
+        <ion-buttons slot="start">
+          <ion-back-button
+            default-href="/tabs/reservations"
+          ></ion-back-button>
+        </ion-buttons>
         <ion-title>Détail de la réservation</ion-title>
-        <template v-slot:end>
-          <ion-buttons>
-            <ion-button
-              @click="toggleEditMode"
-              v-if="!isDeleting && isOwner"
-              color="light"
-            >
-              <ion-icon :icon="isEditing ? close : create" />
-            </ion-button>
-          </ion-buttons>
-        </template>
+        <ion-buttons slot="end">
+          <ion-button
+            @click="toggleEditMode"
+            v-if="!isDeleting && isOwner"
+            color="light"
+          >
+            <ion-icon :icon="isEditing ? close : create" />
+          </ion-button>
+        </ion-buttons>
       </ion-toolbar>
     </ion-header>
     <ion-content class="page-content">

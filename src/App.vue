@@ -1,7 +1,7 @@
 <template>
   <SplashScreen />
   <ion-app>
-    <ion-menu content-id="main-content" type="overlay">
+    <ion-menu menu-id="main-menu" content-id="main-content" type="overlay">
       <ion-header>
         <ion-toolbar>
           <ion-title>Menu</ion-title>
