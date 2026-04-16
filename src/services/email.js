@@ -3,6 +3,7 @@
  */
 
 import { getAddressFromCoordinates } from '@/utils/geocoding'
+import { normalizeServiceError } from '@/utils/service-error'
 
 export const sendSignalementEmail = async (signalementData) => {
   try {
@@ -47,7 +48,11 @@ export const sendSignalementEmail = async (signalementData) => {
 
     return data
   } catch (error) {
-    console.error('Error sending signalement email:', error)
-    throw error
+    const normalizedError = normalizeServiceError(
+      error,
+      "Erreur lors de l'envoi de l'email"
+    )
+    console.error('Error sending signalement email:', normalizedError)
+    throw new Error(normalizedError.message)
   }
 }

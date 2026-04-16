@@ -2,15 +2,25 @@
   <ion-page>
     <ion-header>
       <ion-toolbar color="primary">
-        <ion-buttons slot="start">
-          <ion-back-button default-href="/tabs/signalements"></ion-back-button>
-        </ion-buttons>
+        <template v-slot:start>
+          <ion-buttons>
+            <ion-back-button
+              default-href="/tabs/signalements"
+            ></ion-back-button>
+          </ion-buttons>
+        </template>
         <ion-title>Détail du signalement</ion-title>
-        <ion-buttons slot="end">
-          <ion-button @click="toggleEditMode" v-if="!isArchiving" color="light">
-            <ion-icon :icon="isEditing ? close : create" />
-          </ion-button>
-        </ion-buttons>
+        <template v-slot:end>
+          <ion-buttons>
+            <ion-button
+              @click="toggleEditMode"
+              v-if="!isArchiving"
+              color="light"
+            >
+              <ion-icon :icon="isEditing ? close : create" />
+            </ion-button>
+          </ion-buttons>
+        </template>
       </ion-toolbar>
     </ion-header>
     <ion-content class="detail-content">
@@ -117,7 +127,9 @@
               @click="confirmArchive"
               :disabled="isArchiving"
             >
-              <ion-icon :icon="archive" slot="start" />
+              <template v-slot:start>
+                <ion-icon :icon="archive" />
+              </template>
               Archiver le signalement
             </ion-button>
           </div>
@@ -159,7 +171,9 @@
                 :disabled="saving"
                 class="photo-button"
               >
-                <ion-icon :icon="camera" slot="start" />
+                <template v-slot:start>
+                  <ion-icon :icon="camera" />
+                </template>
                 {{ editPhoto ? 'Reprendre la photo' : 'Prendre une photo' }}
               </ion-button>
 
@@ -198,7 +212,9 @@
                 :disabled="saving"
                 class="save-button"
               >
-                <ion-icon :icon="checkmark" slot="start" />
+                <template v-slot:start>
+                  <ion-icon :icon="checkmark" />
+                </template>
                 Enregistrer les modifications
               </ion-button>
               <ion-button
@@ -264,16 +280,15 @@ import {
   archive,
   location as locationIcon,
   person,
-  time,
   alertCircle,
   camera,
   createOutline
 } from 'ionicons/icons'
 import { SignalementService } from '@/services/signalement-service'
-import { formatDateTime } from '@/utils/date'
 import { trackEvent } from '@/services/posthog'
 import { uploadImageToCloudinary } from '@/services/cloudinary'
 import { useGeocoding } from '@/composables/useGeocoding'
+import { getErrorMessage } from '@/utils/error-message'
 
 const route = useRoute()
 const router = useRouter() // eslint-disable-line no-unused-vars
@@ -505,7 +520,7 @@ const saveChanges = async () => {
     // Track modification error
     trackEvent('signalement_modification_error', {
       signalement_id: route.params.id,
-      error: error.message || 'Unknown error',
+      error: getErrorMessage(error, 'Unknown error'),
       error_code: error.code || null
     })
 
@@ -603,7 +618,7 @@ const archiveSignalement = async () => {
     // Track archiving error
     trackEvent('signalement_archiving_error', {
       signalement_id: route.params.id,
-      error: error.message || 'Unknown error',
+      error: getErrorMessage(error, 'Unknown error'),
       error_code: error.code || null
     })
 

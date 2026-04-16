@@ -44,12 +44,14 @@
             lines="none"
             @click="$router.push(`/signalement/${signalement.id}`)"
           >
-            <IonThumbnail v-if="signalement.photo_url" slot="start">
-              <img
-                :src="signalement.photo_url"
-                :alt="signalement.description"
-              />
-            </IonThumbnail>
+            <template v-slot:start>
+              <IonThumbnail v-if="signalement.photo_url">
+                <img
+                  :src="signalement.photo_url"
+                  :alt="signalement.description"
+                />
+              </IonThumbnail>
+            </template>
             <IonLabel>
               <h2>{{ signalement.description || 'Sans description' }}</h2>
               <p v-if="signalement.comment" class="comment-text">
@@ -115,10 +117,12 @@ import { add, bookOutline } from 'ionicons/icons'
 import AppHeader from '@/components/app-header.vue'
 import { SignalementService } from '@/services/signalement-service'
 import { formatDateTime } from '@/utils/date'
-import { getCityIdFromDatabase, getUserContact } from '@/utils/storage'
+import { useCommuneId } from '@/composables/useCommuneId'
+import { getUserContact } from '@/utils/storage'
 
 const signalements = ref([])
 const selectedStatus = ref('all')
+const { getCommuneId } = useCommuneId()
 
 const filteredSignalements = computed(() => {
   if (selectedStatus.value === 'all') {
@@ -129,7 +133,7 @@ const filteredSignalements = computed(() => {
 
 const loadSignalements = async (event) => {
   try {
-    const communeId = await getCityIdFromDatabase()
+    const communeId = await getCommuneId()
     const contact = getUserContact()
     const userEmail = contact?.email?.trim()
 

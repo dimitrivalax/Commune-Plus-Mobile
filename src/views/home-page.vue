@@ -3,7 +3,16 @@
     <AppHeader title="Accueil" :logo="true"></AppHeader>
     <IonContent class="page-content">
       <div class="ion-padding">
-        <div v-if="items.length > 0" class="cards-wrap">
+        <div v-if="isLoading" class="empty-state">
+          <IonSpinner name="crescent" />
+          <p>Chargement des informations...</p>
+        </div>
+        <div v-else-if="errorMessage" class="empty-state">
+          <IonIcon :icon="informationCircle" class="empty-icon" />
+          <h3>Impossible de charger les informations</h3>
+          <p>{{ errorMessage }}</p>
+        </div>
+        <div v-else-if="items.length > 0" class="cards-wrap">
           <IonCard v-for="item in items" :key="item.id" class="info-card">
             <img
               v-if="item.photo_url"
@@ -38,26 +47,48 @@ import {
   IonCardTitle,
   IonCardContent,
   IonIcon,
+  IonSpinner,
   onIonViewWillEnter
 } from '@ionic/vue'
 import { informationCircle } from 'ionicons/icons'
 import { ref } from 'vue'
 import AppHeader from '@/components/app-header.vue'
 import { InformationCommuneService } from '@/services/information-commune-service'
-import { getCityInfo, getCityIdFromDatabase } from '@/utils/storage'
+import { useCommuneId } from '@/composables/useCommuneId'
+import { getErrorMessage } from '@/utils/error-message'
 
 const items = ref([])
-
-const getCommuneId = async () => {
-  const cityInfo = getCityInfo()
-  if (cityInfo?.id) return cityInfo.id
-  return await getCityIdFromDatabase()
-}
+const isLoading = ref(false)
+const errorMessage = ref('')
+const { getCommuneId } = useCommuneId()
 
 const loadHomeData = async () => {
+  isLoading.value = true
+  errorMessage.value = ''
   const communeId = await getCommuneId()
-  const { data } = await InformationCommuneService.getAll(communeId)
-  items.value = data || []
+  if (!communeId) {
+    items.value = []
+    errorMessage.value = 'Aucune commune n’est configurée pour le moment.'
+    isLoading.value = false
+    return
+  }
+
+  try {
+    const { data, error } = await InformationCommuneService.getAll(communeId)
+    if (error) {
+      throw error
+    }
+    items.value = data || []
+  } catch (error) {
+    console.error('Error loading home data:', error)
+    items.value = []
+    errorMessage.value = getErrorMessage(
+      error,
+      'Veuillez réessayer dans quelques instants.'
+    )
+  } finally {
+    isLoading.value = false
+  }
 }
 
 onIonViewWillEnter(async () => {

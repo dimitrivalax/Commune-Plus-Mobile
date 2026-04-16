@@ -2,9 +2,13 @@
   <ion-page>
     <ion-header>
       <ion-toolbar color="primary">
-        <ion-buttons slot="start">
-          <ion-back-button default-href="/tabs/signalements"></ion-back-button>
-        </ion-buttons>
+        <template v-slot:start>
+          <ion-buttons>
+            <ion-back-button
+              default-href="/tabs/signalements"
+            ></ion-back-button>
+          </ion-buttons>
+        </template>
         <ion-title>Nouveau signalement</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -14,14 +18,28 @@
           <h3 class="section-title">Description</h3>
           <ion-item lines="none" class="form-item">
             <ion-label position="stacked">Description du signalement</ion-label>
-            <ion-textarea shape="round" mode="ios" fill="outline" class="custom" v-model="description"
-              placeholder="Décrivez le signalement..." rows="4"></ion-textarea>
+            <ion-textarea
+              shape="round"
+              mode="ios"
+              fill="outline"
+              class="custom"
+              v-model="description"
+              placeholder="Décrivez le signalement..."
+              rows="4"
+            ></ion-textarea>
           </ion-item>
 
           <div class="location-section">
-            <ion-button expand="block" @click="getCurrentLocation" :disabled="loading || gettingLocation" fill="outline"
-              class="location-button">
-              <ion-icon :icon="locationIcon" slot="start" />
+            <ion-button
+              expand="block"
+              @click="getCurrentLocation"
+              :disabled="loading || gettingLocation"
+              fill="outline"
+              class="location-button"
+            >
+              <template v-slot:start>
+                <ion-icon :icon="locationIcon" />
+              </template>
               {{
                 location
                   ? 'Position GPS enregistrée'
@@ -61,8 +79,14 @@
               </p>
               <ion-item lines="none" class="form-item">
                 <ion-label position="stacked">Adresse</ion-label>
-                <ion-input class="custom" shape="round" mode="ios" fill="outline" v-model="address"
-                  placeholder="Adresse où se trouve le signalement"></ion-input>
+                <ion-input
+                  class="custom"
+                  shape="round"
+                  mode="ios"
+                  fill="outline"
+                  v-model="address"
+                  placeholder="Adresse où se trouve le signalement"
+                ></ion-input>
               </ion-item>
             </div>
           </div>
@@ -71,28 +95,53 @@
         <div class="form-section">
           <h3 class="section-title">Photo</h3>
           <div class="photo-actions">
-            <ion-button expand="block" @click="takePhoto" :disabled="loading" class="photo-button">
-              <ion-icon :icon="camera" slot="start" />
+            <ion-button
+              expand="block"
+              @click="takePhoto"
+              :disabled="loading"
+              class="photo-button"
+            >
+              <template v-slot:start>
+                <ion-icon :icon="camera" />
+              </template>
               {{ photo ? 'Reprendre la photo' : 'Prendre une photo' }}
             </ion-button>
-            <ion-button expand="block" fill="outline" @click="pickFromGallery" :disabled="loading"
-              class="photo-button photo-button-gallery">
-              <ion-icon :icon="images" slot="start" />
+            <ion-button
+              expand="block"
+              fill="outline"
+              @click="pickFromGallery"
+              :disabled="loading"
+              class="photo-button photo-button-gallery"
+            >
+              <template v-slot:start>
+                <ion-icon :icon="images" />
+              </template>
               Choisir depuis la galerie
             </ion-button>
           </div>
 
           <div v-if="photo" class="photo-preview">
             <img :src="photo" alt="Photo du signalement" />
-            <ion-button fill="clear" @click="removePhoto" class="remove-photo-btn">
+            <ion-button
+              fill="clear"
+              @click="removePhoto"
+              class="remove-photo-btn"
+            >
               <ion-icon :icon="close" />
             </ion-button>
           </div>
 
           <ion-item v-if="photo" lines="none" class="form-item">
             <ion-label position="stacked">Commentaire sur la photo</ion-label>
-            <ion-textarea shape="round" mode="ios" fill="outline" class="custom" v-model="comment"
-              placeholder="Ajoutez un commentaire sur cette photo (optionnel)..." rows="3"></ion-textarea>
+            <ion-textarea
+              shape="round"
+              mode="ios"
+              fill="outline"
+              class="custom"
+              v-model="comment"
+              placeholder="Ajoutez un commentaire sur cette photo (optionnel)..."
+              rows="3"
+            ></ion-textarea>
           </ion-item>
         </div>
 
@@ -108,52 +157,90 @@
 
           <ion-card class="contact-card">
             <ion-card-content>
-
-
-
               <ion-item lines="none" class="form-item">
                 <ion-label position="stacked">Prénom *</ion-label>
-                <ion-input class="custom" shape="round" mode="ios" fill="outline" v-model="firstName"
-                  placeholder="Votre prénom" required></ion-input>
+                <ion-input
+                  class="custom"
+                  shape="round"
+                  mode="ios"
+                  fill="outline"
+                  v-model="firstName"
+                  placeholder="Votre prénom"
+                  required
+                ></ion-input>
               </ion-item>
 
               <ion-item lines="none" class="form-item">
-
                 <ion-label position="stacked">Nom *</ion-label>
-                <ion-input class="custom" shape="round" mode="ios" fill="outline" v-model="lastName"
-                  placeholder="Votre nom" required></ion-input>
+                <ion-input
+                  class="custom"
+                  shape="round"
+                  mode="ios"
+                  fill="outline"
+                  v-model="lastName"
+                  placeholder="Votre nom"
+                  required
+                ></ion-input>
               </ion-item>
 
               <ion-item lines="none" class="form-item">
                 <ion-label position="stacked">Email *</ion-label>
-                <ion-input class="custom" shape="round" mode="ios" fill="outline" v-model="email" type="email"
-                  placeholder="votre.email@exemple.com" required></ion-input>
+                <ion-input
+                  class="custom"
+                  shape="round"
+                  mode="ios"
+                  fill="outline"
+                  v-model="email"
+                  type="email"
+                  placeholder="votre.email@exemple.com"
+                  required
+                ></ion-input>
               </ion-item>
 
               <ion-item lines="none" class="form-item">
                 <ion-label position="stacked">Téléphone *</ion-label>
-                <ion-input class="custom" shape="round" mode="ios" fill="outline" v-model="phone" type="tel"
-                  placeholder="06 12 34 56 78" required></ion-input>
+                <ion-input
+                  class="custom"
+                  shape="round"
+                  mode="ios"
+                  fill="outline"
+                  v-model="phone"
+                  type="tel"
+                  placeholder="06 12 34 56 78"
+                  required
+                ></ion-input>
               </ion-item>
             </ion-card-content>
           </ion-card>
         </div>
 
-        <ion-button expand="block" @click="submitSignalement" :disabled="loading ||
-          !photo ||
-          !lastName ||
-          !firstName ||
-          !email ||
-          (!location && !address)
-          " class="submit-button">
-          <ion-icon :icon="checkmark" slot="start" />
+        <ion-button
+          expand="block"
+          @click="submitSignalement"
+          :disabled="
+            loading ||
+            !photo ||
+            !lastName ||
+            !firstName ||
+            !email ||
+            (!location && !address)
+          "
+          class="submit-button"
+        >
+          <template v-slot:start>
+            <ion-icon :icon="checkmark" />
+          </template>
           Envoyer le signalement
         </ion-button>
       </div>
     </ion-content>
 
     <!-- Modale de configuration de la commune -->
-    <CitySetupModal :is-open="showCityModal" @saved="handleCityInfoSaved" @close="showCityModal = false" />
+    <CitySetupModal
+      :is-open="showCityModal"
+      @saved="handleCityInfoSaved"
+      @close="showCityModal = false"
+    />
   </ion-page>
 </template>
 
@@ -193,12 +280,8 @@ import {
 } from 'ionicons/icons'
 import { SignalementService } from '@/services/signalement-service'
 import { uploadImageToCloudinary } from '@/services/cloudinary'
-import {
-  saveUserContact,
-  getUserContact,
-  getCityInfo,
-  getCityIdFromDatabase
-} from '@/utils/storage'
+import { useCommuneId } from '@/composables/useCommuneId'
+import { saveUserContact, getUserContact, getCityInfo } from '@/utils/storage'
 import { sendSignalementEmail } from '@/services/email'
 import CitySetupModal from '@/components/city-setup-modal.vue'
 import { trackEvent } from '@/services/posthog'
@@ -209,6 +292,7 @@ import {
   getOrCreateUserId,
   updatePushTokenEmail
 } from '@/services/push-notifications'
+import { getErrorMessage } from '@/utils/error-message'
 
 const router = useRouter()
 const description = ref('')
@@ -225,6 +309,7 @@ const email = ref('')
 const phone = ref('')
 const loading = ref(false)
 const hasSavedContact = ref(false)
+const { getCommuneId } = useCommuneId()
 const hasCityInfo = ref(false)
 const cityInfo = ref(null)
 const showCityModal = ref(false)
@@ -251,7 +336,7 @@ const takePhoto = async () => {
 
     // Track photo error
     trackEvent('signalement_photo_error', {
-      error: error.message || 'Unknown error'
+      error: getErrorMessage(error, 'Unknown error')
     })
 
     const toast = await toastController.create({
@@ -281,7 +366,7 @@ const pickFromGallery = async () => {
     console.error('Error picking from gallery:', error)
 
     trackEvent('signalement_photo_error', {
-      error: error.message || 'Unknown error',
+      error: getErrorMessage(error, 'Unknown error'),
       source: 'gallery'
     })
 
@@ -504,7 +589,7 @@ const getCurrentLocation = async () => {
 
     // Track GPS error
     trackEvent('signalement_location_gps_error', {
-      error: error.message || 'Unknown error',
+      error: getErrorMessage(error, 'Unknown error'),
       error_code: error.code || null,
       fallback_to_address: true,
       platform: Capacitor.getPlatform()
@@ -519,16 +604,6 @@ const getCurrentLocation = async () => {
   } finally {
     gettingLocation.value = false
   }
-}
-
-const handleUseAddress = () => {
-  useAddress.value = true
-
-  // Track manual address selection
-  trackEvent('signalement_location_address_selected', {
-    location_type: 'address',
-    gps_available: !!location.value
-  })
 }
 
 // Charger les coordonnées sauvegardées et obtenir la position GPS au chargement de la page
@@ -569,10 +644,6 @@ onMounted(async () => {
     console.log('GPS non disponible, mode adresse activé')
   }
 })
-
-const openCityModal = () => {
-  showCityModal.value = true
-}
 
 const handleCityInfoSaved = () => {
   showCityModal.value = false
@@ -668,7 +739,7 @@ const submitSignalement = async () => {
     const photoUrl = await uploadImageToCloudinary(file)
 
     // Récupérer l'ID de la commune
-    const cityId = await getCityIdFromDatabase()
+    const cityId = await getCommuneId()
 
     // Récupérer ou créer l'ID utilisateur pour les notifications push
     const userId = getOrCreateUserId()
@@ -775,12 +846,12 @@ const submitSignalement = async () => {
 
     // Track submission error
     trackEvent('signalement_submission_error', {
-      error: error.message || 'Unknown error',
+      error: getErrorMessage(error, 'Unknown error'),
       error_code: error.code || null
     })
 
     // Afficher un message d'erreur plus détaillé
-    const errorMessage = error.message || "Erreur lors de l'envoi"
+    const errorMessage = getErrorMessage(error, "Erreur lors de l'envoi")
 
     const toast = await toastController.create({
       message: errorMessage,

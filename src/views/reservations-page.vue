@@ -2,11 +2,13 @@
   <IonPage>
     <AppHeader title="Réservations"></AppHeader>
     <IonContent class="page-content">
-      <IonFab vertical="bottom" horizontal="end" slot="fixed">
-        <IonFabButton @click="$router.push('/reservation/new')">
-          <IonIcon :icon="add" />
-        </IonFabButton>
-      </IonFab>
+      <template v-slot:fixed>
+        <IonFab vertical="bottom" horizontal="end">
+          <IonFabButton @click="$router.push('/reservation/new')">
+            <IonIcon :icon="add" />
+          </IonFabButton>
+        </IonFab>
+      </template>
 
       <div class="ion-padding">
         <IonRefresher slot="fixed" @ionRefresh="loadReservations($event)">
@@ -23,7 +25,9 @@
             button
             @click="$router.push(`/reservation/${reservation.id}`)"
           >
-            <IonIcon :icon="calendar" slot="start" class="reservation-icon" />
+            <template v-slot:start>
+              <IonIcon :icon="calendar" class="reservation-icon" />
+            </template>
             <IonLabel>
               <h2>
                 {{
@@ -92,14 +96,15 @@ import { add, calendar, calendarOutline } from 'ionicons/icons'
 import { ReservationService } from '@/services/reservation-service'
 import AppHeader from '@/components/app-header.vue'
 import { formatDate, formatTime } from '@/utils/date'
-import { getCityIdFromDatabase } from '@/utils/storage'
+import { useCommuneId } from '@/composables/useCommuneId'
 import { getUserContact } from '@/utils/storage'
 
 const reservations = ref([])
+const { getCommuneId } = useCommuneId()
 
 const loadReservations = async (event) => {
   try {
-    const communeId = await getCityIdFromDatabase()
+    const communeId = await getCommuneId()
     const contact = getUserContact()
     const userEmail = contact?.email?.trim()
 

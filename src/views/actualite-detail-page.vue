@@ -2,9 +2,11 @@
   <ion-page>
     <ion-header>
       <ion-toolbar color="primary">
-        <ion-buttons slot="start">
-          <ion-back-button default-href="/tabs/actualite"></ion-back-button>
-        </ion-buttons>
+        <template v-slot:start>
+          <ion-buttons>
+            <ion-back-button default-href="/tabs/actualite"></ion-back-button>
+          </ion-buttons>
+        </template>
         <ion-title>Détail de l'actualité</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -51,11 +53,13 @@
             >
               <ion-header>
                 <ion-toolbar>
-                  <ion-buttons slot="end">
-                    <ion-button @click="fullscreenImageUrl = null">
-                      <ion-icon :icon="closeOutline" />
-                    </ion-button>
-                  </ion-buttons>
+                  <template v-slot:end>
+                    <ion-buttons>
+                      <ion-button @click="fullscreenImageUrl = null">
+                        <ion-icon :icon="closeOutline" />
+                      </ion-button>
+                    </ion-buttons>
+                  </template>
                 </ion-toolbar>
               </ion-header>
               <ion-content class="ion-padding fullscreen-image-content">
@@ -103,8 +107,7 @@ import 'swiper/css'
 import 'swiper/css/pagination'
 import { InformationService } from '@/services/actualite-service'
 import { formatDate } from '@/utils/date'
-import { getCityInfo } from '@/utils/storage'
-import { getCityIdFromDatabase } from '@/utils/storage'
+import { useCommuneId } from '@/composables/useCommuneId'
 import { trackEvent } from '@/services/posthog'
 
 const route = useRoute()
@@ -113,6 +116,7 @@ const infoItems = ref([])
 const loading = ref(true)
 const initialSlide = ref(0)
 const fullscreenImageUrl = ref(null)
+const { getCommuneId } = useCommuneId()
 
 const trackActualiteView = (item, source) => {
   if (!item?.id) return
@@ -124,12 +128,6 @@ const trackActualiteView = (item, source) => {
 
 const openFullscreenImage = (url) => {
   fullscreenImageUrl.value = url
-}
-
-const getCommuneId = async () => {
-  const cityInfo = getCityInfo()
-  if (cityInfo?.id) return cityInfo.id
-  return await getCityIdFromDatabase()
 }
 
 const loadInfoItems = async () => {

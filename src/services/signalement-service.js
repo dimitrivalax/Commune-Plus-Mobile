@@ -11,6 +11,7 @@ import {
 } from 'firebase/firestore'
 import { getFirestoreDb } from '@/services/firebase'
 import { docToPlain } from '@/utils/firestore'
+import { normalizeServiceError } from '@/utils/service-error'
 
 const db = () => getFirestoreDb()
 
@@ -81,50 +82,62 @@ export const SignalementService = {
         await notifyBackofficeSignalement(created)
       }
       return { data: [created], error: null }
-    } catch (e) {
-      return { data: null, error: e }
+    } catch (error) {
+      return { data: null, error: normalizeServiceError(error) }
     }
   },
 
   async getMySignalementsInCommune(communeId, userEmail) {
-    if (!communeId || !userEmail) {
-      return { data: [], error: null }
+    try {
+      if (!communeId || !userEmail) {
+        return { data: [], error: null }
+      }
+      const normalizedEmail = userEmail.trim().toLowerCase()
+      const qy = query(
+        collection(db(), 'signalement'),
+        where('city_id', '==', communeId)
+      )
+      const snap = await getDocs(qy)
+      const rows = snap.docs
+        .map((d) => docToPlain(d.id, d.data()))
+        .filter(
+          (r) =>
+            String(r.email || '')
+              .trim()
+              .toLowerCase() === normalizedEmail
+        )
+        .sort((a, b) =>
+          String(b.created_at || '').localeCompare(String(a.created_at || ''))
+        )
+      return { data: rows, error: null }
+    } catch (error) {
+      return { data: [], error: normalizeServiceError(error) }
     }
-    const normalizedEmail = userEmail.trim().toLowerCase()
-    const qy = query(
-      collection(db(), 'signalement'),
-      where('city_id', '==', communeId)
-    )
-    const snap = await getDocs(qy)
-    const rows = snap.docs
-      .map((d) => docToPlain(d.id, d.data()))
-      .filter(
-        (r) =>
-          String(r.email || '')
-            .trim()
-            .toLowerCase() === normalizedEmail
-      )
-      .sort((a, b) =>
-        String(b.created_at || '').localeCompare(String(a.created_at || ''))
-      )
-    return { data: rows, error: null }
   },
 
   async getById(id) {
-    const dref = doc(db(), 'signalement', id)
-    const d = await getDoc(dref)
-    if (!d.exists()) return { data: null, error: { message: 'Not found' } }
-    return { data: docToPlain(d.id, d.data()), error: null }
+    try {
+      const dref = doc(db(), 'signalement', id)
+      const d = await getDoc(dref)
+      if (!d.exists()) return { data: null, error: { message: 'Not found' } }
+      return { data: docToPlain(d.id, d.data()), error: null }
+    } catch (error) {
+      return { data: null, error: normalizeServiceError(error) }
+    }
   },
 
   async update(id, updates) {
-    const dref = doc(db(), 'signalement', id)
-    await updateDoc(dref, {
-      ...updates,
-      updated_at: serverTimestamp()
-    })
-    const snap = await getDoc(dref)
-    return { data: docToPlain(snap.id, snap.data()), error: null }
+    try {
+      const dref = doc(db(), 'signalement', id)
+      await updateDoc(dref, {
+        ...updates,
+        updated_at: serverTimestamp()
+      })
+      const snap = await getDoc(dref)
+      return { data: docToPlain(snap.id, snap.data()), error: null }
+    } catch (error) {
+      return { data: null, error: normalizeServiceError(error) }
+    }
   },
 
   async archive(id) {

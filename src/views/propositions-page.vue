@@ -2,9 +2,11 @@
   <IonPage>
     <AppHeader title="Propositions"></AppHeader>
     <IonContent class="page-content">
-      <IonRefresher slot="fixed" @ionRefresh="loadPropositions($event)">
-        <IonRefresherContent></IonRefresherContent>
-      </IonRefresher>
+      <template v-slot:fixed>
+        <IonRefresher @ionRefresh="loadPropositions($event)">
+          <IonRefresherContent></IonRefresherContent>
+        </IonRefresher>
+      </template>
 
       <div class="ion-padding">
         <!-- Sort Segment -->
@@ -33,9 +35,11 @@
             lines="none"
             @click="$router.push(`/proposition/${proposition.id}`)"
           >
-            <IonThumbnail v-if="proposition.photo_url" slot="start">
-              <img :src="proposition.photo_url" :alt="proposition.name" />
-            </IonThumbnail>
+            <template v-slot:start>
+              <IonThumbnail v-if="proposition.photo_url">
+                <img :src="proposition.photo_url" :alt="proposition.name" />
+              </IonThumbnail>
+            </template>
             <IonLabel>
               <div class="proposition-header">
                 <h2>{{ proposition.name }}</h2>
@@ -96,11 +100,12 @@ import { bookOutline, thumbsUp } from 'ionicons/icons'
 import AppHeader from '@/components/app-header.vue'
 import { PropositionService } from '@/services/proposition-service'
 import { formatDateTime } from '@/utils/date'
-import { getCityIdFromDatabase } from '@/utils/storage'
+import { useCommuneId } from '@/composables/useCommuneId'
 
 const propositions = ref([])
 const sortBy = ref('updated_at')
 const loading = ref(true)
+const { getCommuneId } = useCommuneId()
 
 const loadPropositions = async (event) => {
   try {
@@ -108,7 +113,7 @@ const loadPropositions = async (event) => {
     if (!event && propositions.value.length === 0) {
       loading.value = true
     }
-    const communeId = await getCityIdFromDatabase()
+    const communeId = await getCommuneId()
     if (!communeId) {
       propositions.value = []
       return
@@ -141,8 +146,13 @@ onIonViewWillEnter(() => {
 
 const truncateText = (text, length) => {
   if (!text) return ''
-  const plainText = String(text).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
-  return plainText.length > length ? plainText.substring(0, length) + '...' : plainText
+  const plainText = String(text)
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+  return plainText.length > length
+    ? plainText.substring(0, length) + '...'
+    : plainText
 }
 
 // onMounted removed in favor of onIonViewWillEnter for consistent refreshing

@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { normalizeServiceError } from '@/utils/service-error'
 
 const cloudinaryCloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
 const cloudinaryUploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
@@ -10,7 +11,9 @@ export const uploadImageToCloudinary = async (file) => {
       cloudName: cloudinaryCloudName || 'MISSING',
       uploadPreset: cloudinaryUploadPreset || 'MISSING'
     })
-    throw new Error('Cloudinary credentials are missing. Please check your .env file.')
+    throw new Error(
+      'Cloudinary credentials are missing. Please check your .env file.'
+    )
   }
 
   // Vérifier que le fichier est valide
@@ -35,23 +38,23 @@ export const uploadImageToCloudinary = async (file) => {
         timeout: 60000
       }
     )
-    
+
     if (!response.data || !response.data.secure_url) {
       throw new Error('Invalid response from Cloudinary')
     }
-    
+
     return response.data.secure_url
   } catch (error) {
     console.error('Error uploading image to Cloudinary:', error)
-    
+
     // Améliorer le message d'erreur
-    let errorMessage = 'Erreur lors de l\'upload de l\'image'
-    
+    let errorMessage = "Erreur lors de l'upload de l'image"
+
     if (error.response) {
       // Erreur de réponse du serveur
       const status = error.response.status
       const data = error.response.data
-      
+
       console.error('Cloudinary error details:', {
         status,
         data,
@@ -59,7 +62,7 @@ export const uploadImageToCloudinary = async (file) => {
         uploadPreset: cloudinaryUploadPreset,
         url: `https://api.cloudinary.com/v1_1/${cloudinaryCloudName}/image/upload`
       })
-      
+
       // Extraire le message d'erreur de Cloudinary
       let cloudinaryMessage = ''
       if (data?.error?.message) {
@@ -69,30 +72,36 @@ export const uploadImageToCloudinary = async (file) => {
       } else if (data?.message) {
         cloudinaryMessage = data.message
       }
-      
+
       if (status === 400) {
-        if (cloudinaryMessage.toLowerCase().includes('upload preset') || 
-            cloudinaryMessage.toLowerCase().includes('preset not found')) {
+        if (
+          cloudinaryMessage.toLowerCase().includes('upload preset') ||
+          cloudinaryMessage.toLowerCase().includes('preset not found')
+        ) {
           errorMessage = `Upload preset non trouvé: "${cloudinaryUploadPreset}". Vérifiez que le preset existe dans Cloudinary et qu'il est de type "Unsigned".`
         } else if (cloudinaryMessage.toLowerCase().includes('cloud name')) {
           errorMessage = `Cloud name invalide: "${cloudinaryCloudName}". Vérifiez votre configuration.`
         } else {
-          errorMessage = cloudinaryMessage || 'Requête invalide. Vérifiez votre configuration Cloudinary (cloud_name et upload_preset)'
+          errorMessage =
+            cloudinaryMessage ||
+            'Requête invalide. Vérifiez votre configuration Cloudinary (cloud_name et upload_preset)'
         }
       } else if (status === 401) {
-        errorMessage = 'Non autorisé. Vérifiez que votre upload preset est de type "Unsigned" ou que vous avez les bonnes permissions.'
+        errorMessage =
+          'Non autorisé. Vérifiez que votre upload preset est de type "Unsigned" ou que vous avez les bonnes permissions.'
       } else if (status === 404) {
         errorMessage = `Cloud name introuvable: "${cloudinaryCloudName}". Vérifiez votre configuration.`
       } else {
         errorMessage = `Erreur Cloudinary (${status}): ${cloudinaryMessage || 'Erreur inconnue'}`
       }
     } else if (error.request) {
-      errorMessage = 'Pas de réponse du serveur Cloudinary. Vérifiez votre connexion internet'
+      errorMessage =
+        'Pas de réponse du serveur Cloudinary. Vérifiez votre connexion internet'
     } else {
-      errorMessage = error.message || 'Erreur inconnue lors de l\'upload'
+      errorMessage = error.message || "Erreur inconnue lors de l'upload"
     }
-    
-    throw new Error(errorMessage)
+
+    const normalizedError = normalizeServiceError(error, errorMessage)
+    throw new Error(normalizedError.message)
   }
 }
-

@@ -2,9 +2,11 @@
   <IonPage>
     <IonHeader>
       <IonToolbar color="primary">
-        <IonButtons slot="start">
-          <IonBackButton default-href="/tabs/propositions"></IonBackButton>
-        </IonButtons>
+        <template v-slot:start>
+          <IonButtons>
+            <IonBackButton default-href="/tabs/propositions"></IonBackButton>
+          </IonButtons>
+        </template>
         <IonTitle>Nouvelle Proposition</IonTitle>
       </IonToolbar>
     </IonHeader>
@@ -65,7 +67,9 @@
             @click="takePhoto"
             class="photo-button"
           >
-            <IonIcon :icon="camera" slot="start" />
+            <template v-slot:start>
+              <IonIcon :icon="camera" />
+            </template>
             Ajouter une photo
           </IonButton>
         </div>
@@ -78,12 +82,20 @@
 
           <IonItem lines="none" class="form-item">
             <IonLabel position="stacked">Prénom *</IonLabel>
-            <IonInput v-model="firstName" placeholder="Votre prénom" required></IonInput>
+            <IonInput
+              v-model="firstName"
+              placeholder="Votre prénom"
+              required
+            ></IonInput>
           </IonItem>
 
           <IonItem lines="none" class="form-item">
             <IonLabel position="stacked">Nom *</IonLabel>
-            <IonInput v-model="lastName" placeholder="Votre nom" required></IonInput>
+            <IonInput
+              v-model="lastName"
+              placeholder="Votre nom"
+              required
+            ></IonInput>
           </IonItem>
 
           <IonItem lines="none" class="form-item">
@@ -105,7 +117,9 @@
             :disabled="!isValid || loading"
             class="submit-button"
           >
-            <IonSpinner v-if="loading" name="crescent" slot="start" />
+            <template v-slot:start>
+              <IonSpinner v-if="loading" name="crescent" />
+            </template>
             {{ loading ? 'Envoi en cours...' : 'Publier ma proposition' }}
           </IonButton>
         </div>
@@ -139,11 +153,9 @@ import { camera, closeCircle } from 'ionicons/icons'
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
 import { PropositionService } from '@/services/proposition-service'
 import { uploadImageToCloudinary } from '@/services/cloudinary'
-import {
-  getUserContact,
-  saveUserContact,
-  getCityIdFromDatabase
-} from '@/utils/storage'
+import { useCommuneId } from '@/composables/useCommuneId'
+import { getErrorMessage } from '@/utils/error-message'
+import { getUserContact, saveUserContact } from '@/utils/storage'
 import { getOrCreateUserId } from '@/services/push-notifications'
 
 const router = useRouter()
@@ -155,6 +167,7 @@ const firstName = ref('')
 const lastName = ref('')
 const email = ref('')
 const loading = ref(false)
+const { getCommuneId } = useCommuneId()
 
 const isValid = computed(() => {
   return (
@@ -233,7 +246,7 @@ const submitProposition = async () => {
       photoUrl = await uploadImageToCloudinary(file)
     }
 
-    const communeId = await getCityIdFromDatabase()
+    const communeId = await getCommuneId()
     const userId = getOrCreateUserId()
 
     if (!communeId) {
@@ -253,7 +266,8 @@ const submitProposition = async () => {
       is_archived: false
     }
 
-    const { data: insertData, error: insertError } = await PropositionService.create(propositionData)
+    const { error: insertError } =
+      await PropositionService.create(propositionData)
 
     if (insertError) {
       console.error('Proposition create error:', insertError)
@@ -278,7 +292,7 @@ const submitProposition = async () => {
   } catch (error) {
     console.error('Error submitting proposition:', error)
     const toast = await toastController.create({
-      message: 'Erreur lors de la publication : ' + error.message,
+      message: `Erreur lors de la publication : ${getErrorMessage(error, 'Veuillez réessayer.')}`,
       duration: 3000,
       color: 'danger'
     })

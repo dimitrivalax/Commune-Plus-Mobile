@@ -12,6 +12,7 @@ import {
 } from 'firebase/firestore'
 import { getFirestoreDb } from '@/services/firebase'
 import { docToPlain } from '@/utils/firestore'
+import { normalizeServiceError } from '@/utils/service-error'
 
 const db = () => getFirestoreDb()
 
@@ -83,41 +84,49 @@ async function notifyBackofficeReservation(reservation) {
 
 export const ReservationService = {
   async getMyReservationsInCommune(communeId, userEmail) {
-    if (!communeId || !userEmail) {
-      return { data: [], error: null }
-    }
-    const sallesQ = query(
-      collection(db(), 'salle'),
-      where('commune_id', '==', communeId)
-    )
-    const sallesSnap = await getDocs(sallesQ)
-    const salleIds = sallesSnap.docs.map((d) => d.id)
-    if (salleIds.length === 0) return { data: [], error: null }
-
-    const normalizedEmail = userEmail.trim().toLowerCase()
-    const todayDateString = getTodayDateString()
-    const all = []
-    for (const sid of salleIds) {
-      const rq = query(
-        collection(db(), 'reservation_salle'),
-        where('salle_id', '==', sid),
-        where('email', '==', normalizedEmail),
-        where('date', '>=', todayDateString)
-      )
-      const rs = await getDocs(rq)
-      for (const d of rs.docs) {
-        const plain = docToPlain(d.id, d.data())
-        const sRef = doc(db(), 'salle', plain.salle_id)
-        const sSnap = await getDoc(sRef)
-        const salle = sSnap.exists() ? docToPlain(sSnap.id, sSnap.data()) : null
-        all.push({
-          ...plain,
-          salle: salle ? { id: salle.id, nom: salle.nom } : null
-        })
+    try {
+      if (!communeId || !userEmail) {
+        return { data: [], error: null }
       }
+      const sallesQ = query(
+        collection(db(), 'salle'),
+        where('commune_id', '==', communeId)
+      )
+      const sallesSnap = await getDocs(sallesQ)
+      const salleIds = sallesSnap.docs.map((d) => d.id)
+      if (salleIds.length === 0) return { data: [], error: null }
+
+      const normalizedEmail = userEmail.trim().toLowerCase()
+      const todayDateString = getTodayDateString()
+      const all = []
+      for (const sid of salleIds) {
+        const rq = query(
+          collection(db(), 'reservation_salle'),
+          where('salle_id', '==', sid),
+          where('email', '==', normalizedEmail),
+          where('date', '>=', todayDateString)
+        )
+        const rs = await getDocs(rq)
+        for (const d of rs.docs) {
+          const plain = docToPlain(d.id, d.data())
+          const sRef = doc(db(), 'salle', plain.salle_id)
+          const sSnap = await getDoc(sRef)
+          const salle = sSnap.exists()
+            ? docToPlain(sSnap.id, sSnap.data())
+            : null
+          all.push({
+            ...plain,
+            salle: salle ? { id: salle.id, nom: salle.nom } : null
+          })
+        }
+      }
+      all.sort((a, b) =>
+        String(a.date || '').localeCompare(String(b.date || ''))
+      )
+      return { data: all, error: null }
+    } catch (error) {
+      return { data: [], error: normalizeServiceError(error) }
     }
-    all.sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')))
-    return { data: all, error: null }
   },
 
   async getAll() {
@@ -194,14 +203,20 @@ export const ReservationService = {
   },
 
   async delete(id, email) {
-    const dref = doc(db(), 'reservation_salle', id)
-    const cur = await getDoc(dref)
-    if (!cur.exists()) return { error: { message: 'Not found' } }
-    if (String(cur.data().email || '').toLowerCase() !== email.toLowerCase()) {
-      return { error: { message: 'Forbidden' } }
+    try {
+      const dref = doc(db(), 'reservation_salle', id)
+      const cur = await getDoc(dref)
+      if (!cur.exists()) return { data: null, error: { message: 'Not found' } }
+      if (
+        String(cur.data().email || '').toLowerCase() !== email.toLowerCase()
+      ) {
+        return { data: null, error: { message: 'Forbidden' } }
+      }
+      await deleteDoc(dref)
+      return { data: null, error: null }
+    } catch (error) {
+      return { data: null, error: normalizeServiceError(error) }
     }
-    await deleteDoc(dref)
-    return { error: null }
   },
 
   async getSalles(communeId = null) {

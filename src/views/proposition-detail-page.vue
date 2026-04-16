@@ -2,9 +2,11 @@
   <IonPage>
     <IonHeader>
       <IonToolbar color="primary">
-        <IonButtons slot="start">
-          <IonBackButton default-href="/tabs/propositions"></IonBackButton>
-        </IonButtons>
+        <template v-slot:start>
+          <IonButtons>
+            <IonBackButton default-href="/tabs/propositions"></IonBackButton>
+          </IonButtons>
+        </template>
         <IonTitle>Détail de la Proposition</IonTitle>
       </IonToolbar>
     </IonHeader>
@@ -52,7 +54,9 @@
               @click="handleVote"
               :disabled="voting"
             >
-              <IonIcon :icon="thumbsUpOutline" slot="start" />
+              <template v-slot:start>
+                <IonIcon :icon="thumbsUpOutline" />
+              </template>
               Soutenir cette proposition
             </IonButton>
             <div v-else class="voted-message">
@@ -94,11 +98,21 @@
                   <div class="comment-date">
                     {{ formatDateTime(comment.created_at) }}
                   </div>
-                  <p v-if="editingCommentId !== comment.id" class="comment-content">{{ comment.content }}</p>
+                  <p
+                    v-if="editingCommentId !== comment.id"
+                    class="comment-content"
+                  >
+                    {{ comment.content }}
+                  </p>
                   <div v-else class="edit-comment-box">
                     <IonTextarea v-model="editingCommentContent" rows="3" />
                     <div class="edit-actions">
-                      <IonButton size="small" fill="clear" @click="cancelEditComment">Annuler</IonButton>
+                      <IonButton
+                        size="small"
+                        fill="clear"
+                        @click="cancelEditComment"
+                        >Annuler</IonButton
+                      >
                       <IonButton
                         size="small"
                         :disabled="!editingCommentContent.trim() || commenting"
@@ -109,7 +123,9 @@
                     </div>
                   </div>
                   <IonButton
-                    v-if="canEditComment(comment) && editingCommentId !== comment.id"
+                    v-if="
+                      canEditComment(comment) && editingCommentId !== comment.id
+                    "
                     size="small"
                     fill="clear"
                     class="edit-comment-trigger"
@@ -182,6 +198,7 @@ import { PropositionService } from '@/services/proposition-service'
 import { getUserContact, saveUserContact } from '@/utils/storage'
 import { formatDate, formatDateTime } from '@/utils/date'
 import { trackEvent } from '@/services/posthog'
+import { getErrorMessage } from '@/utils/error-message'
 
 const route = useRoute()
 const proposition = ref(null)
@@ -225,7 +242,11 @@ const loadProposition = async () => {
 
 const canEditComment = (comment) => {
   const email = (comment?.user_email || '').trim().toLowerCase()
-  return !!currentUserEmail.value && email === currentUserEmail.value && comment?.author_type !== 'commune'
+  return (
+    !!currentUserEmail.value &&
+    email === currentUserEmail.value &&
+    comment?.author_type !== 'commune'
+  )
 }
 
 const startEditComment = (comment) => {
@@ -258,7 +279,7 @@ const saveEditedComment = async () => {
     await toast.present()
   } catch (error) {
     const toast = await toastController.create({
-      message: error?.message || 'Impossible de modifier ce commentaire.',
+      message: getErrorMessage(error, 'Impossible de modifier ce commentaire.'),
       duration: 2000,
       color: 'danger'
     })

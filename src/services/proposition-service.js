@@ -13,6 +13,7 @@ import {
 } from 'firebase/firestore'
 import { getFirestoreDb } from '@/services/firebase'
 import { docToPlain } from '@/utils/firestore'
+import { normalizeServiceError } from '@/utils/service-error'
 
 const db = () => getFirestoreDb()
 
@@ -48,8 +49,8 @@ export const PropositionService = {
         )
       }
       return { data: rows, error: null }
-    } catch (e) {
-      return { data: [], error: e }
+    } catch (error) {
+      return { data: [], error: normalizeServiceError(error) }
     }
   },
 
@@ -98,8 +99,8 @@ export const PropositionService = {
         },
         error: null
       }
-    } catch (e) {
-      return { data: null, error: e }
+    } catch (error) {
+      return { data: null, error: normalizeServiceError(error) }
     }
   },
 
@@ -142,8 +143,8 @@ export const PropositionService = {
           updated_at: serverTimestamp()
         })
       })
-    } catch (e) {
-      return { data: null, error: e }
+    } catch (error) {
+      return { data: null, error: normalizeServiceError(error) }
     }
     if (propositionMissing) {
       return { data: null, error: { message: 'Proposition introuvable' } }
@@ -194,8 +195,8 @@ export const PropositionService = {
           updated_at: serverTimestamp()
         })
       })
-    } catch (e) {
-      return { data: null, error: e }
+    } catch (error) {
+      return { data: null, error: normalizeServiceError(error) }
     }
     if (propositionMissing) {
       return { data: null, error: { message: 'Proposition introuvable' } }
@@ -226,8 +227,8 @@ export const PropositionService = {
         ).catch((err) => console.error('Notify error:', err))
       }
       return { data: row, error: null }
-    } catch (e) {
-      return { data: null, error: e }
+    } catch (error) {
+      return { data: null, error: normalizeServiceError(error) }
     }
   },
 
@@ -242,16 +243,19 @@ export const PropositionService = {
       const ownerEmail = (existing?.user_email || '').trim().toLowerCase()
       const emailNormalized = (userEmail || '').trim().toLowerCase()
       if (!emailNormalized || ownerEmail !== emailNormalized) {
-        return { data: null, error: { message: 'Vous ne pouvez modifier que vos commentaires' } }
+        return {
+          data: null,
+          error: { message: 'Vous ne pouvez modifier que vos commentaires' }
+        }
       }
       await updateDoc(ref, {
         content: content.trim(),
-        updated_at: serverTimestamp(),
+        updated_at: serverTimestamp()
       })
       const updated = await getDoc(ref)
       return { data: docToPlain(updated.id, updated.data()), error: null }
-    } catch (e) {
-      return { data: null, error: e }
+    } catch (error) {
+      return { data: null, error: normalizeServiceError(error) }
     }
   },
 

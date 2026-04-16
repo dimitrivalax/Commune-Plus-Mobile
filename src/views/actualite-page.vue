@@ -26,23 +26,18 @@
                 class="info-item"
                 @click="$router.push(`/actualite/${item.id}`)"
               >
-                <IonThumbnail
-                  v-if="item.image_url"
-                  slot="start"
-                  class="info-thumb-wrap"
-                >
-                  <img
-                    :src="item.image_url"
-                    :alt="item.title"
-                    class="info-thumb"
-                  />
-                </IonThumbnail>
-                <IonIcon
-                  v-else
-                  :icon="newspaper"
-                  slot="start"
-                  class="info-icon"
-                />
+                <template v-slot:start>
+                  <IonThumbnail v-if="item.image_url" class="info-thumb-wrap">
+                    <img
+                      :src="item.image_url"
+                      :alt="item.title"
+                      class="info-thumb"
+                    />
+                  </IonThumbnail>
+                </template>
+                <template v-slot:start>
+                  <IonIcon v-else :icon="newspaper" class="info-icon" />
+                </template>
                 <IonLabel>
                   <p class="info-item-title">{{ item.title }}</p>
                   <div class="item-meta">
@@ -110,7 +105,7 @@ import {
 import AppHeader from '@/components/app-header.vue'
 import { InformationService } from '@/services/actualite-service'
 import { formatDateGroupLabel } from '@/utils/date'
-import { getCityInfo, getCityIdFromDatabase } from '@/utils/storage'
+import { useCommuneId } from '@/composables/useCommuneId'
 
 const ionContentRef = ref(null)
 const infoItems = ref([])
@@ -119,12 +114,7 @@ const hasMoreNewer = ref(true)
 const loadingOlder = ref(false)
 const loadingNewer = ref(false)
 const initialLoading = ref(true)
-
-const getCommuneId = async () => {
-  const cityInfo = getCityInfo()
-  if (cityInfo?.id) return cityInfo.id
-  return await getCityIdFromDatabase()
-}
+const { getCommuneId } = useCommuneId()
 
 const getMinEventDate = () => {
   const dates = infoItems.value.map((i) => i.event_date).filter(Boolean)

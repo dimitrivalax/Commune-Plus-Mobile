@@ -8,6 +8,7 @@ import {
 } from 'firebase/firestore'
 import { getFirestoreDb } from '@/services/firebase'
 import { docToPlain } from '@/utils/firestore'
+import { normalizeServiceError } from '@/utils/service-error'
 
 const db = () => getFirestoreDb()
 
@@ -52,8 +53,8 @@ export const InformationService = {
       const rows = await fetchForCommune(communeId)
       rows.sort((a, b) => eventDateString(b).localeCompare(eventDateString(a)))
       return { data: rows, error: null }
-    } catch (e) {
-      return { data: [], error: e }
+    } catch (error) {
+      return { data: [], error: normalizeServiceError(error) }
     }
   },
 
@@ -74,10 +75,10 @@ export const InformationService = {
         hasMoreOlder: true,
         hasMoreNewer: list.length === INITIAL_FUTURE
       }
-    } catch (e) {
+    } catch (error) {
       return {
         data: [],
-        error: e,
+        error: normalizeServiceError(error),
         hasMoreOlder: false,
         hasMoreNewer: false
       }
@@ -100,8 +101,8 @@ export const InformationService = {
         error: null,
         hasMore: list.length === limit
       }
-    } catch (e) {
-      return { data: [], error: e, hasMore: false }
+    } catch (error) {
+      return { data: [], error: normalizeServiceError(error), hasMore: false }
     }
   },
 
@@ -116,8 +117,8 @@ export const InformationService = {
         .sort((a, b) => eventDateString(a).localeCompare(eventDateString(b)))
       const list = newer.slice(0, limit)
       return { data: list, error: null, hasMore: list.length === limit }
-    } catch (e) {
-      return { data: [], error: e, hasMore: false }
+    } catch (error) {
+      return { data: [], error: normalizeServiceError(error), hasMore: false }
     }
   },
 
@@ -139,8 +140,8 @@ export const InformationService = {
         return { data: null, error: { message: 'Forbidden' } }
       }
       return { data: row, error: null }
-    } catch (e) {
-      return { data: null, error: e }
+    } catch (error) {
+      return { data: null, error: normalizeServiceError(error) }
     }
   }
 }
