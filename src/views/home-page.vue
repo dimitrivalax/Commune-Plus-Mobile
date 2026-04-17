@@ -51,10 +51,11 @@ import {
   onIonViewWillEnter
 } from '@ionic/vue'
 import { informationCircle } from 'ionicons/icons'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import AppHeader from '@/components/app-header.vue'
 import { InformationCommuneService } from '@/services/information-commune-service'
 import { useCommuneId } from '@/composables/useCommuneId'
+import { communeFeaturesVersion } from '@/utils/commune-features-version'
 import { getErrorMessage } from '@/utils/error-message'
 
 const items = ref([])
@@ -63,6 +64,8 @@ const errorMessage = ref('')
 const { getCommuneId } = useCommuneId()
 
 const loadHomeData = async () => {
+  if (isLoading.value) return
+
   isLoading.value = true
   errorMessage.value = ''
   const communeId = await getCommuneId()
@@ -94,6 +97,13 @@ const loadHomeData = async () => {
 onIonViewWillEnter(async () => {
   await loadHomeData()
 })
+
+watch(
+  () => communeFeaturesVersion.value,
+  async () => {
+    await loadHomeData()
+  }
+)
 </script>
 
 <style lang="scss" scoped>

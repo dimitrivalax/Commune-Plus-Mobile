@@ -6,7 +6,7 @@
       </ion-toolbar>
     </ion-header>
 
-    <ion-content class="ion-padding">
+    <ion-content class="ion-padding notification-contact-content" :fullscreen="true">
       <div class="modal-content">
         <div class="modal-header">
           <ion-icon :icon="notificationsOutline" class="header-icon"></ion-icon>
@@ -241,6 +241,10 @@ ion-item {
   --padding-end: 16px;
   --padding-top: 8px;
   --padding-bottom: calc(8px + env(safe-area-inset-bottom));
+}
+
+.notification-contact-content {
+  --padding-bottom: calc(132px + env(safe-area-inset-bottom));
 }
 
 .footer-save-button {
