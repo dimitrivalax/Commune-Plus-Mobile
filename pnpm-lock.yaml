@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@capacitor-firebase/crashlytics':
+        specifier: ^8.2.0
+        version: 8.2.0(@capacitor/core@8.1.0)(firebase@12.10.0)
       '@capacitor-firebase/messaging':
         specifier: ^8.1.0
         version: 8.1.0(@capacitor/core@8.1.0)(firebase@12.10.0)
@@ -140,6 +143,15 @@ packages:
 
   '@bufbuild/protobuf@2.11.0':
     resolution: {integrity: sha512-sBXGT13cpmPR5BMgHE6UEEfEaShh5Ror6rfN3yEK5si7QVrtZg8LEPQb0VVhiLRUslD2yLnXtnRzG035J/mZXQ==}
+
+  '@capacitor-firebase/crashlytics@8.2.0':
+    resolution: {integrity: sha512-3unj3kfKgmQMMXpenv3vYF4GwPqJn0vABFwJVMet32vZl2Dn+7z5vf41G+kJLmV7vDLC40R7mMntpQGVZMQYaw==}
+    peerDependencies:
+      '@capacitor/core': '>=8.0.0'
+      firebase: '*'
+    peerDependenciesMeta:
+      firebase:
+        optional: true
 
   '@capacitor-firebase/messaging@8.1.0':
     resolution: {integrity: sha512-SjF14b29/fXlemfRp8tusmc9NGbJjKk8mJ0/mqypoV0Ib+4a5SqJbYK+56fTOGo6fG97r/rIadW4LgXUmyMHBg==}
@@ -3686,6 +3698,12 @@ snapshots:
       '@babel/helper-validator-identifier': 7.28.5
 
   '@bufbuild/protobuf@2.11.0': {}
+
+  '@capacitor-firebase/crashlytics@8.2.0(@capacitor/core@8.1.0)(firebase@12.10.0)':
+    dependencies:
+      '@capacitor/core': 8.1.0
+    optionalDependencies:
+      firebase: 12.10.0
 
   '@capacitor-firebase/messaging@8.1.0(@capacitor/core@8.1.0)(firebase@12.10.0)':
     dependencies:

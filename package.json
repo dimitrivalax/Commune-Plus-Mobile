@@ -1,6 +1,6 @@
 {
   "name": "Commune Plus",
-  "version": "1.2.0",
+  "version": "1.2.2",
   "description": "Application mobile Commune Plus - Gestion des signalements, réservations et informations municipales",
   "author": "Dimitri Valax",
   "private": true,
@@ -19,6 +19,7 @@
     "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
+    "@capacitor-firebase/crashlytics": "^8.2.0",
     "@capacitor-firebase/messaging": "^8.1.0",
     "@capacitor/android": "^8.0.0",
     "@capacitor/app": "^8.0.0",

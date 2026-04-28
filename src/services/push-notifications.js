@@ -15,6 +15,7 @@ import {
 import { getFirestoreDb } from './firebase'
 import { getCityInfo, getUserContact } from '@/utils/storage'
 import { trackEvent } from './posthog'
+import { logBreadcrumb, logNonFatalError } from './crashlytics'
 
 /**
  * Service de gestion des push notifications
@@ -39,6 +40,7 @@ export async function initializePushNotifications() {
   }
 
   try {
+    logBreadcrumb('push:init:start')
     // Fonction helper pour naviguer vers une information
     const navigateToInfo = async (infoId) => {
       if (!infoId) {
@@ -58,6 +60,7 @@ export async function initializePushNotifications() {
         router.push(`/actualite/${infoId}`)
       } catch (error) {
         console.error('Error navigating to info:', error)
+        logNonFatalError(error, { source: 'push.navigateToInfo' })
       }
     }
 
@@ -78,6 +81,7 @@ export async function initializePushNotifications() {
         router.push(`/signalement/${signalementId}`)
       } catch (error) {
         console.error('Error navigating to signalement:', error)
+        logNonFatalError(error, { source: 'push.navigateToSignalement' })
       }
     }
 
@@ -98,6 +102,7 @@ export async function initializePushNotifications() {
         router.push(`/proposition/${propositionId}`)
       } catch (error) {
         console.error('Error navigating to proposition:', error)
+        logNonFatalError(error, { source: 'push.navigateToProposition' })
       }
     }
 
@@ -107,6 +112,7 @@ export async function initializePushNotifications() {
     // Écouter l'événement d'enregistrement
     PushNotifications.addListener('registration', async (token) => {
       console.log('Push registration success, CP token: ' + token.value)
+      logBreadcrumb('push:registration:success')
 
       let finalToken = token.value
 
@@ -123,6 +129,7 @@ export async function initializePushNotifications() {
           }
         } catch (error) {
           console.error('Error getting FCM token on iOS:', error)
+          logNonFatalError(error, { source: 'push.getFcmToken.ios' })
           // On garde le token APNs par défaut, mais ça échouera probablement côté serveur
         }
       }
@@ -133,6 +140,7 @@ export async function initializePushNotifications() {
     // Écouter les erreurs d'enregistrement
     PushNotifications.addListener('registrationError', (error) => {
       console.error('Error on registration: ' + JSON.stringify(error))
+      logNonFatalError(error, { source: 'push.registrationError' })
     })
 
     // Écouter les notifications reçues quand l'app est au premier plan
@@ -152,8 +160,6 @@ export async function initializePushNotifications() {
 
         // Gérer les différents types de notifications
         const notificationType = data?.type || data?.notification_type
-        const communeId = data?.commune_id || getCityInfo()?.id || undefined
-
         if (notificationType === 'signalement') {
           // Notification pour un signalement
           const signalementId = data?.signalement_id || data?.signalementId
@@ -335,6 +341,7 @@ export async function initializePushNotifications() {
     console.log('Registering for push notifications...')
     await PushNotifications.register()
     console.log('Push notifications registered successfully')
+    logBreadcrumb('push:register:done')
 
     isInitialized = true
 
@@ -394,9 +401,11 @@ export async function initializePushNotifications() {
         'No pending notifications found (normal if app was not opened from notification):',
         error.message
       )
+      logNonFatalError(error, { source: 'push.pendingNotifications' })
     }
   } catch (error) {
     console.error('Error initializing push notifications:', error)
+    logNonFatalError(error, { source: 'push.initialize' })
   }
 }
 
@@ -501,6 +510,7 @@ async function savePushToken(token) {
     }
   } catch (error) {
     console.error('Error saving push token:', error)
+    logNonFatalError(error, { source: 'push.saveToken' })
     if (error?.stack) {
       console.error('Error stack:', error.stack)
     }
@@ -530,6 +540,7 @@ export async function disablePushToken() {
     }
   } catch (error) {
     console.error('Error disabling push token:', error)
+    logNonFatalError(error, { source: 'push.disableToken' })
   }
 }
 
@@ -567,6 +578,7 @@ export async function updatePushTokenCommune(communeId) {
     )
   } catch (error) {
     console.error('Error updating push token commune:', error)
+    logNonFatalError(error, { source: 'push.updateTokenCommune' })
   }
 }
 
@@ -605,6 +617,7 @@ export async function updatePushTokenEmail(email) {
     }
   } catch (error) {
     console.error('Error updating push token email:', error)
+    logNonFatalError(error, { source: 'push.updateTokenEmail' })
   }
 }
 

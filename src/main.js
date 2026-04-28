@@ -8,6 +8,12 @@ import {
   updateUserAndCommuneContext
 } from './services/posthog'
 import { initializePushNotifications } from './services/push-notifications'
+import {
+  initCrashlytics,
+  logBreadcrumb,
+  logNonFatalError,
+  setCrashUserContext
+} from './services/crashlytics'
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/vue/css/core.css'
@@ -36,7 +42,7 @@ import './theme/custom.css'
 // Initialize PostHog
 const posthogApiKey = import.meta.env.VITE_POSTHOG_API_KEY
 const posthogHost =
-  import.meta.env.VITE_POSTHOG_HOST || 'https://eu.i.posthog.com'
+  import.meta.env.VITE_POSTHOG_HOST || 'https://t.commune-plus.fr'
 
 if (posthogApiKey) {
   initPostHog(posthogApiKey, posthogHost, {
@@ -49,6 +55,9 @@ if (posthogApiKey) {
   })
   updateUserAndCommuneContext()
 }
+
+initCrashlytics()
+setCrashUserContext()
 
 // Track page views
 router.afterEach((to, from) => {
@@ -66,7 +75,31 @@ router.afterEach((to, from) => {
 
 const app = createApp(App).use(IonicVue).use(router)
 
+app.config.errorHandler = (error, instance, info) => {
+  logNonFatalError(error, {
+    source: 'vue.errorHandler',
+    info,
+    component: instance?.$options?.name || 'anonymous-component'
+  })
+}
+
+window.addEventListener('error', (event) => {
+  logNonFatalError(event.error || event.message, {
+    source: 'window.error',
+    filename: event.filename,
+    lineno: event.lineno,
+    colno: event.colno
+  })
+})
+
+window.addEventListener('unhandledrejection', (event) => {
+  logNonFatalError(event.reason, {
+    source: 'window.unhandledrejection'
+  })
+})
+
 router.isReady().then(async () => {
+  logBreadcrumb('router-ready')
   // Track initial page view when router is ready
   if (posthogApiKey) {
     const route = router.currentRoute.value
@@ -86,7 +119,6 @@ router.isReady().then(async () => {
   // Vérifier si l'app a été ouverte depuis une notification
   // Cela doit être fait après l'initialisation des notifications
   try {
-    const { App } = await import('@capacitor/app')
     const { PushNotifications } = await import('@capacitor/push-notifications')
 
     // Vérifier les notifications en attente (quand l'app était fermée)
@@ -99,6 +131,7 @@ router.isReady().then(async () => {
     // mais on peut aussi vérifier manuellement
   } catch (error) {
     console.log('Could not check pending notifications:', error)
+    logNonFatalError(error, { source: 'app.pendingNotificationsCheck' })
   }
 
   app.mount('#app')

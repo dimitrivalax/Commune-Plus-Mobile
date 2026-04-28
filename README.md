@@ -141,6 +141,42 @@ npx cap open ios
 npx cap open android
 ```
 
+## Crash & Error Reporting
+
+L'application combine :
+
+- **PostHog** pour l'analytics produit
+- **Firebase Crashlytics** pour les crashs natifs iOS/Android et les erreurs JS non fatales
+
+### Pré-requis
+
+- Fichiers Firebase natifs présents :
+  - `android/app/google-services.json`
+  - `ios/App/App/GoogleService-Info.plist`
+- Plugin installé : `@capacitor-firebase/crashlytics`
+- Synchronisation des plateformes après install :
+
+```bash
+npx cap sync
+```
+
+### Validation rapide
+
+1. Lancer l'app sur un device/simulateur natif.
+2. Vérifier dans la console Firebase Crashlytics qu'aucune erreur d'initialisation n'apparaît.
+3. Générer une erreur JS non fatale (ex: throw dans un flux contrôlé) et vérifier la remontée.
+4. Générer un crash natif de test depuis l'app (uniquement en environnement de validation), puis relancer l'app pour forcer l'envoi du rapport.
+
+### Runbook d'exploitation
+
+- **Triage P0** : crash bloquant sur écran d'entrée ou action principale.
+- **Triage P1** : crash/erreur non fatale récurrente sur un parcours métier.
+- **Filtres utiles** : `platform`, `commune_id`, `app_context=mobile`.
+- **SLA recommandé** :
+  - P0 : analyse < 4h ouvrées
+  - P1 : analyse < 1 jour ouvré
+- **RGPD** : ne jamais logger email, token, mot de passe ou secrets applicatifs.
+
 ## Structure du projet
 
 ```

@@ -1,5 +1,20 @@
+import { Capacitor } from '@capacitor/core'
 import posthog from 'posthog-js'
 import { getCityInfo } from '@/utils/storage'
+
+const EVENT_PREFIX = 'Commune-Plus-Mobile: '
+
+/** @type {import('posthog-js').BeforeSendFn} */
+const beforeSend = (event) => {
+  if (!event) {
+    return event
+  }
+  const name = event.event
+  if (typeof name !== 'string' || name.startsWith(EVENT_PREFIX)) {
+    return event
+  }
+  return { ...event, event: `${EVENT_PREFIX}${name}` }
+}
 
 let posthogInstance = null
 const ANALYTICS_DISTINCT_ID_KEY = 'commune-plus-analytics-distinct-id'
@@ -18,6 +33,10 @@ function getOrCreateAnalyticsDistinctId() {
     localStorage.setItem(ANALYTICS_DISTINCT_ID_KEY, distinctId)
   }
   return distinctId
+}
+
+export function getAnalyticsDistinctId() {
+  return getOrCreateAnalyticsDistinctId()
 }
 
 /**
@@ -83,18 +102,29 @@ export function initPostHog(apiKey, host, options = {}) {
     return null
   }
 
+  const { loaded: userLoaded, ...restOptions } = options
+
   try {
     posthog.init(apiKey, {
       api_host: host,
       autocapture: true,
       capture_pageview: false, // We'll handle pageviews manually via router
       capture_pageleave: true,
-      loaded: () => {
+      before_send: beforeSend,
+      loaded: (ph) => {
+        // Super-propriétés : même projet PostHog que le web → filtre par app + OS natif (ios | android | web)
+        ph.register({
+          app: 'Commune-Plus-Mobile',
+          mobile_os: Capacitor.getPlatform()
+        })
         if (process.env.NODE_ENV === 'development') {
           console.log('PostHog loaded successfully')
         }
+        if (typeof userLoaded === 'function') {
+          userLoaded(ph)
+        }
       },
-      ...options
+      ...restOptions
     })
 
     posthogInstance = posthog

@@ -88,7 +88,6 @@ import {
   IonItem,
   IonLabel,
   IonThumbnail,
-  IonButton,
   IonRefresher,
   IonRefresherContent,
   IonSelect,

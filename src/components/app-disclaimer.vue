@@ -1,6 +1,6 @@
 <template>
   <div class="disclaimer-container">
-    <div class="disclaimer-title"></div>
+    <div class="disclaimer-title">Informations légales</div>
     <p class="disclaimer-link">
       Pour toutes questions contactez-nous par email :
       <a href="mailto:contact@commune-plus.fr">contact@commune-plus.fr</a>
@@ -12,6 +12,26 @@
         target="_blank"
         rel="noopener noreferrer"
         >Conditions Générales d'Utilisation (CGU)</a
+      >
+    </p>
+    <p class="disclaimer-text">
+      Commune Plus n'est pas une application gouvernementale officielle. Certaines
+      informations publiques peuvent provenir de sources institutionnelles.
+    </p>
+    <p class="disclaimer-link">
+      Sources officielles :
+      <a
+        href="https://api-adresse.data.gouv.fr"
+        target="_blank"
+        rel="noopener noreferrer"
+        >API Adresse (Etat francais)</a
+      >
+      -
+      <a
+        href="https://www.data.gouv.fr"
+        target="_blank"
+        rel="noopener noreferrer"
+        >data.gouv.fr</a
       >
     </p>
   </div>
