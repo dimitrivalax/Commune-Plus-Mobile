@@ -1,18 +1,22 @@
 <template>
   <IonHeader>
     <IonToolbar>
-      <IonButtons slot="start">
-        <IonMenuButton menu="main-menu" auto-hide="false" />
-      </IonButtons>
+      <template v-slot:start>
+        <IonButtons>
+          <IonMenuButton menu="main-menu" auto-hide="false" />
+        </IonButtons>
+      </template>
       <IonRow>
         <IonTitle v-if="!logo">{{ title }}</IonTitle>
         <CityHeader v-else></CityHeader>
       </IonRow>
-      <IonButtons slot="end">
-        <IonButton @click="$router.push('/settings')" color="light">
-          <IonIcon :icon="settings" />
-        </IonButton>
-      </IonButtons>
+      <template v-slot:end>
+        <IonButtons>
+          <IonButton @click="$router.push('/settings')" color="light">
+            <IonIcon :icon="settings" />
+          </IonButton>
+        </IonButtons>
+      </template>
     </IonToolbar>
   </IonHeader>
 </template>

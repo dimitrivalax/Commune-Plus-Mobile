@@ -25,7 +25,9 @@ export class SignalementsPage {
       .poll(async () => {
         const count = await this.listItems.count()
         if (count > 0) return 'list'
-        const hasEmptyTitle = await this.emptyTitle.isVisible().catch(() => false)
+        const hasEmptyTitle = await this.emptyTitle
+          .isVisible()
+          .catch(() => false)
         return hasEmptyTitle ? 'empty' : 'loading'
       })
       .toMatch(/^(list|empty)$/)

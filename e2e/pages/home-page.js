@@ -6,7 +6,9 @@ export class HomePage {
    */
   constructor(page) {
     this.page = page
-    this.emptyTitle = page.getByRole('heading', { name: 'Aucune information communale' })
+    this.emptyTitle = page.getByRole('heading', {
+      name: 'Aucune information communale'
+    })
     this.errorTitle = page.getByRole('heading', {
       name: 'Impossible de charger les informations'
     })

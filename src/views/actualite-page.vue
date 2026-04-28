@@ -2,11 +2,13 @@
   <IonPage>
     <AppHeader title="Actualités"></AppHeader>
     <IonContent ref="ionContentRef" class="page-content">
-      <div class="ion-padding">
-        <IonRefresher slot="fixed" @ionRefresh="onRefresh($event)">
+      <template #fixed>
+        <IonRefresher @ionRefresh="onRefresh($event)">
           <IonRefresherContent></IonRefresherContent>
         </IonRefresher>
+      </template>
 
+      <div class="ion-padding">
         <template v-if="groupedByDate.length > 0">
           <div
             v-for="group in groupedByDate"
@@ -94,12 +96,7 @@ import {
   IonSpinner,
   onIonViewWillEnter
 } from '@ionic/vue'
-import {
-  newspaper,
-  newspaperOutline,
-  chevronForward,
-  calendarOutline
-} from 'ionicons/icons'
+import { newspaper, newspaperOutline, calendarOutline } from 'ionicons/icons'
 import AppHeader from '@/components/app-header.vue'
 import { InformationService } from '@/services/actualite-service'
 import { formatDateGroupLabel } from '@/utils/date'
@@ -107,17 +104,10 @@ import { useCommuneId } from '@/composables/useCommuneId'
 
 const ionContentRef = ref(null)
 const infoItems = ref([])
-const hasMoreOlder = ref(true)
 const hasMoreNewer = ref(true)
-const loadingOlder = ref(false)
 const loadingNewer = ref(false)
 const initialLoading = ref(true)
 const { getCommuneId } = useCommuneId()
-
-const getMinEventDate = () => {
-  const dates = infoItems.value.map((i) => i.event_date).filter(Boolean)
-  return dates.length ? dates.sort()[0] : null
-}
 
 const getMaxEventDate = () => {
   const dates = infoItems.value.map((i) => i.event_date).filter(Boolean)
@@ -153,46 +143,11 @@ const loadInitial = async () => {
   const {
     data,
     error,
-    hasMoreOlder: moreOlder,
     hasMoreNewer: moreNewer
   } = await InformationService.getInitial(communeId, today)
   if (error) throw error
   infoItems.value = data || []
-  hasMoreOlder.value = moreOlder
   hasMoreNewer.value = moreNewer
-}
-
-const loadOlder = async (event) => {
-  console.log('loadOlder', loadingOlder.value, hasMoreOlder.value)
-  if (loadingOlder.value || !hasMoreOlder.value) {
-    event?.target?.complete()
-    return
-  }
-  const minDate = getMinEventDate()
-  if (!minDate) {
-    hasMoreOlder.value = false
-    event?.target?.complete()
-    return
-  }
-  loadingOlder.value = true
-  try {
-    const communeId = await getCommuneId()
-    const { data, error, hasMore } = await InformationService.getOlderThan(
-      communeId,
-      minDate
-    )
-    if (error) throw error
-    if (data?.length) {
-      infoItems.value = [...(data || []), ...infoItems.value]
-    }
-    hasMoreOlder.value = hasMore
-  } catch (err) {
-    console.error('Error loading older info:', err)
-    hasMoreOlder.value = false
-  } finally {
-    loadingOlder.value = false
-    event?.target?.complete()
-  }
 }
 
 const loadNewer = async (event) => {
@@ -228,7 +183,6 @@ const loadNewer = async (event) => {
 }
 
 const onRefresh = async (event) => {
-  hasMoreOlder.value = true
   hasMoreNewer.value = true
   initialLoading.value = false
   try {

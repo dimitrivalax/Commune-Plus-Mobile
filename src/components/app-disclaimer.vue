@@ -15,8 +15,9 @@
       >
     </p>
     <p class="disclaimer-text">
-      Commune Plus n'est pas une application gouvernementale officielle. Certaines
-      informations publiques peuvent provenir de sources institutionnelles.
+      Commune Plus n'est pas une application gouvernementale officielle.
+      Certaines informations publiques peuvent provenir de sources
+      institutionnelles.
     </p>
     <p class="disclaimer-link">
       Sources officielles :
@@ -36,11 +37,6 @@
     </p>
   </div>
 </template>
-
-<script setup>
-import { IonIcon } from '@ionic/vue'
-import { informationCircleOutline } from 'ionicons/icons'
-</script>
 
 <style lang="scss" scoped>
 .disclaimer-container {

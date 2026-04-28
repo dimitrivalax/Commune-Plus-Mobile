@@ -6,9 +6,13 @@ export class NewSignalementPage {
    */
   constructor(page) {
     this.page = page
-    this.pageTitle = page.locator('ion-title', { hasText: 'Nouveau signalement' })
+    this.pageTitle = page.locator('ion-title', {
+      hasText: 'Nouveau signalement'
+    })
     this.descriptionLabel = page.getByText('Description du signalement')
-    this.submitButton = page.getByRole('button', { name: 'Envoyer le signalement' })
+    this.submitButton = page.getByRole('button', {
+      name: 'Envoyer le signalement'
+    })
   }
 
   async goto() {
@@ -31,7 +35,9 @@ export class NewSignalementPage {
   }
 
   async expectSuccessAndRedirect() {
-    await expect(this.page.getByText('Signalement envoyé avec succès')).toBeVisible()
+    await expect(
+      this.page.getByText('Signalement envoyé avec succès')
+    ).toBeVisible()
     await expect(this.page).toHaveURL(/\/tabs\/signalements$/)
   }
 }

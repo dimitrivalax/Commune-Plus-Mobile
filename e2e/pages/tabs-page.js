@@ -1,5 +1,8 @@
 import { expect } from '@playwright/test'
-import { dismissOnboardingIfPresent, openTabsHome } from '../fixtures/navigation'
+import {
+  dismissOnboardingIfPresent,
+  openTabsHome
+} from '../fixtures/navigation'
 
 export class TabsPage {
   /**
@@ -37,8 +40,12 @@ export class TabsPage {
 
   async expectMainTabsVisible() {
     await expect(this.page.getByRole('tab', { name: 'Accueil' })).toBeVisible()
-    await expect(this.page.getByRole('tab', { name: 'Actualités' })).toBeVisible()
-    await expect(this.page.getByRole('tab', { name: 'Signalements' })).toBeVisible()
+    await expect(
+      this.page.getByRole('tab', { name: 'Actualités' })
+    ).toBeVisible()
+    await expect(
+      this.page.getByRole('tab', { name: 'Signalements' })
+    ).toBeVisible()
     await expect(this.page.getByRole('tab', { name: 'Menu' })).toBeVisible()
   }
 

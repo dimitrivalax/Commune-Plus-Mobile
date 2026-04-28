@@ -6,7 +6,10 @@
       </ion-toolbar>
     </ion-header>
 
-    <ion-content class="ion-padding notification-contact-content" :fullscreen="true">
+    <ion-content
+      class="ion-padding notification-contact-content"
+      :fullscreen="true"
+    >
       <div class="modal-content">
         <div class="modal-header">
           <ion-icon :icon="notificationsOutline" class="header-icon"></ion-icon>

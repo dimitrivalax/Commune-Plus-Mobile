@@ -2,21 +2,25 @@
   <ion-page>
     <ion-header>
       <ion-toolbar color="primary">
-        <ion-buttons slot="start">
-          <ion-back-button
-            default-href="/tabs/reservations"
-          ></ion-back-button>
-        </ion-buttons>
+        <template v-slot:start>
+          <ion-buttons>
+            <ion-back-button
+              default-href="/tabs/reservations"
+            ></ion-back-button>
+          </ion-buttons>
+        </template>
         <ion-title>Détail de la réservation</ion-title>
-        <ion-buttons slot="end">
-          <ion-button
-            @click="toggleEditMode"
-            v-if="!isDeleting && isOwner"
-            color="light"
-          >
-            <ion-icon :icon="isEditing ? close : create" />
-          </ion-button>
-        </ion-buttons>
+        <template v-slot:end>
+          <ion-buttons>
+            <ion-button
+              @click="toggleEditMode"
+              v-if="!isDeleting && isOwner"
+              color="light"
+            >
+              <ion-icon :icon="isEditing ? close : create" />
+            </ion-button>
+          </ion-buttons>
+        </template>
       </ion-toolbar>
     </ion-header>
     <ion-content class="page-content">
@@ -338,15 +342,14 @@ import {
   checkmark,
   calendar,
   person,
-  time,
   alertCircle
 } from 'ionicons/icons'
 import { ReservationService } from '@/services/reservation-service'
-import { formatDateTime, formatDateForDB, formatTime } from '@/utils/date'
+import { formatDateForDB, formatTime } from '@/utils/date'
 import { getUserContact, getCityInfo } from '@/utils/storage'
 
 const route = useRoute()
-const router = useRouter() // eslint-disable-line no-unused-vars
+const router = useRouter()
 
 const reservation = ref(null)
 const loading = ref(true)

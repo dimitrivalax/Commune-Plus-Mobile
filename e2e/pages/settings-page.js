@@ -8,7 +8,9 @@ export class SettingsPage {
     this.page = page
     this.pageTitle = page.locator('ion-title', { hasText: 'Paramètres' })
     this.userSection = page.getByRole('heading', { name: 'Mes coordonnées' })
-    this.citySection = page.getByRole('heading', { name: 'Informations de la commune' })
+    this.citySection = page.getByRole('heading', {
+      name: 'Informations de la commune'
+    })
   }
 
   async goto() {

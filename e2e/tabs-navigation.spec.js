@@ -9,7 +9,10 @@ test.describe('Tabs navigation smoke', () => {
     await tabsPage.expectMainTabsVisible()
   })
 
-  test('navigates to actualites from the tab bar', async ({ page, tabsPage }) => {
+  test('navigates to actualites from the tab bar', async ({
+    page,
+    tabsPage
+  }) => {
     await tabsPage.goToActualitesWithTab()
     await expect(page).toHaveURL(/\/tabs\/actualite$/)
   })

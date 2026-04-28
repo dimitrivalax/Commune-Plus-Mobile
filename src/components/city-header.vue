@@ -17,7 +17,7 @@ import { IonRow } from '@ionic/vue'
 
 const cityInfo = getCityInfo()
 
-const props = defineProps({
+defineProps({
   subtitle: {
     type: String,
     default: ''

@@ -2,19 +2,18 @@
   <IonPage>
     <AppHeader title="Signalements"></AppHeader>
     <IonContent class="page-content">
-      <IonFab vertical="bottom" horizontal="end" slot="fixed">
-        <IonFabButton @click="$router.push('/signalement/new')">
-          <IonIcon :icon="add" />
-        </IonFabButton>
-      </IonFab>
+      <template #fixed>
+        <IonFab vertical="bottom" horizontal="end">
+          <IonFabButton @click="$router.push('/signalement/new')">
+            <IonIcon :icon="add" />
+          </IonFabButton>
+        </IonFab>
 
-      <IonRefresher
-        slot="fixed"
-        @ionRefresh="loadSignalements($event)"
-        class=""
-      >
-        <IonRefresherContent></IonRefresherContent>
-      </IonRefresher>
+        <IonRefresher @ionRefresh="loadSignalements($event)" class="">
+          <IonRefresherContent></IonRefresherContent>
+        </IonRefresher>
+      </template>
+
       <div class="ion-padding">
         <!-- Filtre par statut -->
         <IonItem class="filter-item" lines="none">

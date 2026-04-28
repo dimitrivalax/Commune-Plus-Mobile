@@ -10,7 +10,10 @@ export async function installSignalementSubmitMocks(page) {
       initialPhotoDataUrl:
         'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9oNn6sUAAAAASUVORK5CYII=',
       uploadImageToCloudinary: async () => 'https://example.com/mock-photo.jpg',
-      createSignalement: async () => ({ data: [{ id: 'sig-e2e-001' }], error: null }),
+      createSignalement: async () => ({
+        data: [{ id: 'sig-e2e-001' }],
+        error: null
+      }),
       updatePushTokenEmail: async () => {},
       sendSignalementEmail: async () => {},
       getOrCreateUserId: () => 'user-e2e-001'

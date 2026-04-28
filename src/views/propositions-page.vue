@@ -79,7 +79,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import {
   IonPage,
   IonContent,
@@ -153,8 +153,6 @@ const truncateText = (text, length) => {
     ? plainText.substring(0, length) + '...'
     : plainText
 }
-
-// onMounted removed in favor of onIonViewWillEnter for consistent refreshing
 </script>
 
 <style lang="scss" scoped>

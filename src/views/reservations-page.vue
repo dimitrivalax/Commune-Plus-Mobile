@@ -2,19 +2,18 @@
   <IonPage>
     <AppHeader title="Réservations"></AppHeader>
     <IonContent class="page-content">
-      <template v-slot:fixed>
+      <template #fixed>
         <IonFab vertical="bottom" horizontal="end">
           <IonFabButton @click="$router.push('/reservation/new')">
             <IonIcon :icon="add" />
           </IonFabButton>
         </IonFab>
+        <IonRefresher @ionRefresh="loadReservations($event)">
+          <IonRefresherContent></IonRefresherContent>
+        </IonRefresher>
       </template>
 
       <div class="ion-padding">
-        <IonRefresher slot="fixed" @ionRefresh="loadReservations($event)">
-          <IonRefresherContent></IonRefresherContent>
-        </IonRefresher>
-
         <IonList v-if="reservations.length > 0" class="reservations-list">
           <IonItem
             lines="none"

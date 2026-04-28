@@ -2,21 +2,25 @@
   <ion-page>
     <ion-header>
       <ion-toolbar color="primary">
-        <ion-buttons slot="start">
-          <ion-back-button
-            default-href="/tabs/signalements"
-          ></ion-back-button>
-        </ion-buttons>
+        <template v-slot:start>
+          <ion-buttons>
+            <ion-back-button
+              default-href="/tabs/signalements"
+            ></ion-back-button>
+          </ion-buttons>
+        </template>
         <ion-title>Détail du signalement</ion-title>
-        <ion-buttons slot="end">
-          <ion-button
-            @click="toggleEditMode"
-            v-if="!isArchiving"
-            color="light"
-          >
-            <ion-icon :icon="isEditing ? close : create" />
-          </ion-button>
-        </ion-buttons>
+        <template v-slot:end>
+          <ion-buttons>
+            <ion-button
+              @click="toggleEditMode"
+              v-if="!isArchiving"
+              color="light"
+            >
+              <ion-icon :icon="isEditing ? close : create" />
+            </ion-button>
+          </ion-buttons>
+        </template>
       </ion-toolbar>
     </ion-header>
     <ion-content class="detail-content">
