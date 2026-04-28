@@ -2,6 +2,10 @@ import { test } from './fixtures/test-fixtures'
 import { installActualiteMocks } from './fixtures/mocks'
 
 test.describe('Actualites smoke', () => {
+  test.beforeEach(async ({ page }) => {
+    await installActualiteMocks(page)
+  })
+
   test('loads actualites view and shows list or empty state', async ({
     actualitePage,
     e2eNavigation
@@ -22,11 +26,9 @@ test.describe('Actualites smoke', () => {
   })
 
   test('shows back button on actualite detail when an item exists', async ({
-    page,
     actualitePage,
     e2eNavigation
   }) => {
-    await installActualiteMocks(page)
     await actualitePage.goto()
     await e2eNavigation.dismissOnboardingIfPresent()
     await actualitePage.expectListOrEmptyState()

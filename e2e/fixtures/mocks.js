@@ -57,3 +57,20 @@ export async function installActualiteMocks(page) {
     }
   })
 }
+
+/**
+ * Injects deterministic home data for smoke tests.
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+export async function installHomeMocks(page) {
+  await page.addInitScript(() => {
+    window.__CP_E2E_MOCKS = {
+      ...(window.__CP_E2E_MOCKS || {}),
+      informationCommuneGetAll: async () => ({
+        data: [],
+        error: null
+      })
+    }
+  })
+}

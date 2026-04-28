@@ -5,6 +5,11 @@ import { normalizeServiceError } from '@/utils/service-error'
 
 const db = () => getFirestoreDb()
 
+function getE2EMocks() {
+  if (typeof window === 'undefined') return null
+  return window.__CP_E2E_MOCKS || null
+}
+
 function asIso(value) {
   if (!value) return ''
   if (typeof value === 'string') return value
@@ -16,6 +21,10 @@ function asIso(value) {
 
 export const InformationCommuneService = {
   async getAll(communeId = null) {
+    const e2eMocks = getE2EMocks()
+    if (typeof e2eMocks?.informationCommuneGetAll === 'function') {
+      return e2eMocks.informationCommuneGetAll(communeId)
+    }
     if (!communeId) return { data: [], error: null }
     try {
       const ref = collection(db(), 'information_commune')
