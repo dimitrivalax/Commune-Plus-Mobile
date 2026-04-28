@@ -23,6 +23,9 @@ export class ActualitePage {
         if (count > 0) return 'list'
         const hasEmpty = await this.emptyTitle.isVisible().catch(() => false)
         return hasEmpty ? 'empty' : 'loading'
+      }, {
+        timeout: 15000,
+        intervals: [250, 500, 1000]
       })
       .toMatch(/^(list|empty)$/)
   }

@@ -2,10 +2,10 @@
   "cookies": [
     {
       "name": "ph_phc_73rbuEKrrDAHQBZ3LSjNXOfAohpwRbTHoBIulHunMV8_posthog",
-      "value": "%7B%22%24device_id%22%3A%22019dd348-c38b-7073-9c94-27adbf60852b%22%2C%22distinct_id%22%3A%22cp_anal8tics_5da2-f7eb-4f69-9519-1125fadccc58%22%2C%22%24epp%22%3Atrue%7D",
+      "value": "%7B%22%24device_id%22%3A%22019dd440-9ba1-7281-a9a2-eed930803390%22%2C%22distinct_id%22%3A%22cp_analbtics_8aa5-093f-440a-ad64-cdcf4ecb7bf8%22%2C%22%24epp%22%3Atrue%7D",
       "domain": "127.0.0.1",
       "path": "/",
-      "expires": 1808902254,
+      "expires": 1808918497,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
@@ -21,7 +21,7 @@
         },
         {
           "name": "commune-plus-analytics-distinct-id",
-          "value": "cp_anal8tics_5da2-f7eb-4f69-9519-1125fadccc58"
+          "value": "cp_analbtics_8aa5-093f-440a-ad64-cdcf4ecb7bf8"
         },
         {
           "name": "commune-plus-user-contact",
@@ -29,7 +29,7 @@
         },
         {
           "name": "ph_phc_73rbuEKrrDAHQBZ3LSjNXOfAohpwRbTHoBIulHunMV8_posthog",
-          "value": "{\"$initialization_time\":\"2026-04-28T08:50:54.475Z\",\"$configured_session_timeout_ms\":1800000,\"distinct_id\":\"cp_anal8tics_5da2-f7eb-4f69-9519-1125fadccc58\",\"$device_id\":\"019dd348-c38b-7073-9c94-27adbf60852b\",\"$user_state\":\"identified\",\"app\":\"Commune-Plus-Mobile\",\"mobile_os\":\"web\",\"$epp\":true,\"$user_id\":\"cp_anal8tics_5da2-f7eb-4f69-9519-1125fadccc58\",\"$stored_person_properties\":{}}"
+          "value": "{\"$initialization_time\":\"2026-04-28T13:21:37.184Z\",\"$configured_session_timeout_ms\":1800000,\"distinct_id\":\"cp_analbtics_8aa5-093f-440a-ad64-cdcf4ecb7bf8\",\"$device_id\":\"019dd440-9ba1-7281-a9a2-eed930803390\",\"$user_state\":\"identified\",\"app\":\"Commune-Plus-Mobile\",\"mobile_os\":\"web\",\"$epp\":true,\"$user_id\":\"cp_analbtics_8aa5-093f-440a-ad64-cdcf4ecb7bf8\",\"$stored_person_properties\":{}}"
         }
       ]
     }

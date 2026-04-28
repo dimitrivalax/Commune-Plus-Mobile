@@ -22,5 +22,6 @@ android/keystore.properties
 .env.dev
 
 # Playwright
-playwright-report
-test-results
+/playwright-report
+/test-results
+playwright-report/index.html

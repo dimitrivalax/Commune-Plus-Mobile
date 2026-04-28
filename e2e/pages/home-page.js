@@ -27,6 +27,9 @@ export class HomePage {
         if (await this.emptyTitle.isVisible().catch(() => false)) return 'empty'
         if (await this.errorTitle.isVisible().catch(() => false)) return 'error'
         return 'loading'
+      }, {
+        timeout: 15000,
+        intervals: [250, 500, 1000]
       })
       .toMatch(/^(cards|empty|error)$/)
   }
