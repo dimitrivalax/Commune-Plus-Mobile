@@ -2,10 +2,10 @@
   "cookies": [
     {
       "name": "ph_phc_73rbuEKrrDAHQBZ3LSjNXOfAohpwRbTHoBIulHunMV8_posthog",
-      "value": "%7B%22%24device_id%22%3A%22019d967b-efae-7191-b8b9-72b5dfd05ac3%22%2C%22distinct_id%22%3A%22cp_anal9tics_ca03-7ade-4f54-bec4-c032045d47e9%22%2C%22%24epp%22%3Atrue%7D",
+      "value": "%7B%22%24device_id%22%3A%22019dd348-c38b-7073-9c94-27adbf60852b%22%2C%22distinct_id%22%3A%22cp_anal8tics_5da2-f7eb-4f69-9519-1125fadccc58%22%2C%22%24epp%22%3Atrue%7D",
       "domain": "127.0.0.1",
       "path": "/",
-      "expires": 1807882197,
+      "expires": 1808902254,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
@@ -21,7 +21,7 @@
         },
         {
           "name": "commune-plus-analytics-distinct-id",
-          "value": "cp_anal9tics_ca03-7ade-4f54-bec4-c032045d47e9"
+          "value": "cp_anal8tics_5da2-f7eb-4f69-9519-1125fadccc58"
         },
         {
           "name": "commune-plus-user-contact",
@@ -29,7 +29,7 @@
         },
         {
           "name": "ph_phc_73rbuEKrrDAHQBZ3LSjNXOfAohpwRbTHoBIulHunMV8_posthog",
-          "value": "{\"$initialization_time\":\"2026-04-16T13:29:57.933Z\",\"$configured_session_timeout_ms\":1800000,\"distinct_id\":\"cp_anal9tics_ca03-7ade-4f54-bec4-c032045d47e9\",\"$device_id\":\"019d967b-efae-7191-b8b9-72b5dfd05ac3\",\"$user_state\":\"identified\",\"$epp\":true,\"$user_id\":\"cp_anal9tics_ca03-7ade-4f54-bec4-c032045d47e9\",\"$stored_person_properties\":{}}"
+          "value": "{\"$initialization_time\":\"2026-04-28T08:50:54.475Z\",\"$configured_session_timeout_ms\":1800000,\"distinct_id\":\"cp_anal8tics_5da2-f7eb-4f69-9519-1125fadccc58\",\"$device_id\":\"019dd348-c38b-7073-9c94-27adbf60852b\",\"$user_state\":\"identified\",\"app\":\"Commune-Plus-Mobile\",\"mobile_os\":\"web\",\"$epp\":true,\"$user_id\":\"cp_anal8tics_5da2-f7eb-4f69-9519-1125fadccc58\",\"$stored_person_properties\":{}}"
         }
       ]
     }

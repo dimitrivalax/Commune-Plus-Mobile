@@ -20,3 +20,7 @@ node_modules
 
 android/keystore.properties
 .env.dev
+
+# Playwright
+playwright-report
+test-results
