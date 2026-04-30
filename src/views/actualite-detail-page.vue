@@ -2,11 +2,10 @@
   <ion-page>
     <ion-header>
       <ion-toolbar color="primary">
-        <template v-slot:start>
-          <ion-buttons>
-            <ion-back-button default-href="/tabs/actualite"></ion-back-button>
-          </ion-buttons>
-        </template>
+        <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+        <ion-buttons slot="start">
+          <ion-back-button default-href="/tabs/actualite"></ion-back-button>
+        </ion-buttons>
         <ion-title>Détail de l'actualité</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -53,13 +52,12 @@
             >
               <ion-header>
                 <ion-toolbar>
-                  <template v-slot:end>
-                    <ion-buttons>
-                      <ion-button @click="fullscreenImageUrl = null">
-                        <ion-icon :icon="closeOutline" />
-                      </ion-button>
-                    </ion-buttons>
-                  </template>
+                  <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+                  <ion-buttons slot="end">
+                    <ion-button @click="fullscreenImageUrl = null">
+                      <ion-icon :icon="closeOutline" />
+                    </ion-button>
+                  </ion-buttons>
                 </ion-toolbar>
               </ion-header>
               <ion-content class="ion-padding fullscreen-image-content">

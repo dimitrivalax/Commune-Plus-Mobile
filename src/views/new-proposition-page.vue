@@ -2,11 +2,10 @@
   <IonPage>
     <IonHeader>
       <IonToolbar color="primary">
-        <template v-slot:start>
-          <IonButtons>
-            <IonBackButton default-href="/tabs/propositions"></IonBackButton>
-          </IonButtons>
-        </template>
+        <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+        <IonButtons slot="start">
+          <IonBackButton default-href="/tabs/propositions"></IonBackButton>
+        </IonButtons>
         <IonTitle>Nouvelle Proposition</IonTitle>
       </IonToolbar>
     </IonHeader>
@@ -67,9 +66,8 @@
             @click="takePhoto"
             class="photo-button"
           >
-            <template v-slot:start>
-              <IonIcon :icon="camera" />
-            </template>
+            <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+            <IonIcon slot="start" :icon="camera" />
             Ajouter une photo
           </IonButton>
         </div>
@@ -117,9 +115,8 @@
             :disabled="!isValid || loading"
             class="submit-button"
           >
-            <template v-slot:start>
-              <IonSpinner v-if="loading" name="crescent" />
-            </template>
+            <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+            <IonSpinner v-if="loading" slot="start" name="crescent" />
             {{ loading ? 'Envoi en cours...' : 'Publier ma proposition' }}
           </IonButton>
         </div>

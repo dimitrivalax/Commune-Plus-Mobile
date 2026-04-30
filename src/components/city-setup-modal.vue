@@ -7,11 +7,10 @@
     <ion-header>
       <ion-toolbar color="primary">
         <ion-title>Configuration de la commune</ion-title>
-        <template v-slot:end>
-          <ion-buttons v-if="allowCancel">
-            <ion-button @click="handleCancel">Annuler</ion-button>
-          </ion-buttons>
-        </template>
+        <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+        <ion-buttons v-if="allowCancel" slot="end">
+          <ion-button @click="handleCancel">Annuler</ion-button>
+        </ion-buttons>
       </ion-toolbar>
     </ion-header>
     <ion-content class="ion-padding">

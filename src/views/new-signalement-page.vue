@@ -2,13 +2,10 @@
   <ion-page>
     <ion-header>
       <ion-toolbar color="primary">
-        <template v-slot:start>
-          <ion-buttons>
-            <ion-back-button
-              default-href="/tabs/signalements"
-            ></ion-back-button>
-          </ion-buttons>
-        </template>
+        <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+        <ion-buttons slot="start">
+          <ion-back-button default-href="/tabs/signalements"></ion-back-button>
+        </ion-buttons>
         <ion-title>Nouveau signalement</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -37,9 +34,8 @@
               fill="outline"
               class="location-button"
             >
-              <template v-slot:start>
-                <ion-icon :icon="locationIcon" />
-              </template>
+              <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+              <ion-icon slot="start" :icon="locationIcon" />
               {{
                 location
                   ? 'Position GPS enregistrée'
@@ -101,9 +97,8 @@
               :disabled="loading"
               class="photo-button"
             >
-              <template v-slot:start>
-                <ion-icon :icon="camera" />
-              </template>
+              <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+              <ion-icon slot="start" :icon="camera" />
               {{ photo ? 'Reprendre la photo' : 'Prendre une photo' }}
             </ion-button>
             <ion-button
@@ -113,9 +108,8 @@
               :disabled="loading"
               class="photo-button photo-button-gallery"
             >
-              <template v-slot:start>
-                <ion-icon :icon="images" />
-              </template>
+              <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+              <ion-icon slot="start" :icon="images" />
               Choisir depuis la galerie
             </ion-button>
           </div>
@@ -227,9 +221,8 @@
           "
           class="submit-button"
         >
-          <template v-slot:start>
-            <ion-icon :icon="checkmark" />
-          </template>
+          <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+          <ion-icon slot="start" :icon="checkmark" />
           Envoyer le signalement
         </ion-button>
       </div>

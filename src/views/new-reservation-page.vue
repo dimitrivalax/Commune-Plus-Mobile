@@ -2,13 +2,10 @@
   <ion-page>
     <ion-header>
       <ion-toolbar color="primary">
-        <template v-slot:start>
-          <ion-buttons>
-            <ion-back-button
-              default-href="/tabs/reservations"
-            ></ion-back-button>
-          </ion-buttons>
-        </template>
+        <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+        <ion-buttons slot="start">
+          <ion-back-button default-href="/tabs/reservations"></ion-back-button>
+        </ion-buttons>
         <ion-title>Nouvelle réservation</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -224,9 +221,8 @@
           @click="submitReservation"
           :disabled="loading || !isFormValid || !!conflictMessage"
         >
-          <template v-slot:start>
-            <ion-icon :icon="checkmark" />
-          </template>
+          <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+          <ion-icon slot="start" :icon="checkmark" />
           Envoyer la demande
         </ion-button>
       </div>

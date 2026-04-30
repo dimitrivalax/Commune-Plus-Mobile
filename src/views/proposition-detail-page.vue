@@ -2,11 +2,10 @@
   <IonPage>
     <IonHeader>
       <IonToolbar color="primary">
-        <template v-slot:start>
-          <IonButtons>
-            <IonBackButton default-href="/tabs/propositions"></IonBackButton>
-          </IonButtons>
-        </template>
+        <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+        <IonButtons slot="start">
+          <IonBackButton default-href="/tabs/propositions"></IonBackButton>
+        </IonButtons>
         <IonTitle>Détail de la Proposition</IonTitle>
       </IonToolbar>
     </IonHeader>
@@ -54,9 +53,8 @@
               @click="handleVote"
               :disabled="voting"
             >
-              <template v-slot:start>
-                <IonIcon :icon="thumbsUpOutline" />
-              </template>
+              <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+              <IonIcon slot="start" :icon="thumbsUpOutline" />
               Soutenir cette proposition
             </IonButton>
             <div v-else class="voted-message">

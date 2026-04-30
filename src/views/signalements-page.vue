@@ -2,17 +2,21 @@
   <IonPage>
     <AppHeader title="Signalements"></AppHeader>
     <IonContent class="page-content">
-      <template #fixed>
-        <IonFab vertical="bottom" horizontal="end">
-          <IonFabButton @click="$router.push('/signalement/new')">
-            <IonIcon :icon="add" />
-          </IonFabButton>
-        </IonFab>
+      <!-- eslint-disable vue/no-deprecated-slot-attribute -->
+      <IonFab slot="fixed" vertical="bottom" horizontal="end">
+        <IonFabButton @click="$router.push('/signalement/new')">
+          <IonIcon :icon="add" />
+        </IonFabButton>
+      </IonFab>
 
-        <IonRefresher @ionRefresh="loadSignalements($event)" class="">
-          <IonRefresherContent></IonRefresherContent>
-        </IonRefresher>
-      </template>
+      <IonRefresher
+        slot="fixed"
+        @ionRefresh="loadSignalements($event)"
+        class=""
+      >
+        <IonRefresherContent></IonRefresherContent>
+      </IonRefresher>
+      <!-- eslint-enable vue/no-deprecated-slot-attribute -->
 
       <div class="ion-padding">
         <!-- Filtre par statut -->
@@ -43,14 +47,10 @@
             lines="none"
             @click="$router.push(`/signalement/${signalement.id}`)"
           >
-            <template v-slot:start>
-              <IonThumbnail v-if="signalement.photo_url">
-                <img
-                  :src="signalement.photo_url"
-                  :alt="signalement.description"
-                />
-              </IonThumbnail>
-            </template>
+            <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+            <IonThumbnail v-if="signalement.photo_url" slot="start">
+              <img :src="signalement.photo_url" :alt="signalement.description" />
+            </IonThumbnail>
             <IonLabel>
               <h2>{{ signalement.description || 'Sans description' }}</h2>
               <p v-if="signalement.comment" class="comment-text">

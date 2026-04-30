@@ -8,8 +8,7 @@ import {
   addDoc,
   updateDoc,
   runTransaction,
-  serverTimestamp,
-  increment
+  serverTimestamp
 } from 'firebase/firestore'
 import { getFirestoreDb } from '@/services/firebase'
 import { docToPlain } from '@/utils/firestore'
@@ -26,6 +25,15 @@ function voteDocId(propositionId, emailNormalized) {
     h = Math.imul(h, 16777619)
   }
   return `${propositionId}_v_${(h >>> 0).toString(16)}`
+}
+
+async function getVotesCountForProposition(propositionId) {
+  const qy = query(
+    collection(db(), 'proposition_vote'),
+    where('proposition_id', '==', propositionId)
+  )
+  const snap = await getDocs(qy)
+  return snap.size
 }
 
 export const PropositionService = {
@@ -90,10 +98,12 @@ export const PropositionService = {
         )
         hasVoted = vsnap.exists()
       }
+      const votesCount = await getVotesCountForProposition(id)
 
       return {
         data: {
           ...proposition,
+          votes_count: votesCount,
           comments,
           has_voted: hasVoted
         },
@@ -116,19 +126,15 @@ export const PropositionService = {
     const vid = voteDocId(propositionId, emailNormalized)
     const voteRef = doc(db(), 'proposition_vote', vid)
     const propRef = doc(db(), 'proposition', propositionId)
+    const propSnap = await getDoc(propRef)
+    if (!propSnap.exists()) {
+      return { data: null, error: { message: 'Proposition introuvable' } }
+    }
 
     let alreadyVoted = false
-    let propositionMissing = false
     try {
       await runTransaction(db(), async (t) => {
-        const [voteSnap, propSnap] = await Promise.all([
-          t.get(voteRef),
-          t.get(propRef)
-        ])
-        if (!propSnap.exists()) {
-          propositionMissing = true
-          return
-        }
+        const voteSnap = await t.get(voteRef)
         if (voteSnap.exists()) {
           alreadyVoted = true
           return
@@ -138,16 +144,9 @@ export const PropositionService = {
           email: emailNormalized,
           created_at: serverTimestamp()
         })
-        t.update(propRef, {
-          votes_count: increment(1),
-          updated_at: serverTimestamp()
-        })
       })
     } catch (error) {
       return { data: null, error: normalizeServiceError(error) }
-    }
-    if (propositionMissing) {
-      return { data: null, error: { message: 'Proposition introuvable' } }
     }
     if (alreadyVoted) {
       return { data: null, error: { message: 'Already voted' } }
@@ -156,8 +155,14 @@ export const PropositionService = {
     this.notify(propositionId, 'vote').catch((err) =>
       console.error('Notify error:', err)
     )
-    const snap = await getDoc(propRef)
-    return { data: docToPlain(snap.id, snap.data()), error: null }
+    const [snap, votesCount] = await Promise.all([
+      getDoc(propRef),
+      getVotesCountForProposition(propositionId)
+    ])
+    return {
+      data: { ...docToPlain(snap.id, snap.data()), votes_count: votesCount },
+      error: null
+    }
   },
 
   async unvote(propositionId, userEmail) {
@@ -172,9 +177,12 @@ export const PropositionService = {
     const vid = voteDocId(propositionId, emailNormalized)
     const voteRef = doc(db(), 'proposition_vote', vid)
     const propRef = doc(db(), 'proposition', propositionId)
+    const propSnap = await getDoc(propRef)
+    if (!propSnap.exists()) {
+      return { data: null, error: { message: 'Proposition introuvable' } }
+    }
 
     let noVote = false
-    let propositionMissing = false
     try {
       await runTransaction(db(), async (t) => {
         const voteSnap = await t.get(voteRef)
@@ -182,31 +190,23 @@ export const PropositionService = {
           noVote = true
           return
         }
-        const propSnap = await t.get(propRef)
-        if (!propSnap.exists()) {
-          propositionMissing = true
-          return
-        }
         t.delete(voteRef)
-        const prev = propSnap.data().votes_count || 0
-        const newCount = Math.max(0, prev - 1)
-        t.update(propRef, {
-          votes_count: newCount,
-          updated_at: serverTimestamp()
-        })
       })
     } catch (error) {
       return { data: null, error: normalizeServiceError(error) }
-    }
-    if (propositionMissing) {
-      return { data: null, error: { message: 'Proposition introuvable' } }
     }
     if (noVote) {
       return { data: null, error: { message: 'No vote to remove' } }
     }
 
-    const snap = await getDoc(propRef)
-    return { data: docToPlain(snap.id, snap.data()), error: null }
+    const [snap, votesCount] = await Promise.all([
+      getDoc(propRef),
+      getVotesCountForProposition(propositionId)
+    ])
+    return {
+      data: { ...docToPlain(snap.id, snap.data()), votes_count: votesCount },
+      error: null
+    }
   },
 
   async addComment(commentData) {

@@ -12,21 +12,18 @@
           <ion-list>
             <ion-menuToggle auto-hide>
               <ion-item button router-link="/tabs/home" lines="none">
-                <template v-slot:start>
-                  <ion-icon :icon="homeOutline" />
-                </template>
+                <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+                <ion-icon slot="start" :icon="homeOutline" />
                 <ion-label>Accueil</ion-label>
               </ion-item>
               <ion-item button router-link="/tabs/actualite" lines="none">
-                <template v-slot:start>
-                  <ion-icon :icon="newspaperOutline" />
-                </template>
+                <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+                <ion-icon slot="start" :icon="newspaperOutline" />
                 <ion-label>Actualités</ion-label>
               </ion-item>
               <ion-item button router-link="/tabs/signalements" lines="none">
-                <template v-slot:start>
-                  <ion-icon :icon="warningOutline" />
-                </template>
+                <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+                <ion-icon slot="start" :icon="warningOutline" />
                 <ion-label>Signalements</ion-label>
               </ion-item>
 
@@ -36,9 +33,8 @@
                 router-link="/tabs/reservations"
                 lines="none"
               >
-                <template v-slot:start>
-                  <ion-icon :icon="calendarOutline" />
-                </template>
+                <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+                <ion-icon slot="start" :icon="calendarOutline" />
                 <ion-label>Réservations</ion-label>
               </ion-item>
               <ion-item
@@ -47,9 +43,8 @@
                 router-link="/tabs/propositions"
                 lines="none"
               >
-                <template v-slot:start>
-                  <ion-icon :icon="bookOutline" />
-                </template>
+                <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+                <ion-icon slot="start" :icon="bookOutline" />
                 <ion-label>Propositions</ion-label>
               </ion-item>
             </ion-menuToggle>

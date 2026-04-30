@@ -2,16 +2,16 @@
   <IonPage>
     <AppHeader title="Réservations"></AppHeader>
     <IonContent class="page-content">
-      <template #fixed>
-        <IonFab vertical="bottom" horizontal="end">
-          <IonFabButton @click="$router.push('/reservation/new')">
-            <IonIcon :icon="add" />
-          </IonFabButton>
-        </IonFab>
-        <IonRefresher @ionRefresh="loadReservations($event)">
-          <IonRefresherContent></IonRefresherContent>
-        </IonRefresher>
-      </template>
+      <!-- eslint-disable vue/no-deprecated-slot-attribute -->
+      <IonFab slot="fixed" vertical="bottom" horizontal="end">
+        <IonFabButton @click="$router.push('/reservation/new')">
+          <IonIcon :icon="add" />
+        </IonFabButton>
+      </IonFab>
+      <IonRefresher slot="fixed" @ionRefresh="loadReservations($event)">
+        <IonRefresherContent></IonRefresherContent>
+      </IonRefresher>
+      <!-- eslint-enable vue/no-deprecated-slot-attribute -->
 
       <div class="ion-padding">
         <IonList v-if="reservations.length > 0" class="reservations-list">
@@ -24,9 +24,8 @@
             button
             @click="$router.push(`/reservation/${reservation.id}`)"
           >
-            <template v-slot:start>
-              <IonIcon :icon="calendar" class="reservation-icon" />
-            </template>
+            <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+            <IonIcon slot="start" :icon="calendar" class="reservation-icon" />
             <IonLabel>
               <h2>
                 {{

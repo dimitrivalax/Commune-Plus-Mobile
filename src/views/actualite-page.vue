@@ -2,11 +2,10 @@
   <IonPage>
     <AppHeader title="Actualités"></AppHeader>
     <IonContent ref="ionContentRef" class="page-content">
-      <template #fixed>
-        <IonRefresher @ionRefresh="onRefresh($event)">
-          <IonRefresherContent></IonRefresherContent>
-        </IonRefresher>
-      </template>
+      <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+      <IonRefresher slot="fixed" @ionRefresh="onRefresh($event)">
+        <IonRefresherContent></IonRefresherContent>
+      </IonRefresher>
 
       <div class="ion-padding">
         <template v-if="groupedByDate.length > 0">
@@ -28,16 +27,16 @@
                 class="info-item"
                 @click="$router.push(`/actualite/${item.id}`)"
               >
-                <template v-slot:start>
-                  <IonThumbnail v-if="item.image_url" class="info-thumb-wrap">
-                    <img
-                      :src="item.image_url"
-                      :alt="item.title"
-                      class="info-thumb"
-                    />
-                  </IonThumbnail>
-                  <IonIcon v-else :icon="newspaper" class="info-icon" />
-                </template>
+                <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+                <IonThumbnail
+                  v-if="item.image_url"
+                  slot="start"
+                  class="info-thumb-wrap"
+                >
+                  <img :src="item.image_url" :alt="item.title" class="info-thumb" />
+                </IonThumbnail>
+                <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+                <IonIcon v-else slot="start" :icon="newspaper" class="info-icon" />
                 <IonLabel>
                   <p class="info-item-title">{{ item.title }}</p>
                   <div class="item-meta">

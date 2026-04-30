@@ -2,11 +2,10 @@
   <IonPage>
     <AppHeader title="Propositions"></AppHeader>
     <IonContent class="page-content">
-      <template v-slot:fixed>
-        <IonRefresher @ionRefresh="loadPropositions($event)">
-          <IonRefresherContent></IonRefresherContent>
-        </IonRefresher>
-      </template>
+      <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+      <IonRefresher slot="fixed" @ionRefresh="loadPropositions($event)">
+        <IonRefresherContent></IonRefresherContent>
+      </IonRefresher>
 
       <div class="ion-padding">
         <!-- Sort Segment -->
@@ -35,11 +34,10 @@
             lines="none"
             @click="$router.push(`/proposition/${proposition.id}`)"
           >
-            <template v-slot:start>
-              <IonThumbnail v-if="proposition.photo_url">
-                <img :src="proposition.photo_url" :alt="proposition.name" />
-              </IonThumbnail>
-            </template>
+            <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+            <IonThumbnail v-if="proposition.photo_url" slot="start">
+              <img :src="proposition.photo_url" :alt="proposition.name" />
+            </IonThumbnail>
             <IonLabel>
               <div class="proposition-header">
                 <h2>{{ proposition.name }}</h2>

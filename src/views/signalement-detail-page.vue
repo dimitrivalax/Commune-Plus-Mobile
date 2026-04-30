@@ -2,25 +2,21 @@
   <ion-page>
     <ion-header>
       <ion-toolbar color="primary">
-        <template v-slot:start>
-          <ion-buttons>
-            <ion-back-button
-              default-href="/tabs/signalements"
-            ></ion-back-button>
-          </ion-buttons>
-        </template>
+        <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+        <ion-buttons slot="start">
+          <ion-back-button default-href="/tabs/signalements"></ion-back-button>
+        </ion-buttons>
         <ion-title>Détail du signalement</ion-title>
-        <template v-slot:end>
-          <ion-buttons>
-            <ion-button
-              @click="toggleEditMode"
-              v-if="!isArchiving"
-              color="light"
-            >
-              <ion-icon :icon="isEditing ? close : create" />
-            </ion-button>
-          </ion-buttons>
-        </template>
+        <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+        <ion-buttons slot="end">
+          <ion-button
+            @click="toggleEditMode"
+            v-if="!isArchiving"
+            color="light"
+          >
+            <ion-icon :icon="isEditing ? close : create" />
+          </ion-button>
+        </ion-buttons>
       </ion-toolbar>
     </ion-header>
     <ion-content class="detail-content">
@@ -127,9 +123,8 @@
               @click="confirmArchive"
               :disabled="isArchiving"
             >
-              <template v-slot:start>
-                <ion-icon :icon="archive" />
-              </template>
+              <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+              <ion-icon slot="start" :icon="archive" />
               Archiver le signalement
             </ion-button>
           </div>
@@ -171,9 +166,8 @@
                 :disabled="saving"
                 class="photo-button"
               >
-                <template v-slot:start>
-                  <ion-icon :icon="camera" />
-                </template>
+                <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+                <ion-icon slot="start" :icon="camera" />
                 {{ editPhoto ? 'Reprendre la photo' : 'Prendre une photo' }}
               </ion-button>
 
@@ -212,9 +206,8 @@
                 :disabled="saving"
                 class="save-button"
               >
-                <template v-slot:start>
-                  <ion-icon :icon="checkmark" />
-                </template>
+                <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+                <ion-icon slot="start" :icon="checkmark" />
                 Enregistrer les modifications
               </ion-button>
               <ion-button
