@@ -36,6 +36,37 @@ async function getVotesCountForProposition(propositionId) {
   return snap.size
 }
 
+async function getVotesCountMapForPropositions(propositionIds) {
+  const ids = Array.from(
+    new Set((propositionIds || []).filter((id) => typeof id === 'string' && id))
+  )
+  if (ids.length === 0) return {}
+
+  const counts = {}
+  ids.forEach((id) => {
+    counts[id] = 0
+  })
+
+  // Firestore "in" supports a limited amount of values per query.
+  const chunkSize = 10
+  for (let i = 0; i < ids.length; i += chunkSize) {
+    const chunk = ids.slice(i, i + chunkSize)
+    const qy = query(
+      collection(db(), 'proposition_vote'),
+      where('proposition_id', 'in', chunk)
+    )
+    const snap = await getDocs(qy)
+    snap.docs.forEach((d) => {
+      const pid = d.data()?.proposition_id
+      if (typeof pid === 'string' && counts[pid] != null) {
+        counts[pid] += 1
+      }
+    })
+  }
+
+  return counts
+}
+
 export const PropositionService = {
   async getAll(communeId, sortBy = 'updated_at') {
     try {
@@ -47,6 +78,15 @@ export const PropositionService = {
       let rows = snap.docs
         .map((d) => docToPlain(d.id, d.data()))
         .filter((r) => !r.is_archived)
+
+      const votesMap = await getVotesCountMapForPropositions(
+        rows.map((row) => row.id)
+      )
+      rows = rows.map((row) => ({
+        ...row,
+        votes_count: votesMap[row.id] || 0
+      }))
+
       if (sortBy === 'votes_count') {
         rows.sort(
           (a, b) => (Number(b.votes_count) || 0) - (Number(a.votes_count) || 0)
