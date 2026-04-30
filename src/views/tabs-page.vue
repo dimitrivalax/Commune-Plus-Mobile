@@ -45,14 +45,14 @@ import { useRoute } from 'vue-router'
 const ionRouter = useIonRouter()
 const route = useRoute()
 
-const tabs = ['home', 'signalements', 'info']
+const tabs = ['home', 'actualite', 'signalements']
 
 const navigate = (tab) => {
-  const currentIndex = tabs.findIndex((t) => route.path.includes(t))
+  const currentIndex = tabs.findIndex((t) => route.path === `/tabs/${t}`)
   const targetIndex = tabs.indexOf(tab)
 
   // Si on est déjà sur l'onglet, on ne fait rien
-  if (currentIndex === targetIndex) return
+  if (currentIndex !== -1 && currentIndex === targetIndex) return
 
   const direction =
     currentIndex === -1 || targetIndex > currentIndex ? 'forward' : 'back'

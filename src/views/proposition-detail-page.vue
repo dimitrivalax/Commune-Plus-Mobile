@@ -48,7 +48,7 @@
           <!-- Vote Area -->
           <div class="vote-action-section">
             <IonButton
-              v-if="!proposition.has_voted"
+              v-show="!proposition.has_voted"
               expand="block"
               @click="handleVote"
               :disabled="voting"
@@ -57,7 +57,7 @@
               <IonIcon slot="start" :icon="thumbsUpOutline" />
               Soutenir cette proposition
             </IonButton>
-            <div v-else class="voted-message">
+            <div v-show="proposition.has_voted" class="voted-message">
               <span class="voted-message-text">
                 <IonIcon :icon="checkmarkCircle" />
                 Vous soutenez déjà cette proposition
@@ -335,14 +335,23 @@ const handleVote = async () => {
   const userEmail = await getEmailForVote()
   if (!userEmail) return
   voting.value = true
+  const previous = proposition.value
   try {
-    const { error } = await PropositionService.vote(
+    const { data, error } = await PropositionService.vote(
       proposition.value.id,
       userEmail
     )
     if (error) throw error
 
-    await loadProposition()
+    // Mise à jour locale pour éviter un rechargement complet de la page.
+    if (proposition.value) {
+      proposition.value = {
+        ...proposition.value,
+        has_voted: true,
+        votes_count:
+          data?.votes_count ?? (proposition.value.votes_count || 0) + 1
+      }
+    }
 
     const toast = await toastController.create({
       message: 'Vote enregistré !',
@@ -351,6 +360,7 @@ const handleVote = async () => {
     })
     await toast.present()
   } catch (error) {
+    proposition.value = previous
     console.error('Error voting:', error)
     const toast = await toastController.create({
       message:
@@ -371,14 +381,24 @@ const handleUnvote = async () => {
   const userEmail = currentUserEmail.value || (await getEmailForVote())
   if (!userEmail) return
   voting.value = true
+  const previous = proposition.value
   try {
-    const { error } = await PropositionService.unvote(
+    const { data, error } = await PropositionService.unvote(
       proposition.value.id,
       userEmail
     )
     if (error) throw error
 
-    await loadProposition()
+    // Mise à jour locale pour éviter un rechargement complet de la page.
+    if (proposition.value) {
+      proposition.value = {
+        ...proposition.value,
+        has_voted: false,
+        votes_count:
+          data?.votes_count ??
+          Math.max(0, (proposition.value.votes_count || 0) - 1)
+      }
+    }
 
     const toast = await toastController.create({
       message: 'Vous ne soutenez plus cette proposition.',
@@ -387,6 +407,7 @@ const handleUnvote = async () => {
     })
     await toast.present()
   } catch (error) {
+    proposition.value = previous
     console.error('Error unvoting:', error)
     const toast = await toastController.create({
       message: 'Impossible de retirer votre soutien.',
