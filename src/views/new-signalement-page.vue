@@ -273,6 +273,7 @@ import {
 } from 'ionicons/icons'
 import { SignalementService } from '@/services/signalement-service'
 import { uploadImageToCloudinary } from '@/services/cloudinary'
+import { compressImageDataUrl } from '@/utils/image'
 import { useCommuneId } from '@/composables/useCommuneId'
 import { saveUserContact, getUserContact, getCityInfo } from '@/utils/storage'
 import { sendSignalementEmail } from '@/services/email'
@@ -323,7 +324,7 @@ const takePhoto = async () => {
       source: CameraSource.Camera
     })
 
-    photo.value = image.dataUrl
+    photo.value = await compressImageDataUrl(image.dataUrl)
 
     // Track photo taken event
     trackEvent('signalement_photo_taken', {
@@ -355,7 +356,7 @@ const pickFromGallery = async () => {
       source: CameraSource.Photos
     })
 
-    photo.value = image.dataUrl
+    photo.value = await compressImageDataUrl(image.dataUrl)
 
     trackEvent('signalement_photo_from_gallery', {
       has_photo: true
@@ -717,27 +718,12 @@ const submitSignalement = async () => {
     const e2eMocks = getE2EMocks()
 
     // Convertir dataUrl en File pour Cloudinary
+    // La photo est toujours du JPEG après compression (cf. compressImageDataUrl)
     const response = await fetch(photo.value)
     const blob = await response.blob()
 
-    // Déterminer l'extension et le type MIME à partir du blob
-    let extension = 'jpg'
-    let mimeType = 'image/jpeg'
-
-    if (blob.type) {
-      mimeType = blob.type
-      if (blob.type === 'image/png') {
-        extension = 'png'
-      } else if (blob.type === 'image/webp') {
-        extension = 'webp'
-      } else if (blob.type === 'image/jpeg' || blob.type === 'image/jpg') {
-        extension = 'jpg'
-        mimeType = 'image/jpeg'
-      }
-    }
-
-    const file = new File([blob], `signalement.${extension}`, {
-      type: mimeType
+    const file = new File([blob], 'signalement.jpg', {
+      type: 'image/jpeg'
     })
 
     // Upload vers Cloudinary
