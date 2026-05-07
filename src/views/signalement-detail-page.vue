@@ -9,11 +9,7 @@
         <ion-title>Détail du signalement</ion-title>
         <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
         <ion-buttons slot="end">
-          <ion-button
-            @click="toggleEditMode"
-            v-if="!isArchiving"
-            color="light"
-          >
+          <ion-button @click="toggleEditMode" v-if="!isArchiving" color="light">
             <ion-icon :icon="isEditing ? close : create" />
           </ion-button>
         </ion-buttons>

@@ -27,16 +27,25 @@
                 class="info-item"
                 @click="$router.push(`/actualite/${item.id}`)"
               >
-                <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+                <!-- eslint-disable vue/no-deprecated-slot-attribute -->
                 <IonThumbnail
                   v-if="item.image_url"
                   slot="start"
                   class="info-thumb-wrap"
                 >
-                  <img :src="item.image_url" :alt="item.title" class="info-thumb" />
+                  <img
+                    :src="item.image_url"
+                    :alt="item.title"
+                    class="info-thumb"
+                  />
                 </IonThumbnail>
-                <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
-                <IonIcon v-else slot="start" :icon="newspaper" class="info-icon" />
+                <IonIcon
+                  v-else
+                  slot="start"
+                  :icon="newspaper"
+                  class="info-icon"
+                />
+                <!-- eslint-enable vue/no-deprecated-slot-attribute -->
                 <IonLabel>
                   <p class="info-item-title">{{ item.title }}</p>
                   <div class="item-meta">

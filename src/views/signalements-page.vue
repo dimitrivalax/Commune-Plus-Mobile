@@ -49,7 +49,10 @@
           >
             <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
             <IonThumbnail v-if="signalement.photo_url" slot="start">
-              <img :src="signalement.photo_url" :alt="signalement.description" />
+              <img
+                :src="signalement.photo_url"
+                :alt="signalement.description"
+              />
             </IonThumbnail>
             <IonLabel>
               <h2>{{ signalement.description || 'Sans description' }}</h2>

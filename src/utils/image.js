@@ -17,7 +17,11 @@ function computeTargetSize(width, height, maxSize) {
   }
   const ratio = width / height
   if (width >= height) {
-    return { width: maxSize, height: Math.round(maxSize / ratio), resized: true }
+    return {
+      width: maxSize,
+      height: Math.round(maxSize / ratio),
+      resized: true
+    }
   }
   return { width: Math.round(maxSize * ratio), height: maxSize, resized: true }
 }

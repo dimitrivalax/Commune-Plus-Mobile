@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-deprecated-slot-attribute -->
 <template>
   <ion-page>
     <ion-tabs>
@@ -13,7 +14,10 @@
           <ion-label>Actualités</ion-label>
         </ion-tab-button>
 
-        <ion-tab-button tab="signalements" @click.prevent="navigate('signalements')">
+        <ion-tab-button
+          tab="signalements"
+          @click.prevent="navigate('signalements')"
+        >
           <ion-icon :icon="warning" />
           <ion-label>Signalements</ion-label>
         </ion-tab-button>

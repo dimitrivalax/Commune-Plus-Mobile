@@ -8,7 +8,9 @@ export class ActualitePage {
     this.page = page
     this.emptyTitle = page.getByRole('heading', { name: 'Aucune information' })
     this.listItems = page.locator('.info-item')
-    this.backButton = page.locator('ion-back-button, button[aria-label*="back" i]')
+    this.backButton = page.locator(
+      'ion-back-button, button[aria-label*="back" i]'
+    )
   }
 
   async goto() {
@@ -18,15 +20,18 @@ export class ActualitePage {
 
   async expectListOrEmptyState() {
     await expect
-      .poll(async () => {
-        const count = await this.listItems.count()
-        if (count > 0) return 'list'
-        const hasEmpty = await this.emptyTitle.isVisible().catch(() => false)
-        return hasEmpty ? 'empty' : 'loading'
-      }, {
-        timeout: 15000,
-        intervals: [250, 500, 1000]
-      })
+      .poll(
+        async () => {
+          const count = await this.listItems.count()
+          if (count > 0) return 'list'
+          const hasEmpty = await this.emptyTitle.isVisible().catch(() => false)
+          return hasEmpty ? 'empty' : 'loading'
+        },
+        {
+          timeout: 15000,
+          intervals: [250, 500, 1000]
+        }
+      )
       .toMatch(/^(list|empty)$/)
   }
 
@@ -39,7 +44,10 @@ export class ActualitePage {
   }
 
   async expectBackButtonVisible() {
-    const backVisible = await this.backButton.first().isVisible().catch(() => false)
+    const backVisible = await this.backButton
+      .first()
+      .isVisible()
+      .catch(() => false)
     if (backVisible) {
       await expect(this.backButton.first()).toBeVisible()
       return

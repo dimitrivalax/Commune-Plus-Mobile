@@ -10,7 +10,9 @@ export class TabsPage {
    */
   constructor(page) {
     this.page = page
-    this.menuButton = page.locator('ion-menu-button, button[aria-label*="menu" i]')
+    this.menuButton = page.locator(
+      'ion-menu-button, button[aria-label*="menu" i]'
+    )
     this.menuTab = page.locator('ion-tab-button', {
       has: page.locator('ion-label', { hasText: 'Menu' })
     })
@@ -51,19 +53,27 @@ export class TabsPage {
     }
 
     // Some web/headless renders hide Ionic tab controls: verify home UI instead.
-    await expect(this.page.getByRole('heading', { name: 'E2E Commune' })).toBeVisible()
+    await expect(
+      this.page.getByRole('heading', { name: 'E2E Commune' })
+    ).toBeVisible()
   }
 
   async openMenuWithBurger() {
     await this.dismissOnboardingIfVisible()
-    const burgerVisible = await this.menuButton.first().isVisible().catch(() => false)
+    const burgerVisible = await this.menuButton
+      .first()
+      .isVisible()
+      .catch(() => false)
     if (burgerVisible) {
       await this.menuButton.first().click()
       await this.expectMenuVisible()
       return
     }
 
-    const menuTabVisible = await this.menuTab.first().isVisible().catch(() => false)
+    const menuTabVisible = await this.menuTab
+      .first()
+      .isVisible()
+      .catch(() => false)
     if (menuTabVisible) {
       await this.menuTab.first().click()
       await this.expectMenuVisible()
