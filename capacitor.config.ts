@@ -1,4 +1,6 @@
+/// <reference types="@capacitor/keyboard" />
 import { CapacitorConfig } from '@capacitor/cli';
+import { KeyboardResize } from '@capacitor/keyboard';
 
 const config: CapacitorConfig = {
   appId: 'com.communeplus.app',
@@ -7,10 +9,16 @@ const config: CapacitorConfig = {
   server: {
     androidScheme: 'https'
   },
+  plugins: {
+    Keyboard: {
+      resize: KeyboardResize.Ionic,
+      resizeOnFullScreen: true
+    }
+  },
   splashScreen: {
     launchShowDuration: 2000,
     launchAutoHide: true,
-    backgroundColor: '#ffffff', // Couleur de fond (blanc pour correspondre à l'icône)
+    backgroundColor: '#ffffff',
     androidSplashResourceName: 'splash',
     androidScaleType: 'CENTER_CROP',
     showSpinner: false, // On utilise notre propre spinner dans le composant

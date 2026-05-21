@@ -15,20 +15,14 @@ import { SplashScreen as CapacitorSplashScreen } from '@capacitor/splash-screen'
 const show = ref(true)
 
 onMounted(async () => {
-  // Attendre un peu pour afficher le splash screen
   await new Promise((resolve) => setTimeout(resolve, 2000))
 
-  // Masquer le splash screen natif (mobile)
   try {
-    await CapacitorSplashScreen.hide({
-      fadeOutDuration: 300
-    })
-  } catch (error) {
-    // Ignorer l'erreur si on est sur le web
-    console.log('Splash screen native not available (web mode)')
+    await CapacitorSplashScreen.hide({ fadeOutDuration: 300 })
+  } catch {
+    // Web : pas de splash natif Capacitor
   }
 
-  // Masquer le splash screen web
   show.value = false
 })
 </script>
@@ -40,7 +34,7 @@ onMounted(async () => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: #000;
+  background: #ffffff;
   z-index: 9999;
   display: flex;
   align-items: center;

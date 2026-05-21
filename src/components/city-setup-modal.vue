@@ -13,7 +13,11 @@
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
-    <ion-content class="ion-padding">
+    <ion-content
+      ref="contentRef"
+      class="ion-padding city-setup-content"
+      :fullscreen="true"
+    >
       <div class="modal-content">
         <div class="modal-header">
           <ion-icon :icon="locationOutline" class="header-icon"></ion-icon>
@@ -118,6 +122,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { useKeyboardScrollReset } from '@/composables/useKeyboardScrollReset'
 import {
   IonModal,
   IonHeader,
@@ -165,6 +170,10 @@ const formData = ref({
 
 const isSubmitting = ref(false)
 const isSaved = ref(false)
+const contentRef = ref(null)
+const { resetScroll: resetModalScroll } = useKeyboardScrollReset(contentRef, {
+  when: () => props.isOpen
+})
 
 const isFormValid = computed(() => {
   return !!(
@@ -231,7 +240,8 @@ const handleSubmit = async () => {
   }
 }
 
-const handleDismiss = () => {
+const handleDismiss = async () => {
+  await resetModalScroll()
   emit('close')
 }
 
@@ -256,7 +266,7 @@ const handleCitySelect = (city) => {
 // Réinitialiser le formulaire quand la modale s'ouvre
 watch(
   () => props.isOpen,
-  (newValue) => {
+  async (newValue) => {
     if (newValue) {
       formData.value = {
         id: null,
@@ -268,7 +278,9 @@ watch(
         feature_propositions: true
       }
       isSaved.value = false
+      return
     }
+    await resetModalScroll()
   }
 )
 </script>
@@ -303,8 +315,12 @@ watch(
 }
 
 .sub-menu {
-  margin-top: 72px;
+  margin-top: 24px;
   text-align: center;
+}
+
+.city-setup-content {
+  --padding-bottom: calc(16px + env(safe-area-inset-bottom));
 }
 
 .logo-image {

@@ -9,7 +9,7 @@
         <ion-title>Paramètres</ion-title>
       </ion-toolbar>
     </ion-header>
-    <ion-content class="page-content">
+    <ion-content ref="pageContentRef" class="page-content">
       <div class="ion-padding">
         <!-- Section Coordonnées utilisateur -->
         <div class="settings-section">
@@ -178,19 +178,19 @@
 
         <AppDisclaimer />
       </div>
-
-      <!-- Modale de configuration de la commune -->
-      <CitySetupModal
-        :is-open="showCityModal"
-        @saved="handleCityInfoSaved"
-        @close="showCityModal = false"
-      />
     </ion-content>
+
+    <CitySetupModal
+      :is-open="showCityModal"
+      @saved="handleCityInfoSaved"
+      @close="handleCityModalClose"
+    />
   </ion-page>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useKeyboardScrollReset } from '@/composables/useKeyboardScrollReset'
 import {
   IonPage,
   IonHeader,
@@ -234,6 +234,8 @@ const cityInfo = ref(null)
 const hasCityInfo = ref(false)
 const isSavingUser = ref(false)
 const showCityModal = ref(false)
+const pageContentRef = ref(null)
+const { resetScroll: resetPageScroll } = useKeyboardScrollReset(pageContentRef)
 
 const loadData = async () => {
   // Charger les coordonnées utilisateur
@@ -316,9 +318,13 @@ const openCityModal = () => {
   showCityModal.value = true
 }
 
-const handleCityInfoSaved = async () => {
+const handleCityModalClose = async () => {
   showCityModal.value = false
-  // Recharger les informations de la commune
+  await resetPageScroll()
+}
+
+const handleCityInfoSaved = async () => {
+  await handleCityModalClose()
   await loadData()
   updateUserAndCommuneContext()
 }

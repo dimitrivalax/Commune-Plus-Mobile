@@ -7,6 +7,7 @@
     </ion-header>
 
     <ion-content
+      ref="contentRef"
       class="ion-padding notification-contact-content"
       :fullscreen="true"
     >
@@ -62,33 +63,31 @@
               :disabled="isSaving"
             ></ion-input>
           </ion-item>
+
+          <div class="form-actions">
+            <ion-button
+              fill="clear"
+              color="medium"
+              expand="block"
+              type="button"
+              @click="handleSkip"
+              :disabled="isSaving"
+            >
+              Plus tard
+            </ion-button>
+            <ion-button
+              type="submit"
+              expand="block"
+              class="save-button"
+              :disabled="isSaving"
+            >
+              <ion-spinner v-if="isSaving" name="crescent"></ion-spinner>
+              <span v-else>Enregistrer</span>
+            </ion-button>
+          </div>
         </form>
       </div>
     </ion-content>
-
-    <ion-footer class="notification-contact-footer">
-      <ion-toolbar>
-        <ion-button
-          fill="clear"
-          color="medium"
-          expand="block"
-          @click="handleSkip"
-          :disabled="isSaving"
-        >
-          Plus tard
-        </ion-button>
-        <ion-button
-          type="submit"
-          form="notification-contact-form"
-          expand="block"
-          class="footer-save-button"
-          :disabled="isSaving"
-        >
-          <ion-spinner v-if="isSaving" name="crescent"></ion-spinner>
-          <span v-else>Enregistrer</span>
-        </ion-button>
-      </ion-toolbar>
-    </ion-footer>
   </ion-modal>
 </template>
 
@@ -106,9 +105,9 @@ import {
   IonButton,
   IonIcon,
   IonSpinner,
-  IonFooter,
   toastController
 } from '@ionic/vue'
+import { useKeyboardScrollReset } from '@/composables/useKeyboardScrollReset'
 import { notificationsOutline } from 'ionicons/icons'
 import { getUserContact, saveUserContact } from '@/utils/storage'
 import { updatePushTokenEmail } from '@/services/push-notifications'
@@ -129,6 +128,10 @@ const formData = ref({
   email: ''
 })
 const isSaving = ref(false)
+const contentRef = ref(null)
+const { resetScroll: resetModalScroll } = useKeyboardScrollReset(contentRef, {
+  when: () => props.isOpen
+})
 
 const isEmailValid = computed(() => {
   const email = formData.value.email.trim()
@@ -185,20 +188,24 @@ const handleSkip = () => {
   emit('close')
 }
 
-const handleClose = () => {
+const handleClose = async () => {
+  await resetModalScroll()
   emit('close')
 }
 
 watch(
   () => props.isOpen,
-  (newValue) => {
-    if (!newValue) return
-    const savedContact = getUserContact()
-    formData.value = {
-      firstName: savedContact?.firstName || '',
-      lastName: savedContact?.lastName || '',
-      email: savedContact?.email || ''
+  async (newValue) => {
+    if (newValue) {
+      const savedContact = getUserContact()
+      formData.value = {
+        firstName: savedContact?.firstName || '',
+        lastName: savedContact?.lastName || '',
+        email: savedContact?.email || ''
+      }
+      return
     }
+    await resetModalScroll()
   }
 )
 </script>
@@ -239,18 +246,20 @@ ion-item {
   margin-bottom: 16px;
 }
 
-.notification-contact-footer ion-toolbar {
-  --padding-start: 16px;
-  --padding-end: 16px;
-  --padding-top: 8px;
-  --padding-bottom: calc(8px + env(safe-area-inset-bottom));
-}
-
 .notification-contact-content {
-  --padding-bottom: calc(132px + env(safe-area-inset-bottom));
+  --padding-bottom: calc(16px + env(safe-area-inset-bottom));
 }
 
-.footer-save-button {
+.form-actions {
   margin-top: 8px;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.save-button {
+  margin-top: 8px;
+}
+
+ion-spinner {
+  margin-right: 8px;
 }
 </style>
