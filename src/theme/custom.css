@@ -162,6 +162,27 @@ ion-textarea {
     --padding-top: 10px;
   } */
 
+  .native-time-input {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: var(--spacing-sm, 8px);
+    padding: 12px;
+    min-height: 44px;
+    border: none;
+    border-radius: 12px;
+    background: rgba(44, 163, 217, 0);
+    font-size: 16px;
+    font-family: inherit;
+    color: var(--ion-text-color, #000);
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  
+  .native-time-input:focus {
+    outline: none;
+  }
+
 ion-card-title{
   color: var(--ion-color-dark);
 }

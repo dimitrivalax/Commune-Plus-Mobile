@@ -100,36 +100,23 @@
         <div v-if="newForm.salleId" class="time-selection-container">
           <h2 class="section-title">Votre créneau</h2>
           <ion-item lines="none">
-            <ion-label>Heure de début</ion-label>
-            <ion-datetime-button datetime="start-time"></ion-datetime-button>
-            <ion-modal :keep-contents-mounted="true">
-              <ion-datetime
-                id="start-time"
-                :show-default-buttons="true"
-                presentation="time"
-                :value="newForm.startTime"
-                @ionChange="handleStartTimeChange"
-              ></ion-datetime>
-            </ion-modal>
+            <ion-label position="stacked">Heure de début</ion-label>
+            <input
+              type="time"
+              class="native-time-input custom"
+              v-model="newForm.startTime"
+              @change="handleStartTimeChange"
+            />
           </ion-item>
 
           <ion-item lines="none">
-            <ion-label>Heure de fin</ion-label>
-            <ion-datetime-button datetime="end-time"></ion-datetime-button>
-            <ion-modal :keep-contents-mounted="true">
-              <ion-datetime
-                id="end-time"
-                :show-default-buttons="true"
-                presentation="time"
-                :value="newForm.endTime"
-                @ionChange="
-                  (event) => {
-                    newForm.endTime = event.detail.value
-                    validateTimeRange()
-                  }
-                "
-              ></ion-datetime>
-            </ion-modal>
+            <ion-label position="stacked">Heure de fin</ion-label>
+            <input
+              type="time"
+              class="native-time-input custom"
+              v-model="newForm.endTime"
+              @change="validateTimeRange"
+            />
           </ion-item>
 
           <div v-if="conflictMessage" class="conflict-alert">
@@ -219,7 +206,7 @@
           expand="block"
           class="submit-button"
           @click="submitReservation"
-          :disabled="loading || !isFormValid || !!conflictMessage"
+          :disabled="loading"
         >
           <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
           <ion-icon slot="start" :icon="checkmark" />
@@ -248,9 +235,7 @@ import {
   IonCardTitle,
   IonCardSubtitle,
   IonCardContent,
-  IonModal,
   IonDatetime,
-  IonDatetimeButton,
   IonTextarea,
   IonInput,
   IonButton,
@@ -321,19 +306,36 @@ const getSallePhotoUrl = (salle) => {
   )
 }
 
-const isFormValid = computed(() => {
-  return (
-    newForm.value.salleId &&
-    newForm.value.date &&
-    newForm.value.startTime &&
-    newForm.value.endTime &&
-    newForm.value.firstName.trim() &&
-    newForm.value.lastName.trim() &&
-    newForm.value.email.trim() &&
-    newForm.value.phone.trim() &&
-    newForm.value.reason.trim() !== ''
-  )
+const missingRequiredFields = computed(() => {
+  const form = newForm.value
+  const missing = []
+
+  if (!form.salleId) missing.push('Salle')
+  if (!form.date) missing.push('Date')
+  if (!form.startTime) missing.push('Heure de début')
+  if (!form.endTime) missing.push('Heure de fin')
+  if (!form.firstName.trim()) missing.push('Prénom')
+  if (!form.lastName.trim()) missing.push('Nom')
+  if (!form.email.trim()) missing.push('Email')
+  if (!form.phone.trim()) missing.push('Téléphone')
+  if (!form.reason.trim()) missing.push('Raison de la réservation')
+
+  return missing
 })
+
+const getValidationMessage = () => {
+  const missing = missingRequiredFields.value
+  if (missing.length === 1) {
+    return `Champ obligatoire manquant : ${missing[0]}`
+  }
+  if (missing.length > 1) {
+    return `Champs obligatoires manquants : ${missing.join(', ')}`
+  }
+
+  if (conflictMessage.value) return conflictMessage.value
+
+  return ''
+}
 
 // Charger les réservations pour la salle sélectionnée
 const fetchReservations = async (salleId) => {
@@ -399,19 +401,19 @@ const handleDateChange = (event) => {
   validateTimeRange()
 }
 
-/** Retourne l'heure de fin = heure de début + 1h (même format que la valeur reçue) */
-const getEndTimeOneHourAfter = (startTimeValue) => {
+/** Heure de fin = heure de début + 3 h (format HH:mm pour input natif) */
+const getEndTimeAfterStart = (startTimeValue, hoursToAdd = 3) => {
   const dateStr = formatDateForDB(newForm.value.date)
   const timeStr = formatTime(startTimeValue)
-  const d = new Date(dateStr + 'T' + timeStr + ':00')
-  d.setHours(d.getHours() + 3)
-  return d.toISOString()
+  const d = new Date(`${dateStr}T${timeStr}:00`)
+  d.setHours(d.getHours() + hoursToAdd)
+  const hours = String(d.getHours()).padStart(2, '0')
+  const minutes = String(d.getMinutes()).padStart(2, '0')
+  return `${hours}:${minutes}`
 }
 
-const handleStartTimeChange = (event) => {
-  const value = event.detail.value
-  newForm.value.startTime = value
-  newForm.value.endTime = getEndTimeOneHourAfter(value)
+const handleStartTimeChange = () => {
+  newForm.value.endTime = getEndTimeAfterStart(newForm.value.startTime)
   validateTimeRange()
 }
 
@@ -457,12 +459,11 @@ const validateTimeRange = () => {
 }
 
 const submitReservation = async () => {
-  if (!isFormValid.value || conflictMessage.value) {
+  const validationMessage = getValidationMessage()
+  if (validationMessage) {
     const toast = await toastController.create({
-      message:
-        conflictMessage.value ||
-        'Veuillez remplir tous les champs obligatoires',
-      duration: 2000,
+      message: validationMessage,
+      duration: Math.min(4500, 2500 + missingRequiredFields.value.length * 400),
       color: 'warning'
     })
     await toast.present()
@@ -770,6 +771,8 @@ ion-item {
   --inner-padding-end: 0;
   margin-bottom: 8px;
 }
+
+
 
 .page-content::part(scroll) {
   overscroll-behavior-y: contain;
