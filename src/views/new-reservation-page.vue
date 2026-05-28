@@ -189,7 +189,7 @@
 
         <ion-item lines="none" class="reason-item">
           <ion-label position="stacked"
-            >Raison de la réservation (obligatoire)</ion-label
+            >Motif de la réservation (obligatoire)</ion-label
           >
           <ion-textarea
             shape="round"
@@ -318,7 +318,7 @@ const missingRequiredFields = computed(() => {
   if (!form.lastName.trim()) missing.push('Nom')
   if (!form.email.trim()) missing.push('Email')
   if (!form.phone.trim()) missing.push('Téléphone')
-  if (!form.reason.trim()) missing.push('Raison de la réservation')
+  if (!form.reason.trim()) missing.push('Motif de la réservation')
 
   return missing
 })

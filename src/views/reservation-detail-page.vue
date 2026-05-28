@@ -201,7 +201,7 @@
 
               <ion-item lines="none" class="form-item">
                 <ion-label position="stacked"
-                  >Raison de la réservation (obligatoire)</ion-label
+                  >Motif de la réservation (obligatoire)</ion-label
                 >
                 <ion-textarea
                   shape="round"

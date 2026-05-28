@@ -10,9 +10,15 @@ const config: CapacitorConfig = {
     androidScheme: 'https'
   },
   plugins: {
+    SystemBars: {
+      insetsHandling: 'css',
+      style: 'LIGHT',
+      hidden: false,
+      animation: 'NONE'
+    },
     Keyboard: {
       resize: KeyboardResize.Ionic,
-      resizeOnFullScreen: true
+      resizeOnFullScreen: false
     }
   },
   splashScreen: {
