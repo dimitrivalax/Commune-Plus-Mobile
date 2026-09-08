@@ -2,6 +2,8 @@
 
 **Dernière mise à jour :** 1er avril 2026  
 
+> Note open source : ce document décrit le traitement des données pour l’application **Commune Plus** distribuée par Dimitri Valax EI. Si vous forkez ce dépôt, publiez votre propre politique de confidentialité et n’indiquez pas ce responsable du traitement.
+
 La présente politique décrit comment l’application mobile **Commune Plus** (« l’Application ») traite les données personnelles, dans le respect du Règlement général sur la protection des données (RGPD) et des exigences de la [Google Play Console](https://play.google.com/about/developer-content-policy/) (section données utilisateur et fiche « Sécurité des données »).
 
 ---
