@@ -7,19 +7,25 @@ node_modules
 /.tmp
 /.www
 *.log
-.env
-.env.local
 
-# VSCode
+# Env
+.env
+.env.*
+!.env.example
+
+# VSCode / local history
 .vscode
 .history
 
 # Firebase
 .firebase
+android/app/google-services.json
+ios/App/App/GoogleService-Info.plist
 
-
+# Android signing
 android/keystore.properties
-.env.dev
+*.jks
+*.keystore
 
 # Playwright
 /playwright-report

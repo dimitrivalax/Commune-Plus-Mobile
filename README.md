@@ -1,6 +1,10 @@
-## Commune Plus Mobile
+# Commune Plus Mobile
 
 Application citoyenne Ionic + Vue pour les signalements, réservations de salles et informations municipales.
+
+Logiciel libre sous **EUPL-1.2**. L’offre hébergée [Commune Plus](https://commune-plus.fr) (SaaS) est un service distinct : marque, domaines et backends de production restent réservés. Les forks doivent utiliser leurs propres projets Firebase / Cloudinary / BackOffice.
+
+Companion repo : [Commune-Plus-BackOffice](https://github.com/dimitrivalax/Commune-Plus-BackOffice).
 
 ## Stack
 
@@ -36,160 +40,98 @@ cp .env.example .env
 - `VITE_CLOUDINARY_CLOUD_NAME`
 - `VITE_CLOUDINARY_UPLOAD_PRESET`
 
+4. (Builds natifs) Configurer Firebase Android / iOS :
+
+```bash
+cp android/app/google-services.json.example android/app/google-services.json
+cp ios/App/App/GoogleService-Info.plist.example ios/App/App/GoogleService-Info.plist
+```
+
+Remplacez les placeholders par les valeurs de **votre** projet Firebase (ou téléchargez les fichiers depuis la console Firebase). Ne committez jamais les fichiers réels.
+
+## Self-host (aperçu)
+
+1. Créer un projet Firebase (Firestore + éventuellement Auth / FCM).
+2. Déployer les règles : `firestore.rules` à la racine (`firebase deploy --only firestore:rules`).
+3. Créer un compte Cloudinary et un upload preset unsigned pour le client.
+4. Pointer `VITE_BACKOFFICE_API_URL` vers une instance du [BackOffice](https://github.com/dimitrivalax/Commune-Plus-BackOffice) (emails signalement, notifications, etc.).
+5. Optionnel : PostHog pour l’analytics.
+
+### Collections Firestore utilisées
+
+- `commune`, `salle`, `signalement`, `reservation_salle`, `actualite`
+- `proposition`, `proposition_comment`, `proposition_vote`, `push_token`
+
+### Legacy `supabase/`
+
+Le dossier `supabase/` contient d’anciennes edge functions / notes. Le runtime actuel s’appuie sur **Firebase** et l’API BackOffice, pas sur Supabase côté client.
+
 ## Firestore Rules
 
 Un fichier `firestore.rules` est fourni à la racine de ce projet.
-
-Déploiement :
 
 ```bash
 firebase deploy --only firestore:rules
 ```
 
-Ces règles sont compatibles avec le fonctionnement actuel de l'app mobile (lecture publique + validations minimales d'écriture côté client).
+Ces règles sont compatibles avec le fonctionnement actuel de l'app mobile (lecture publique + validations minimales d'écriture côté client). Adaptez-les à votre politique de sécurité avant une mise en production.
 
 ## Personnalisation du design
 
-L'application utilise un design épuré et lisible en marque blanche. Pour personnaliser le design selon votre ville :
+L'application utilise un design épuré et lisible en marque blanche. Pour personnaliser selon votre ville :
 
-1. **Modifier le nom et la couleur de la ville** :
-   Éditez le fichier `src/config/city.js` :
-   ```javascript
-   export const cityConfig = {
-     name: 'Votre Ville', // Remplacez par le nom de votre ville
-     primaryColor: '#2563eb', // Remplacez par la couleur dominante de votre charte graphique
-     logo: '/assets/logo-city.svg', // Chemin vers votre logo
-   }
-   ```
-
-2. **Ajouter votre logo** :
-   - Placez votre logo dans le dossier `public/assets/`
-   - Le logo doit être au format SVG (recommandé) ou PNG
-   - Mettez à jour le chemin dans `city.js` si nécessaire
-
-3. **Couleurs personnalisées** :
-   - La couleur principale sera automatiquement appliquée à tous les éléments de l'interface
-   - Les nuances (shade/tint) sont générées automatiquement
-
-## Modèle Firestore (collections utilisées)
-
-- `commune`
-- `salle`
-- `signalement`
-- `reservation_salle`
-- `actualite`
-- `proposition`
-- `proposition_comment`
-- `proposition_vote`
-- `push_token`
+1. Éditez `src/config/city.js` (`name`, `primaryColor`, `logo`).
+2. Placez votre logo dans `public/assets/`.
 
 ## Configuration Cloudinary
 
 1. Créer un compte sur [Cloudinary](https://cloudinary.com)
-2. Créer un upload preset dans les paramètres de votre compte
-3. Ajouter les credentials dans le fichier `.env`
+2. Créer un upload preset
+3. Ajouter les valeurs dans `.env` (jamais dans le dépôt git)
 
 ## Développement
 
-Lancer le serveur de développement :
-
-Avec **pnpm** :
 ```bash
 pnpm dev
 ```
 
-Ou avec **npm** :
-```bash
-npm run dev
-```
-
-L'application sera accessible sur http://localhost:5173
+Application : http://localhost:5173
 
 ## Build
 
-Construire l'application pour la production :
-
-Avec **pnpm** :
 ```bash
 pnpm build
 ```
 
-Ou avec **npm** :
-```bash
-npm run build
-```
-
 ## Capacitor
 
-Pour ajouter une plateforme mobile :
-
 ```bash
-npx cap add ios
-# ou
-npx cap add android
-```
-
-Pour synchroniser les fichiers web avec les plateformes natives :
-```bash
+npx cap add ios   # ou android
 npx cap sync
-```
-
-Pour ouvrir dans l'IDE natif :
-```bash
-npx cap open ios
-# ou
-npx cap open android
+npx cap open ios  # ou android
 ```
 
 ## Crash & Error Reporting
 
-L'application combine :
+- **PostHog** : analytics produit
+- **Firebase Crashlytics** : crashs natifs / erreurs JS (fichiers Firebase natifs requis)
 
-- **PostHog** pour l'analytics produit
-- **Firebase Crashlytics** pour les crashs natifs iOS/Android et les erreurs JS non fatales
-
-### Pré-requis
-
-- Fichiers Firebase natifs présents :
-  - `android/app/google-services.json`
-  - `ios/App/App/GoogleService-Info.plist`
-- Plugin installé : `@capacitor-firebase/crashlytics`
-- Synchronisation des plateformes après install :
-
-```bash
-npx cap sync
-```
-
-### Validation rapide
-
-1. Lancer l'app sur un device/simulateur natif.
-2. Vérifier dans la console Firebase Crashlytics qu'aucune erreur d'initialisation n'apparaît.
-3. Générer une erreur JS non fatale (ex: throw dans un flux contrôlé) et vérifier la remontée.
-4. Générer un crash natif de test depuis l'app (uniquement en environnement de validation), puis relancer l'app pour forcer l'envoi du rapport.
-
-### Runbook d'exploitation
-
-- **Triage P0** : crash bloquant sur écran d'entrée ou action principale.
-- **Triage P1** : crash/erreur non fatale récurrente sur un parcours métier.
-- **Filtres utiles** : `platform`, `commune_id`, `app_context=mobile`.
-- **SLA recommandé** :
-  - P0 : analyse < 4h ouvrées
-  - P1 : analyse < 1 jour ouvré
-- **RGPD** : ne jamais logger email, token, mot de passe ou secrets applicatifs.
+Voir aussi `PRIVACY_POLICY.md` (politique de l’application distribuée Commune Plus). Les forks doivent publier leur propre politique de confidentialité.
 
 ## Structure du projet
 
 ```
 src/
-├── views/          # Pages de l'application
-├── services/       # Services Firestore / Cloudinary / Push
-├── utils/          # Helpers (storage, firestore, etc.)
-├── router/         # Configuration du routage
-├── theme/          # Variables CSS Ionic
-└── main.js         # Point d'entrée
+├── views/          # Pages
+├── services/       # Firestore / Cloudinary / Push
+├── utils/
+├── router/
+├── theme/
+└── main.js
 ```
 
 ## Licence
 
-MIT
+Copyright (c) 2026 Dimitri Valax EI — [EUPL-1.2](./LICENSE).
 
+Voir [CONTRIBUTING.md](./CONTRIBUTING.md) et [SECURITY.md](./SECURITY.md).

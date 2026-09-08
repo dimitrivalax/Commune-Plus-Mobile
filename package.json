@@ -1,8 +1,9 @@
 {
   "name": "Commune Plus",
   "version": "1.2.3",
-  "description": "Application mobile Commune Plus - Gestion des signalements, réservations et informations municipales",
-  "author": "Dimitri Valax",
+  "description": "Application mobile Commune Plus - Solution pour faciliter la communication entre les mairies et les habitant·es.",
+  "author": "Dimitri Valax EI",
+  "license": "EUPL-1.2",
   "private": true,
   "scripts": {
     "dev": "vite",
