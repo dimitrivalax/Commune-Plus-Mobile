@@ -32,8 +32,8 @@
     "@capacitor/keyboard": "^8.0.3",
     "@capacitor/push-notifications": "^8.1.1",
     "@capacitor/splash-screen": "^8.0.1",
-    "@ionic/vue": "^8.0.0",
-    "@ionic/vue-router": "^8.0.0",
+    "@ionic/vue": "^9.0.0",
+    "@ionic/vue-router": "^9.0.0",
     "axios": "^1.6.2",
     "firebase": "^12.10.0",
     "ionicons": "^8.0.0",
@@ -41,8 +41,8 @@
     "posthog-js": "^1.313.0",
     "sharp": "^0.34.5",
     "swiper": "^12.0.3",
-    "vue": "^3.3.4",
-    "vue-router": "^4.2.5"
+    "vue": "^3.5.0",
+    "vue-router": "^5.0.0"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
